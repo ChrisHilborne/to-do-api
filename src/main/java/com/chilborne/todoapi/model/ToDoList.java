@@ -1,22 +1,41 @@
 package com.chilborne.todoapi.model;
 
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Table(name = "lists")
 public class ToDoList {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "list_id", updatable = false, unique = true, nullable = false)
     private long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "desc")
     private String description;
-    private User owner;
-    private LocalDate dateCreated;
-    private List<Task> tasks;
+
+    @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
+    private LocalDateTime dateTimeCreated = LocalDateTime.now();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "list")
+    private List<Task> tasks = new LinkedList<>();
+
+    @Column(name = "ACTIVE", columnDefinition = "boolean default true", nullable = false)
     private boolean active = true;
 
     protected ToDoList() {}
+
+    public ToDoList(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -26,20 +45,12 @@ public class ToDoList {
         this.name = name;
     }
 
-    public User getOwner() {
-        return owner;
+    public LocalDateTime getDateTimeCreated() {
+        return dateTimeCreated;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-
-    public LocalDate getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(LocalDate dateCreated) {
-        this.dateCreated = dateCreated;
+    public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
+        this.dateTimeCreated = dateTimeCreated;
     }
 
     public List<Task> getTasks() {
@@ -67,16 +78,14 @@ public class ToDoList {
 
         if (active != toDoList.active) return false;
         if (!name.equals(toDoList.name)) return false;
-        if (!owner.equals(toDoList.owner)) return false;
-        if (!dateCreated.equals(toDoList.dateCreated)) return false;
+        if (!dateTimeCreated.equals(toDoList.dateTimeCreated)) return false;
         return Objects.equals(tasks, toDoList.tasks);
     }
 
     @Override
     public int hashCode() {
         int result = name.hashCode();
-        result = 31 * result + owner.hashCode();
-        result = 31 * result + dateCreated.hashCode();
+        result = 31 * result + dateTimeCreated.hashCode();
         result = 31 * result + (tasks != null ? tasks.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
         return result;
@@ -86,8 +95,7 @@ public class ToDoList {
     public String toString() {
         return "ToDoList {" +
                 "name='" + name + '\'' +
-                ", owner=" + owner +
-                ", dateCreated=" + dateCreated +
+                ", dateCreated=" + dateTimeCreated +
                 ", tasks=" + tasks +
                 ", active=" + active +
                 " }";
