@@ -1,8 +1,8 @@
-package com.chilborne.todoapi.bootstrap;
+package com.chilborne.todoapi.persistance.bootstrap;
 
-import com.chilborne.todoapi.model.Task;
-import com.chilborne.todoapi.model.ToDoList;
-import com.chilborne.todoapi.repository.ToDoListRepository;
+import com.chilborne.todoapi.persistance.model.Task;
+import com.chilborne.todoapi.persistance.model.ToDoList;
+import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
-public class LoadDataBase {
+public class BootstrapDatabase {
 
     private final ToDoListRepository repository;
-    private final Logger logger = LoggerFactory.getLogger(LoadDataBase.class);
+    private final Logger logger = LoggerFactory.getLogger(BootstrapDatabase.class);
 
-    public LoadDataBase(ToDoListRepository repository) {
+    public BootstrapDatabase(ToDoListRepository repository) {
         this.repository = repository;
     }
 
