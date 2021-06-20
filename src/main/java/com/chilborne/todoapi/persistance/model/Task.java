@@ -1,4 +1,4 @@
-package com.chilborne.todoapi.model;
+package com.chilborne.todoapi.persistance.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

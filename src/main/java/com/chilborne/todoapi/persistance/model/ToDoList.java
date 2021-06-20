@@ -1,7 +1,6 @@
-package com.chilborne.todoapi.model;
+package com.chilborne.todoapi.persistance.model;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +18,8 @@ public class ToDoList {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "desc")
+    @Lob
+    @Column(name = "desc", columnDefinition = "CLOB")
     private String description;
 
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
@@ -28,7 +28,7 @@ public class ToDoList {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "list")
     private List<Task> tasks = new LinkedList<>();
 
-    @Column(name = "ACTIVE", columnDefinition = "boolean default true", nullable = false)
+    @Column(name = "ACTIVE", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
     private boolean active = true;
 
     protected ToDoList() {}
@@ -37,12 +37,48 @@ public class ToDoList {
         this.name = name;
     }
 
+    public ToDoList(String name, List<Task> tasks) {
+        this(name);
+        this.tasks = new LinkedList<>(tasks);
+    }
+
+    public ToDoList(String name, String description) {
+        this(name);
+        this.description = description;
+    }
+
+    public ToDoList(String name, String description, List<Task> tasks) {
+        this(name, description);
+        this.tasks = new LinkedList<>(tasks);
+    }
+
+    public void addTask(Task task) {
+        tasks.add(task);
+    }
+
+    public void removeTask(Task task) {
+        tasks.remove(task);
+    }
+
+
+    public long getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getDateTimeCreated() {
@@ -54,11 +90,11 @@ public class ToDoList {
     }
 
     public List<Task> getTasks() {
-        return tasks;
+        return List.copyOf(tasks);
     }
 
     public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+        this.tasks = new LinkedList<>(tasks);
     }
 
     public boolean isActive() {
