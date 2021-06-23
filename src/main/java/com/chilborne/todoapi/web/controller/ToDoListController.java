@@ -4,7 +4,11 @@ import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.ServletRequest;
 
 @RestController
 @RequestMapping("/list")
@@ -19,12 +23,22 @@ public class ToDoListController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ToDoList getToDoList(@PathVariable long id) {
-        return new ToDoList("fails");
+    public ResponseEntity<ToDoList> getToDoList(@PathVariable long id) {
+        logger.info("Processing GET Request for ToDoList (id: " + id +")");
+        ToDoList result;
+        try {
+            result = service.getToDoListById(id);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
     }
 
     @PostMapping(value = "/new", produces = "application/json")
-    public ToDoList newToDoList(@RequestBody ToDoList list) {
-        return new ToDoList("fails");
+    public ToDoList postToDoList(@RequestBody ToDoList list) {
+        logger.info("Processing POST request for new ToDoList");
+        ToDoList result = service.saveToDoList(list);
+        return result;
     }
 }
