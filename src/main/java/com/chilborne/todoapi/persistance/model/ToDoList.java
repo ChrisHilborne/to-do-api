@@ -1,7 +1,10 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +25,7 @@ public class ToDoList {
     @Column(name = "desc", columnDefinition = "CLOB")
     private String description;
 
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime dateTimeCreated = LocalDateTime.now();
 
@@ -60,7 +64,6 @@ public class ToDoList {
         tasks.remove(task);
     }
 
-
     public long getId() {
         return id;
     }
@@ -82,7 +85,7 @@ public class ToDoList {
     }
 
     public LocalDateTime getDateTimeCreated() {
-        return dateTimeCreated;
+        return LocalDateTime.of(dateTimeCreated.toLocalDate(), dateTimeCreated.toLocalTime());
     }
 
     public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
@@ -93,7 +96,7 @@ public class ToDoList {
         return List.copyOf(tasks);
     }
 
-    public void setTasks(List<Task> tasks) {
+    public void setTasks(Collection<Task> tasks) {
         this.tasks = new LinkedList<>(tasks);
     }
 

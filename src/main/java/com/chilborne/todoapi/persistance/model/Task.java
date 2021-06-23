@@ -1,5 +1,8 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,6 +17,7 @@ public class Task {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
+    @JsonIgnore
     private ToDoList list;
 
     @Column(name = "name", nullable = false)
@@ -23,14 +27,16 @@ public class Task {
     @Column(name = "desc", columnDefinition = "CLOB")
     private String description;
 
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timeCreated = LocalDateTime.now();
 
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_finished", columnDefinition = "TIMESTAMP")
     private LocalDateTime timeCompleted;
 
     @Column(name = "active", columnDefinition = "boolean default true" ,nullable = false)
-    private boolean active;
+    private boolean active = true;
 
     protected Task() {}
 
