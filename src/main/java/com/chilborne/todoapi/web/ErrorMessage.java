@@ -1,6 +1,6 @@
 package com.chilborne.todoapi.web;
 
-public class ErrorMessage {
+public class ErrorMessage  {
 
     private String error;
 
