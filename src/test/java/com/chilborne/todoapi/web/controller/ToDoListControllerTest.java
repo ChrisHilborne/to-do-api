@@ -203,4 +203,25 @@ class ToDoListControllerTest {
 
     }
 
+    @Test
+    void addTaskShouldReturn404WhenListDoesNotExist() throws Exception {
+        //given
+        String taskJson = """
+        {
+              "name": "task"
+        }""";
+
+        //when
+        when(service.addTask(anyLong(), any(Task.class)))
+                .thenThrow(new RuntimeException("List Does Not Exist"));
+
+        //verify
+        mvc.perform(put("/list/1/list/add")
+                .accept("application/json")
+                .contentType("application/json")
+                .content(taskJson))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("List Does Not Exist"));
+    }
+
 }
