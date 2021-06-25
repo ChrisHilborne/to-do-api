@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
 import com.chilborne.todoapi.web.ErrorMessage;
@@ -55,5 +56,12 @@ public class ToDoListController {
                     .body(new ErrorMessage(e));
         }
 
+    }
+
+    @PutMapping(value = "/{id}/task/add", produces = "application/json")
+    public ResponseEntity<?> addTaskToList(@PathVariable long id, @RequestBody Task task) {
+        logger.info(String.format("Adding new Task to ToDoList (id: %d)", id));
+        ToDoList result = new ToDoList("fails");
+        return ResponseEntity.ok(result);
     }
 }

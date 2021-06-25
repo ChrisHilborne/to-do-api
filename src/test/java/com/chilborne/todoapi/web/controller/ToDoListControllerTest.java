@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
 import org.junit.jupiter.api.BeforeEach;
@@ -170,6 +171,37 @@ class ToDoListControllerTest {
                 );
         verify(service).setActive(1L, true);
         verifyNoMoreInteractions(service);
+    }
+
+    @Test
+    void addTaskShouldReturnListWithNewTask() throws Exception {
+        //given
+        String taskJson = """
+        {
+              "name": "task"
+        }""";
+        ToDoList list = new ToDoList("test");
+        list.setDateTimeCreated(now);
+        Task task = new Task(list, "task");
+        list.addTask(task);
+
+        //when
+        when(service.addTask(list.getId(), task)).thenReturn(list);
+
+        //verify
+        mvc.perform(
+                put("/list/" + list.getId() + "/task/add")
+                        .accept("application/json")
+                        .contentType("application/json")
+                        .content(taskJson)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("test"))
+                .andExpect(jsonPath("$.tasks[0].name").value("task"));
+
+        verify(service).addTask(list.getId(), task);
+        verifyNoMoreInteractions(service);
+
     }
 
 }
