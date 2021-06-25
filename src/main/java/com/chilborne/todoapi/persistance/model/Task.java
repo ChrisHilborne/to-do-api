@@ -40,7 +40,11 @@ public class Task {
 
     protected Task() {}
 
-    public Task (ToDoList list, String name) {
+    public Task(String name) {
+        this.name = name;
+    }
+
+    public Task(ToDoList list, String name) {
         this.list = list;
         this.name = name;
     }

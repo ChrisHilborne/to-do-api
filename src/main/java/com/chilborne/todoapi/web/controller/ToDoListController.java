@@ -60,8 +60,14 @@ public class ToDoListController {
 
     @PutMapping(value = "/{id}/task/add", produces = "application/json")
     public ResponseEntity<?> addTaskToList(@PathVariable long id, @RequestBody Task task) {
-        logger.info(String.format("Adding new Task to ToDoList (id: %d)", id));
-        ToDoList result = new ToDoList("fails");
-        return ResponseEntity.ok(result);
+        logger.info(String.format("Processing Request to add new Task (name: %s) to ToDoList (id: %d)", task.getName(), id));
+        ToDoList result;
+        try {
+            result = service.addTask(id, task);
+            return ResponseEntity.ok(result);
+        }
+        catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

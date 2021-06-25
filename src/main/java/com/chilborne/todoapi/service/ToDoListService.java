@@ -76,6 +76,7 @@ public class ToDoListService {
                 String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
         );
         ToDoList list = getToDoListById(listId);
+        task.setList(list);
         list.addTask(task);
         return repository.save(list);
     }
