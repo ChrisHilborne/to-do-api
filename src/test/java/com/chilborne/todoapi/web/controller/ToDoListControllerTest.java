@@ -180,26 +180,25 @@ class ToDoListControllerTest {
         {
               "name": "task"
         }""";
-        ToDoList list = new ToDoList("test");
-        list.setDateTimeCreated(now);
-        Task task = new Task(list, "task");
-        list.addTask(task);
+        ToDoList testList = new ToDoList("test");
+        testList.setDateTimeCreated(now);
+        Task testTask = new Task(testList, "task");
+        testList.addTask(testTask);
 
         //when
-        when(service.addTask(list.getId(), task)).thenReturn(list);
+        when(service.addTask(anyLong(), any(Task.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
-                put("/list/" + list.getId() + "/task/add")
+                put("/list/" + testList.getId() + "/task/add")
                         .accept("application/json")
                         .contentType("application/json")
-                        .content(taskJson)
-        )
+                        .content(taskJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.tasks[0].name").value("task"));
 
-        verify(service).addTask(list.getId(), task);
+        verify(service).addTask(anyLong(), any(Task.class));
         verifyNoMoreInteractions(service);
 
     }
