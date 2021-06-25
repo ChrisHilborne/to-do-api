@@ -71,7 +71,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList addTask(Long listId, Task task) {
+    public ToDoList addTask(Long listId, Task task) throws RuntimeException {
         logger.info(
                 String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
         );

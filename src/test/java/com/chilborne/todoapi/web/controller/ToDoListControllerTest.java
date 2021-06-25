@@ -216,7 +216,7 @@ class ToDoListControllerTest {
                 .thenThrow(new RuntimeException("List Does Not Exist"));
 
         //verify
-        mvc.perform(put("/list/1/list/add")
+        mvc.perform(put("/list/1/task/add")
                 .accept("application/json")
                 .contentType("application/json")
                 .content(taskJson))
