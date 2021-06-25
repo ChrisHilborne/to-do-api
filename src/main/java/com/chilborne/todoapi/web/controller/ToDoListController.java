@@ -66,8 +66,13 @@ public class ToDoListController {
             result = service.addTask(id, task);
             return ResponseEntity.ok(result);
         }
+        catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage(e));
+        }
         catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorMessage(e));
         }
     }
 }
