@@ -20,8 +20,7 @@ import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,7 +89,7 @@ class ToDoListControllerTest {
     }
 
     @Test
-    void newToDoList() throws Exception {
+    void postToDoListShouldReturnNewlyCreatedToDoList() throws Exception {
         //given
         String testJson = """
                 {
@@ -117,4 +116,36 @@ class ToDoListControllerTest {
         assertEquals(testList.getName(), captor.getValue().getName());
         assertEquals(testList.getDescription(), captor.getValue().getDescription());
     }
+
+    @Test
+    void setActiveShouldReturnUpdatedToDoList() throws Exception {
+        //given
+        ToDoList activeList = new ToDoList("test");
+        activeList.setDateTimeCreated(now);
+        activeList.setActive(true);
+        long activeId = activeList.getId();
+
+        ToDoList inactiveList = new ToDoList("test");
+        inactiveList.setDateTimeCreated(now);
+        inactiveList.setActive(false);
+
+
+        //when
+        when(service.setActive(activeId, false)).thenReturn(inactiveList);
+
+        //verify
+        mvc.perform(
+                put("/list/" + activeId + "/active/false")
+                .accept("application/json")
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false))
+                .andExpect(jsonPath("$.name").value("test"))
+                .andExpect(jsonPath("$.date_time_created").value(nowString));
+        verify(service).getToDoListById(activeId);
+        verify(service).saveToDoList(inactiveList);
+        verifyNoMoreInteractions(service);
+
+    }
+
 }

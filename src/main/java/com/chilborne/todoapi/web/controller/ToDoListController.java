@@ -36,9 +36,16 @@ public class ToDoListController {
     }
 
     @PostMapping(value = "/new", produces = "application/json")
-    public ToDoList postToDoList(@RequestBody ToDoList list) {
+    public ResponseEntity<ToDoList> postToDoList(@RequestBody ToDoList list) {
         logger.info("Processing POST request for new ToDoList");
         ToDoList result = service.saveToDoList(list);
-        return result;
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping(value = "/{id}/active/{active}")
+    public ResponseEntity<ToDoList> setActive(@PathVariable long id, @PathVariable boolean active) {
+        logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
+        return ResponseEntity.ok(new ToDoList("fails"));
+
     }
 }
