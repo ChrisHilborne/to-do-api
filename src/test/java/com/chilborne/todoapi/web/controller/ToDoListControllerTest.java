@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -90,6 +91,8 @@ class ToDoListControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value(errorMessage)
                 );
+        verify(service).getToDoListById(1L);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -114,7 +117,8 @@ class ToDoListControllerTest {
                         .content(testJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.description").value("this is a test"));
+                .andExpect(jsonPath("$.description").value("this is a test")
+                );
         verify(service).saveToDoList(captor.capture());
         verifyNoMoreInteractions(service);
         assertEquals(testList.getName(), captor.getValue().getName());
@@ -149,6 +153,23 @@ class ToDoListControllerTest {
         verify(service).setActive(activeId, false);
         verifyNoMoreInteractions(service);
 
+    }
+
+    @Test
+    void setActiveWhenListDoesNotExistShouldReturn404WithExceptionMessage() throws Exception {
+        //given
+        given(service.setActive(1L, true)).willThrow(new RuntimeException("This List Does Not Exist"));
+
+        //verify
+        mvc.perform(
+                put("/list/1/active/true")
+                        .accept("application/json")
+        )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("This List Does Not Exist")
+                );
+        verify(service).setActive(1L, true);
+        verifyNoMoreInteractions(service);
     }
 
 }

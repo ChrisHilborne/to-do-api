@@ -147,7 +147,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(described);
 
         //when
-        ToDoList result = service.addDescription(1L, description);
+        ToDoList result = service.setDescription(1L, description);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -162,7 +162,6 @@ class ToDoListServiceTest {
     @Test
     void setActive() {
         //given
-        boolean inactive = false;
         ToDoList deactivated = new ToDoList("test", testList.getTasks());
         deactivated.setDateTimeCreated(now);
         deactivated.setActive(false);
@@ -171,7 +170,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(deactivated);
 
         //when
-        ToDoList result = service.setActive(1L, inactive);
+        ToDoList result = service.setActive(1L, false);
 
         //verify
         verify(repository, times(1)).findById(1L);

@@ -27,7 +27,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList getToDoListById(Long id) {
+    public ToDoList getToDoListById(Long id) throws RuntimeException {
         logger.info(String.format("Fetching ToDoList with id: %d", id));
         return repository.findById(id).orElseThrow(
                 () -> new RuntimeException(String.format("ToDoList with id %d not found", id))
@@ -53,7 +53,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList addDescription(Long id, String description) {
+    public ToDoList setDescription(Long id, String description) {
         logger.info(
                 String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)", description.hashCode(), id)
         );
@@ -62,7 +62,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList setActive(Long id, boolean active) {
+    public ToDoList setActive(Long id, boolean active) throws RuntimeException {
         logger.info(
                 String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
         );
