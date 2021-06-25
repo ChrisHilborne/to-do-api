@@ -2,6 +2,7 @@ package com.chilborne.todoapi.web.controller;
 
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
+import com.chilborne.todoapi.web.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,14 +24,15 @@ public class ToDoListController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<ToDoList> getToDoList(@PathVariable long id) {
+    public ResponseEntity<?> getToDoList(@PathVariable long id) {
         logger.info("Processing GET Request for ToDoList (id: " + id +")");
         ToDoList result;
         try {
             result = service.getToDoListById(id);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage(e));
         }
 
     }
@@ -43,9 +45,17 @@ public class ToDoListController {
     }
 
     @PutMapping(value = "/{id}/active/{active}")
-    public ResponseEntity<ToDoList> setActive(@PathVariable long id, @PathVariable boolean active) {
+    public ResponseEntity<?> setActive(@PathVariable long id, @PathVariable boolean active) {
         logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
-        return ResponseEntity.ok(new ToDoList("fails"));
+        ToDoList result;
+        try {
+            result = service.setActive(id, active);
+            return ResponseEntity.ok(result);
+        }
+        catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage(e));
+        }
 
     }
 }
