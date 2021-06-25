@@ -69,7 +69,8 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.date_time_created").value(nowString));
+                .andExpect(jsonPath("$.date_time_created").value(nowString)
+                );
 
         verify(service).getToDoListById(0L);
         verifyNoMoreInteractions(service);
@@ -79,13 +80,16 @@ class ToDoListControllerTest {
     void getToDoListShouldReturn404WhenListDoesNotExist() throws Exception {
         //given
         long id = 1l;
-        when(service.getToDoListById(id)).thenThrow(new RuntimeException());
+        String errorMessage = "This list does not exit";
+        when(service.getToDoListById(id)).thenThrow(new RuntimeException(errorMessage));
 
         //verify
         mvc.perform(
                 get("/list/" + id)
                 .accept("application/json"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value(errorMessage)
+                );
     }
 
     @Test
@@ -142,8 +146,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.date_time_created").value(nowString));
-        verify(service).getToDoListById(activeId);
-        verify(service).saveToDoList(inactiveList);
+        verify(service).setActive(activeId, false);
         verifyNoMoreInteractions(service);
 
     }
