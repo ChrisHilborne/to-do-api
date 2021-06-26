@@ -75,4 +75,20 @@ public class ToDoListController {
                     .body(new ErrorMessage(e));
         }
     }
+
+    @PutMapping(value = "/{listId}/task/remove/{taskId}", produces = "application/json")
+    public ResponseEntity<?> removeTaskFromList(@PathVariable long listId, @PathVariable long taskId) {
+        logger.info(String.format("Removing Task with id %d from ToDoList with id %d", taskId, listId));
+        ToDoList result;
+        try {
+            result = service.removeTask(listId, taskId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorMessage(e));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorMessage(e));
+        }
+    }
 }

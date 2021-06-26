@@ -81,12 +81,15 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList removeTask(Long listId, Task task) {
+    public ToDoList removeTask(Long listId, Long taskId) throws RuntimeException {
         logger.info(
-                String.format("Removing Task (id: %d) from ToDoList (id; %d)", task.getTaskId(), listId)
+                String.format("Removing Task (id: %d) from ToDoList (id; %d)", taskId, listId)
         );
         ToDoList list = getToDoListById(listId);
-        list.removeTask(task);
-        return repository.save(list);
+        if (list.removeTask(taskId)) {
+            return repository.save(list);
+        } else
+            throw new RuntimeException(
+                    String.format("List with id %d does not contain task with id %d", listId, taskId));
     }
 }

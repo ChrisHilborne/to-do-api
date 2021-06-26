@@ -39,7 +39,7 @@ class ToDoListTest {
         list.setTasks(List.of(first, second));
 
         //when
-        list.removeTask(second);
+        list.removeTask(second.getTaskId());
 
         //verify
         assertEquals(List.of(first), list.getTasks());
