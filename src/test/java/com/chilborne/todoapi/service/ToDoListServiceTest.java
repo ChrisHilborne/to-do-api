@@ -212,13 +212,13 @@ class ToDoListServiceTest {
         Task toRemove = testList.getTasks().get(1);
         ToDoList minusTask = new ToDoList("test", testList.getTasks());
         minusTask.setDateTimeCreated(now);
-        minusTask.removeTask(toRemove);
+        minusTask.removeTask(toRemove.getTaskId());
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any(ToDoList.class))).willReturn(minusTask);
 
         //when
-        ToDoList result = service.removeTask(1L, toRemove);
+        ToDoList result = service.removeTask(1L, toRemove.getTaskId());
 
         //verify
         verify(repository, times(1)).findById(1L);

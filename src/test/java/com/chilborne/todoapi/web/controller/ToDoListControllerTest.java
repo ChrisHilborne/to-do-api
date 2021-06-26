@@ -13,11 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -88,7 +90,7 @@ class ToDoListControllerTest {
         //verify
         mvc.perform(
                 get("/list/" + id)
-                .accept("application/json"))
+                        .accept("application/json"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value(errorMessage)
                 );
@@ -145,7 +147,7 @@ class ToDoListControllerTest {
         //verify
         mvc.perform(
                 put("/list/" + activeId + "/active/false")
-                .accept("application/json")
+                        .accept("application/json")
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
@@ -177,9 +179,9 @@ class ToDoListControllerTest {
     void addTaskShouldReturnListWithNewTask() throws Exception {
         //given
         String taskJson = """
-        {
-              "name": "task"
-        }""";
+                {
+                      "name": "task"
+                }""";
         ToDoList testList = new ToDoList("test");
         testList.setDateTimeCreated(now);
         Task testTask = new Task(testList, "task");
@@ -207,9 +209,9 @@ class ToDoListControllerTest {
     void addTaskShouldReturn404WhenListDoesNotExist() throws Exception {
         //given
         String taskJson = """
-        {
-              "name": "task"
-        }""";
+                {
+                      "name": "task"
+                }""";
 
         //when
         when(service.addTask(anyLong(), any(Task.class)))
@@ -222,6 +224,30 @@ class ToDoListControllerTest {
                 .content(taskJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("List Does Not Exist"));
+    }
+
+    @Test
+    void removeTaskShouldReturnUpdatedToDoList() throws Exception {
+        //given
+        ToDoList testList = new ToDoList("testList");
+        Task initialTask = new Task(testList, "task1");
+        testList.addTask(initialTask);
+        Task taskToRemove = new Task(testList, "task2");
+        long idTestList = testList.getId();
+        long idTaskToRemove = taskToRemove.getTaskId();
+
+        //when
+        when(service.removeTask(idTestList, idTaskToRemove)).thenReturn(testList);
+
+        //verify
+        mvc.perform(
+                put(String.format("/list/%d/task/remove/%d", idTestList, idTaskToRemove))
+                .accept("application/json")
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tasks[0].name").value("task1"));
+        verify(service).removeTask(idTestList, idTaskToRemove);
+        verifyNoMoreInteractions(service);
     }
 
 }

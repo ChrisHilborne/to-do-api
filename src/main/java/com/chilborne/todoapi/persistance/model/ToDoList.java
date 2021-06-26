@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "lists")
@@ -60,8 +61,12 @@ public class ToDoList {
         tasks.add(task);
     }
 
-    public void removeTask(Task task) {
-        tasks.remove(task);
+    public boolean removeTask(long taskId) {
+        int initialSize = tasks.size();
+        tasks = tasks.stream()
+                .filter(task -> task.getTaskId() != taskId)
+                .collect(Collectors.toList());
+        return initialSize < tasks.size();
     }
 
     public long getId() {
