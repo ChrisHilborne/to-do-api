@@ -18,7 +18,9 @@ class ToDoListTest {
     void init() {
         list = new ToDoList("To Do");
         first = new Task(list, "First");
+        first.setTaskId(1L);
         second = new Task(list, "Second");
+        second.setTaskId(2L);
     }
 
     @Test
@@ -34,15 +36,44 @@ class ToDoListTest {
     }
 
     @Test
-    void removeTask() {
+    void removeTaskShouldRemoveSingleTaskAndReturnTrue() {
         //given
         list.setTasks(List.of(first, second));
 
         //when
-        list.removeTask(second.getTaskId());
+        boolean removed = list.removeTask(second.getTaskId());
 
         //verify
         assertEquals(List.of(first), list.getTasks());
-
+        assertTrue(removed);
     }
+
+    @Test
+    void removeTaskShouldNotRemoveTaskAndReturnFalseWhenTaskIsNotPresent() {
+        //given
+        list.setTasks(List.of(first, second));
+
+        //when
+        boolean removed = list.removeTask(5L);
+
+        //verify
+        assertEquals(List.of(first, second), list.getTasks());
+        assertFalse(removed);
+    }
+
+    @Test
+    void getTasksShouldReturnAnUnmodifiableList() {
+        //given
+        list.addTask(first);
+        list.addTask(second);
+
+        //when
+        List<Task> tasks = list.getTasks();
+
+        //verify
+        Exception e = assertThrows(UnsupportedOperationException.class,
+                () -> tasks.add(first));
+    }
+
+
 }

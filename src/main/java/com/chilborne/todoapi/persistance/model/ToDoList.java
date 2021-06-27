@@ -66,7 +66,7 @@ public class ToDoList {
         tasks = tasks.stream()
                 .filter(task -> task.getTaskId() != taskId)
                 .collect(Collectors.toList());
-        return initialSize < tasks.size();
+        return tasks.size() == initialSize - 1;
     }
 
     public long getId() {
