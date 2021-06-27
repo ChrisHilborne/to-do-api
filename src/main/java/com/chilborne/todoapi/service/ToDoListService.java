@@ -1,5 +1,7 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.TaskNotFoundException;
+import com.chilborne.todoapi.exception.ToDoListNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
@@ -21,16 +23,14 @@ public class ToDoListService {
     }
 
     public ToDoList saveToDoList(ToDoList list) {
-        logger.info(
-                String.format("Saving ToDoList (name: %s)", list.getName())
-        );
+        logger.info("Saving ToDoList (name: " + list.getName() + ")");
         return repository.save(list);
     }
 
-    public ToDoList getToDoListById(Long id) throws RuntimeException {
-        logger.info(String.format("Fetching ToDoList with id: %d", id));
+    public ToDoList getToDoListById(Long id) throws ToDoListNotFoundException {
+        logger.info("Fetching ToDoList with id: " + " id");
         return repository.findById(id).orElseThrow(
-                () -> new RuntimeException(String.format("ToDoList with id %d not found", id))
+                () -> new ToDoListNotFoundException("ToDoList with id " + id + " not found")
         );
     }
 
@@ -40,11 +40,11 @@ public class ToDoListService {
     }
 
     public void deleteToDoList(Long id) {
-        logger.info(String.format("Deleting ToDoList (id: %d)", id));
+        logger.info("Deleting ToDoList (id: " + id + ")");
         repository.deleteById(id);
     }
 
-    public ToDoList setName(Long id, String name) {
+    public ToDoList setName(Long id, String name) throws ToDoListNotFoundException {
         logger.info(
             String.format("Setting name of ToDoList (id: %d) to: %s", id, name)
         );
@@ -53,16 +53,17 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList setDescription(Long id, String description) {
+    public ToDoList setDescription(Long id, String description) throws ToDoListNotFoundException {
         logger.info(
-                String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)", description.hashCode(), id)
+                String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
+                        description.hashCode(), id)
         );
         ToDoList list = getToDoListById(id);
         list.setDescription(description);
         return repository.save(list);
     }
 
-    public ToDoList setActive(Long id, boolean active) throws RuntimeException {
+    public ToDoList setActive(Long id, boolean active) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
         );
@@ -71,7 +72,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList addTask(Long listId, Task task) throws RuntimeException {
+    public ToDoList addTask(Long listId, Task task) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
         );
@@ -81,7 +82,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList removeTask(Long listId, Long taskId) throws RuntimeException {
+    public ToDoList removeTask(Long listId, Long taskId) throws TaskNotFoundException {
         logger.info(
                 String.format("Removing Task (id: %d) from ToDoList (id; %d)", taskId, listId)
         );
@@ -89,7 +90,7 @@ public class ToDoListService {
         if (list.removeTask(taskId)) {
             return repository.save(list);
         } else
-            throw new RuntimeException(
+            throw new TaskNotFoundException(
                     String.format("List with id %d does not contain task with id %d", listId, taskId));
     }
 }

@@ -1,4 +1,4 @@
-package com.chilborne.todoapi.web;
+package com.chilborne.todoapi.web.error;
 
 public class ErrorMessage  {
 
@@ -8,7 +8,7 @@ public class ErrorMessage  {
     }
 
     public ErrorMessage(Exception e) {
-        this.error = e.getMessage();
+        this.error = e.getClass().getSimpleName() + " -> " + e.getMessage();
     }
 
     public String getError() {
