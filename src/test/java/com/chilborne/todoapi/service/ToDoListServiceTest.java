@@ -229,4 +229,16 @@ class ToDoListServiceTest {
         assertEquals(minusTask, result);
         assertEquals(minusTask, toDoListCaptor.getValue());
     }
+
+    @Test
+    void removeTaskShouldThrowExceptionIfTaskIsNotPresentInList() {
+        //when
+        when(repository.findById(0L)).thenReturn(Optional.ofNullable(testList));
+
+        //verify
+        Exception e = assertThrows(RuntimeException.class,
+                () -> service.removeTask(testList.getId(), 500L));
+        assertEquals("List with id 0 does not contain task with id 500", e.getMessage());
+    }
+
 }
