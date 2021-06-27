@@ -1,5 +1,7 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.exception.TaskNotFoundException;
+import com.chilborne.todoapi.exception.ToDoListNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -78,23 +81,6 @@ class ToDoListControllerTest {
         verifyNoMoreInteractions(service);
     }
 
-    @Test
-    void getToDoListShouldReturn404WhenListDoesNotExist() throws Exception {
-        //given
-        long id = 1L;
-        String errorMessage = "This list does not exit";
-        when(service.getToDoListById(id)).thenThrow(new RuntimeException(errorMessage));
-
-        //verify
-        mvc.perform(
-                get("/list/" + id)
-                        .accept("application/json"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value(errorMessage)
-                );
-        verify(service).getToDoListById(1L);
-        verifyNoMoreInteractions(service);
-    }
 
     @Test
     void postToDoListShouldReturnNewlyCreatedToDoList() throws Exception {
@@ -157,23 +143,6 @@ class ToDoListControllerTest {
     }
 
     @Test
-    void setActiveWhenListDoesNotExistShouldReturn404WithExceptionMessage() throws Exception {
-        //given
-        given(service.setActive(1L, true)).willThrow(new RuntimeException("This List Does Not Exist"));
-
-        //verify
-        mvc.perform(
-                put("/list/1/active/true")
-                        .accept("application/json")
-        )
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("This List Does Not Exist")
-                );
-        verify(service).setActive(1L, true);
-        verifyNoMoreInteractions(service);
-    }
-
-    @Test
     void addTaskShouldReturnListWithNewTask() throws Exception {
         //given
         String taskJson = """
@@ -203,26 +172,6 @@ class ToDoListControllerTest {
 
     }
 
-    @Test
-    void addTaskShouldReturn404WhenListDoesNotExist() throws Exception {
-        //given
-        String taskJson = """
-                {
-                      "name": "task"
-                }""";
-
-        //when
-        when(service.addTask(anyLong(), any(Task.class)))
-                .thenThrow(new RuntimeException("List Does Not Exist"));
-
-        //verify
-        mvc.perform(put("/list/1/task/add")
-                .accept("application/json")
-                .contentType("application/json")
-                .content(taskJson))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("List Does Not Exist"));
-    }
 
     @Test
     void removeTaskShouldReturnUpdatedToDoList() throws Exception {
@@ -248,21 +197,24 @@ class ToDoListControllerTest {
         verifyNoMoreInteractions(service);
     }
 
+
     @Test
-    void removeTaskShouldReturn404WhenTaskNotPresent() throws Exception {
+    void setDescriptionShouldReturnUpdatedToDoList() throws Exception {
+        //given
+        String description = "This is a description";
+        ToDoList testList = new ToDoList("testTask", description);
+
         //when
-        when(service.removeTask(1L, 1L)).thenThrow(new RuntimeException("List id: 1 Does Not Include Task id: 1"));
+        when(service.setDescription(testList.getId(), description)).thenReturn(testList);
 
         //verify
         mvc.perform(
-                put("/list/1/task/remove/1")
+                put(String.format("/list/%d/description", testList.getId()))
+                        .content("{ \"description\": \"" + description + "\"")
                         .accept("application/json")
         )
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void setDescriptionShouldReturnUpdatedToDoList() {
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value(description));
 
     }
 

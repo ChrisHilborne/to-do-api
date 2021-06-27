@@ -1,14 +1,18 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.exception.DataNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
-import com.chilborne.todoapi.web.ErrorMessage;
+import com.chilborne.todoapi.web.error.ErrorMessage;
+import com.chilborne.todoapi.web.error.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/list")
@@ -23,17 +27,10 @@ public class ToDoListController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<?> getToDoList(@PathVariable long id) {
+    public ResponseEntity<ToDoList> getToDoList(@PathVariable long id) {
         logger.info("Processing GET Request for ToDoList (id: " + id +")");
-        ToDoList result;
-        try {
-            result = service.getToDoListById(id);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage(e));
-        }
-
+        ToDoList result = service.getToDoListById(id);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping(value = "/new", produces = "application/json")
@@ -44,51 +41,25 @@ public class ToDoListController {
     }
 
     @PutMapping(value = "/{id}/active/{active}")
-    public ResponseEntity<?> setActive(@PathVariable long id, @PathVariable boolean active) {
+    public ResponseEntity<ToDoList> setActive(@PathVariable long id, @PathVariable boolean active) {
         logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
-        ToDoList result;
-        try {
-            result = service.setActive(id, active);
-            return ResponseEntity.ok(result);
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage(e));
-        }
+        ToDoList result = service.setActive(id, active);
+        return ResponseEntity.ok(result);
 
     }
 
     @PutMapping(value = "/{id}/task/add", produces = "application/json")
-    public ResponseEntity<?> addTaskToList(@PathVariable long id, @RequestBody Task task) {
+    public ResponseEntity<ToDoList> addTaskToList(@PathVariable long id, @RequestBody Task task) {
         logger.info(String.format("Processing Request to add new Task (name: %s) to ToDoList (id: %d)", task.getName(), id));
-        ToDoList result;
-        try {
-            result = service.addTask(id, task);
-            return ResponseEntity.ok(result);
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage(e));
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorMessage(e));
-        }
+        ToDoList result = service.addTask(id, task);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping(value = "/{listId}/task/remove/{taskId}", produces = "application/json")
-    public ResponseEntity<?> removeTaskFromList(@PathVariable long listId, @PathVariable long taskId) {
+    public ResponseEntity<ToDoList> removeTaskFromList(@PathVariable long listId, @PathVariable long taskId) {
         logger.info(String.format("Removing Task with id %d from ToDoList with id %d", taskId, listId));
-        ToDoList result;
-        try {
-            result = service.removeTask(listId, taskId);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorMessage(e));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorMessage(e));
-        }
+        ToDoList result = service.removeTask(listId, taskId);
+        return ResponseEntity.ok(result);
     }
+    
 }
