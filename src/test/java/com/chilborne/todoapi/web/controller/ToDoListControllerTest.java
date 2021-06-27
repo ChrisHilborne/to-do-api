@@ -13,13 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -83,7 +81,7 @@ class ToDoListControllerTest {
     @Test
     void getToDoListShouldReturn404WhenListDoesNotExist() throws Exception {
         //given
-        long id = 1l;
+        long id = 1L;
         String errorMessage = "This list does not exit";
         when(service.getToDoListById(id)).thenThrow(new RuntimeException(errorMessage));
 
@@ -248,6 +246,29 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.tasks[0].name").value("task1"));
         verify(service).removeTask(idTestList, idTaskToRemove);
         verifyNoMoreInteractions(service);
+    }
+
+    @Test
+    void removeTaskShouldReturn404WhenTaskNotPresent() throws Exception {
+        //when
+        when(service.removeTask(1L, 1L)).thenThrow(new RuntimeException("List id: 1 Does Not Include Task id: 1"));
+
+        //verify
+        mvc.perform(
+                put("/list/1/task/remove/1")
+                        .accept("application/json")
+        )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void setDescriptionShouldReturnUpdatedToDoList() {
+
+    }
+
+    @Test
+    void setNameShouldReturnUpdatedToDoList() {
+
     }
 
 }
