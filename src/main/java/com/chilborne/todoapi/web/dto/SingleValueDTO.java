@@ -1,10 +1,10 @@
 package com.chilborne.todoapi.web.dto;
 
-public class SingleValueDTO {
+public class SingleValueDTO<T> {
 
-    private String value;
+    private T value;
 
-    public SingleValueDTO(String value) {
+    public SingleValueDTO(T value) {
         this.value = value;
     }
 
@@ -12,11 +12,11 @@ public class SingleValueDTO {
 
     }
 
-    public String getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(T value) {
         this.value = value;
     }
 }

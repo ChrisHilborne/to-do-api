@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +47,10 @@ class ToDoListControllerTest {
     ArgumentCaptor<Long> idCaptor;
 
     @Captor
-    ArgumentCaptor<SingleValueDTO> dtoCaptor;
+    ArgumentCaptor<SingleValueDTO<String>> stringDTOCaptor;
+
+    @Captor
+    ArgumentCaptor<SingleValueDTO<Boolean>> booleanDTOCaptor;
 
     LocalDateTime now = LocalDateTime.now();
 
@@ -119,10 +121,11 @@ class ToDoListControllerTest {
     @Test
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
+        String activeJson = "{ \"value\" : \"false\" }";
         ToDoList activeList = new ToDoList("test");
         activeList.setDateTimeCreated(now);
         activeList.setActive(true);
-        long activeId = activeList.getId();
+        long activeListId = activeList.getId();
 
         ToDoList inactiveList = new ToDoList("test");
         inactiveList.setDateTimeCreated(now);
@@ -130,19 +133,27 @@ class ToDoListControllerTest {
 
 
         //when
-        when(service.setActive(activeId, false)).thenReturn(inactiveList);
+        when(service.setActive(anyLong(), any(SingleValueDTO.class))).thenReturn(inactiveList);
 
         //verify
         mvc.perform(
-                put("/list/" + activeId + "/active/false")
+                put("/list/" + activeListId + "/active/")
                         .accept("application/json")
+                        .contentType("application/json")
+                        .content(activeJson)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.date_time_created").value(nowString));
-        verify(service).setActive(activeId, false);
+        verify(service).setActive(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
+
+        verify(service).setActive(idCaptor.capture(), booleanDTOCaptor.capture());
+        long passedId = idCaptor.getValue();
+        SingleValueDTO<Boolean> passedDTO = booleanDTOCaptor.getValue();
+        assertEquals(activeListId, passedId);
+        assertEquals(false, passedDTO.getValue());
 
     }
 
@@ -206,7 +217,7 @@ class ToDoListControllerTest {
     void setDescriptionShouldReturnUpdatedToDoList() throws Exception {
         //given
         String description = "This is a description";
-        SingleValueDTO descriptionDTO = new SingleValueDTO(description);
+        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
         ToDoList testList = new ToDoList("testTask", description);
 
 
@@ -214,21 +225,20 @@ class ToDoListControllerTest {
         when(service.setDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
 
         //verify
-        MvcResult result = mvc.perform(
+        mvc.perform(
                 put(String.format("/list/%d/description", testList.getId()))
                         .contentType("application/json")
                         .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
                         .accept("application/json")
         )
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         verify(service).setDescription(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
         
-        verify(service).setDescription(idCaptor.capture(), dtoCaptor.capture());
+        verify(service).setDescription(idCaptor.capture(), stringDTOCaptor.capture());
         long passedId = idCaptor.getValue();
-        SingleValueDTO passedDTO = dtoCaptor.getValue();
+        SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
         assertEquals(testList.getId(), passedId);
         assertEquals(description, passedDTO.getValue());
 
