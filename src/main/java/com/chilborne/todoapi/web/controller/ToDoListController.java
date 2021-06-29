@@ -1,18 +1,13 @@
 package com.chilborne.todoapi.web.controller;
 
-import com.chilborne.todoapi.exception.DataNotFoundException;
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
-import com.chilborne.todoapi.web.error.ErrorMessage;
-import com.chilborne.todoapi.web.error.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/list")
@@ -31,6 +26,7 @@ public class ToDoListController {
         logger.info("Processing GET Request for ToDoList (id: " + id +")");
         ToDoList result = service.getToDoListById(id);
         return ResponseEntity.ok(result);
+
     }
 
     @PostMapping(value = "/new", produces = "application/json")
@@ -61,5 +57,11 @@ public class ToDoListController {
         ToDoList result = service.removeTask(listId, taskId);
         return ResponseEntity.ok(result);
     }
-    
+
+    @PutMapping(value = "/{id}/description")
+    public ResponseEntity<ToDoList> setDescription(@PathVariable long id, @RequestBody SingleValueDTO description) {
+        logger.info("Setting description of List id: " + id + " to: " + description.getValue());
+        ToDoList result = service.setDescription(id, description);
+        return ResponseEntity.ok(result);
+    }
 }
