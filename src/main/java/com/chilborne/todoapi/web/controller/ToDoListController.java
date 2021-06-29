@@ -36,8 +36,8 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping(value = "/{id}/active/{active}")
-    public ResponseEntity<ToDoList> setActive(@PathVariable long id, @PathVariable boolean active) {
+    @PutMapping(value = "/{id}/active/")
+    public ResponseEntity<ToDoList> setActive(@PathVariable long id, @RequestBody SingleValueDTO<Boolean> active) {
         logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
         ToDoList result = service.setActive(id, active);
         return ResponseEntity.ok(result);
@@ -59,7 +59,7 @@ public class ToDoListController {
     }
 
     @PutMapping(value = "/{id}/description")
-    public ResponseEntity<ToDoList> setDescription(@PathVariable long id, @RequestBody SingleValueDTO description) {
+    public ResponseEntity<ToDoList> setDescription(@PathVariable long id, @RequestBody SingleValueDTO<String> description) {
         logger.info("Setting description of List id: " + id + " to: " + description.getValue());
         ToDoList result = service.setDescription(id, description);
         return ResponseEntity.ok(result);

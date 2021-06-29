@@ -54,7 +54,7 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList setDescription(Long id, SingleValueDTO description) throws ToDoListNotFoundException {
+    public ToDoList setDescription(Long id, SingleValueDTO<String> description) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
                         description.hashCode(), id)
@@ -64,12 +64,12 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList setActive(Long id, boolean active) throws ToDoListNotFoundException {
+    public ToDoList setActive(Long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
         );
         ToDoList list = getToDoListById(id);
-        list.setActive(active);
+        list.setActive(active.getValue());
         return repository.save(list);
     }
 

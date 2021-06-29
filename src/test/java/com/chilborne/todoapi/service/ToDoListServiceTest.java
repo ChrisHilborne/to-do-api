@@ -141,7 +141,7 @@ class ToDoListServiceTest {
     void addDescription() {
         //given
         String description = "This is a To Do List";
-        SingleValueDTO singleValueDTO = new SingleValueDTO(description);
+        SingleValueDTO<String> singleValueDTO = new SingleValueDTO<>(description);
         ToDoList described = new ToDoList("test", description, testList.getTasks());
         described.setDateTimeCreated(now);
 
@@ -164,15 +164,16 @@ class ToDoListServiceTest {
     @Test
     void setActive() {
         //given
+        SingleValueDTO<Boolean> activeDTO = new SingleValueDTO<>(false);
         ToDoList deactivated = new ToDoList("test", testList.getTasks());
         deactivated.setDateTimeCreated(now);
-        deactivated.setActive(false);
+        deactivated.setActive(activeDTO.getValue());
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any(ToDoList.class))).willReturn(deactivated);
 
         //when
-        ToDoList result = service.setActive(1L, false);
+        ToDoList result = service.setActive(1L, activeDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
