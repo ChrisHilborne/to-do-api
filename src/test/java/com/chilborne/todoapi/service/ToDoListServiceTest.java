@@ -28,7 +28,7 @@ class ToDoListServiceTest {
     ToDoListRepository repository;
 
     @InjectMocks
-    ToDoListService service;
+    ToDoListServiceImpl service;
 
     @Captor
     ArgumentCaptor<ToDoList> toDoListCaptor;
@@ -52,7 +52,7 @@ class ToDoListServiceTest {
         given(repository.save(testList)).willReturn(testList);
 
         //when
-        ToDoList result = service.saveToDoList(testList);
+        ToDoList result = service.save(testList);
 
         //verify
         verify(repository, times(1)).save(testList);
@@ -68,7 +68,7 @@ class ToDoListServiceTest {
                 .willReturn(Optional.ofNullable(testList));
 
         //when
-        ToDoList result = service.getToDoListById(1L);
+        ToDoList result = service.getById(1L);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -82,7 +82,7 @@ class ToDoListServiceTest {
         given(repository.findById(1L)).willReturn(Optional.empty());
 
         //when
-        Exception e = assertThrows(RuntimeException.class, () -> service.getToDoListById(1L));
+        Exception e = assertThrows(RuntimeException.class, () -> service.getById(1L));
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -96,7 +96,7 @@ class ToDoListServiceTest {
         given(repository.findAll()).willReturn(List.of(testList));
 
         //when
-        List<ToDoList> result = service.getAllToDoList();
+        List<ToDoList> result = service.getAll();
 
         //verify
         verify(repository, times(1)).findAll();
@@ -107,7 +107,7 @@ class ToDoListServiceTest {
     @Test
     void deleteToDoList() {
         //when
-        service.deleteToDoList(1L);
+        service.delete(1L);
 
         //verify
         verify(repository, times(1)).deleteById(1L);

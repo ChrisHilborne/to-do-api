@@ -1,6 +1,7 @@
 package com.chilborne.todoapi.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import net.bytebuddy.dynamic.scaffold.MethodGraph;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class ToDoList {
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime dateTimeCreated = LocalDateTime.now();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "list")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "list")
     private List<Task> tasks = new LinkedList<>();
 
     @Column(name = "ACTIVE", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
@@ -42,19 +43,19 @@ public class ToDoList {
         this.name = name;
     }
 
-    public ToDoList(String name, List<Task> tasks) {
-        this(name);
-        this.tasks = new LinkedList<>(tasks);
-    }
-
     public ToDoList(String name, String description) {
         this(name);
         this.description = description;
     }
 
+    public ToDoList(String name, List<Task> tasks) {
+        this(name);
+        this.tasks.addAll(tasks);
+    }
+
     public ToDoList(String name, String description, List<Task> tasks) {
-        this(name, description);
-        this.tasks = new LinkedList<>(tasks);
+        this(name, tasks);
+        this.description = description;
     }
 
     public void addTask(Task task) {
@@ -62,11 +63,7 @@ public class ToDoList {
     }
 
     public boolean removeTask(long taskId) {
-        int initialSize = tasks.size();
-        tasks = tasks.stream()
-                .filter(task -> task.getTaskId() != taskId)
-                .collect(Collectors.toList());
-        return tasks.size() == initialSize - 1;
+        return this.tasks.removeIf(task -> task.getTaskId() == taskId);
     }
 
     public long getId() {
@@ -101,8 +98,11 @@ public class ToDoList {
         return List.copyOf(tasks);
     }
 
-    public void setTasks(Collection<Task> tasks) {
-        this.tasks = new LinkedList<>(tasks);
+    public void setTasks(List<Task> tasks) {
+        if (this.tasks != tasks) {
+            this.tasks.clear();
+            this.tasks.addAll(tasks);
+        }
     }
 
     public boolean isActive() {

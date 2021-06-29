@@ -3,7 +3,7 @@ package com.chilborne.todoapi.web.controller;
 import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
-import com.chilborne.todoapi.service.ToDoListService;
+import com.chilborne.todoapi.service.ToDoListServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ class ToDoListControllerTest {
     MockMvc mvc;
 
     @MockBean
-    ToDoListService service;
+    ToDoListServiceImpl service;
 
     @InjectMocks
     ToDoListController controller;
@@ -71,7 +71,7 @@ class ToDoListControllerTest {
         testList.setDateTimeCreated(now);
 
         //when
-        when(service.getToDoListById(id)).thenReturn(testList);
+        when(service.getById(id)).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -83,7 +83,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.date_time_created").value(nowString)
                 );
 
-        verify(service).getToDoListById(0L);
+        verify(service).getById(0L);
         verifyNoMoreInteractions(service);
     }
 
@@ -100,7 +100,7 @@ class ToDoListControllerTest {
         testList.setDateTimeCreated(now);
 
         //when
-        when(service.saveToDoList(any(ToDoList.class))).thenReturn(testList);
+        when(service.save(any(ToDoList.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -112,7 +112,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
-        verify(service).saveToDoList(toDoListCaptor.capture());
+        verify(service).save(toDoListCaptor.capture());
         verifyNoMoreInteractions(service);
         assertEquals(testList.getName(), toDoListCaptor.getValue().getName());
         assertEquals(testList.getDescription(), toDoListCaptor.getValue().getDescription());
@@ -218,7 +218,7 @@ class ToDoListControllerTest {
         //given
         String description = "This is a description";
         SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
-        ToDoList testList = new ToDoList("testTask", description);
+        ToDoList testList = new ToDoList("testList", description);
 
 
         //when

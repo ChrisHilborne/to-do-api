@@ -1,9 +1,10 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.service.ToDoListService;
 import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
-import com.chilborne.todoapi.service.ToDoListService;
+import com.chilborne.todoapi.service.ToDoListServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +18,14 @@ public class ToDoListController {
 
     private final Logger logger = LoggerFactory.getLogger(ToDoListController.class);
 
-    public ToDoListController(ToDoListService service) {
+    public ToDoListController(ToDoListServiceImpl service) {
         this.service = service;
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<ToDoList> getToDoList(@PathVariable long id) {
         logger.info("Processing GET Request for ToDoList (id: " + id +")");
-        ToDoList result = service.getToDoListById(id);
+        ToDoList result = service.getById(id);
         return ResponseEntity.ok(result);
 
     }
@@ -32,11 +33,11 @@ public class ToDoListController {
     @PostMapping(value = "/new", produces = "application/json")
     public ResponseEntity<ToDoList> postToDoList(@RequestBody ToDoList list) {
         logger.info("Processing POST request for new ToDoList");
-        ToDoList result = service.saveToDoList(list);
+        ToDoList result = service.save(list);
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping(value = "/{id}/active/")
+    @PutMapping(value = "/{id}/active")
     public ResponseEntity<ToDoList> setActive(@PathVariable long id, @RequestBody SingleValueDTO<Boolean> active) {
         logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
         ToDoList result = service.setActive(id, active);
