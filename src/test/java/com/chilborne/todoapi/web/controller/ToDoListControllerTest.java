@@ -245,8 +245,33 @@ class ToDoListControllerTest {
     }
 
     @Test
-    void setNameShouldReturnUpdatedToDoList() {
+    void setNameShouldReturnUpdatedToDoList() throws Exception {
+        //given
+        String name = "This is a name";
+        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(name);
+        ToDoList testList = new ToDoList("testTask", name);
 
+
+        //when
+        when(service.setName(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
+
+        //verify
+        mvc.perform(
+                put(String.format("/list/%d/name", testList.getId()))
+                        .contentType("application/json")
+                        .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
+                        .accept("application/json")
+        )
+                .andExpect(status().isOk());
+
+        verify(service).setName(anyLong(), any(SingleValueDTO.class));
+        verifyNoMoreInteractions(service);
+
+        verify(service).setName(idCaptor.capture(), stringDTOCaptor.capture());
+        long passedId = idCaptor.getValue();
+        SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
+        assertEquals(testList.getId(), passedId);
+        assertEquals(name, passedDTO.getValue());
     }
 
 }

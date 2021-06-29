@@ -60,8 +60,15 @@ public class ToDoListController {
 
     @PutMapping(value = "/{id}/description")
     public ResponseEntity<ToDoList> setDescription(@PathVariable long id, @RequestBody SingleValueDTO<String> description) {
-        logger.info("Setting description of List id: " + id + " to: " + description.getValue());
+        logger.info("Processing request to set description of List id: " + id + " to: " + description.getValue());
         ToDoList result = service.setDescription(id, description);
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping(value ="/{id}/name")
+    public ResponseEntity<ToDoList> setName(@PathVariable long id, @RequestBody SingleValueDTO<String> name) {
+        logger.info("Processing request to set name of List id: " + id + "to: " + name.getValue());
+        ToDoList result = service.setName(id, name);
         return ResponseEntity.ok(result);
     }
 }

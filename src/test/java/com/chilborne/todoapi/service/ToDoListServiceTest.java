@@ -118,14 +118,15 @@ class ToDoListServiceTest {
     void setName() {
         //given
         String name = "new name";
-        ToDoList newName = new ToDoList("new name", testList.getTasks());
+        SingleValueDTO<String> nameDTO = new SingleValueDTO<>(name);
+        ToDoList newName = new ToDoList(name, testList.getTasks());
         newName.setDateTimeCreated(now);
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any())).willReturn(newName);
 
         //when
-        ToDoList result = service.setName(1L, name);
+        ToDoList result = service.setName(1L, nameDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
