@@ -6,6 +6,7 @@ import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class ToDoListService {
     }
 
     public ToDoList getToDoListById(Long id) throws ToDoListNotFoundException {
-        logger.info("Fetching ToDoList with id: " + " id");
+        logger.info("Fetching ToDoList with id: " + id);
         return repository.findById(id).orElseThrow(
                 () -> new ToDoListNotFoundException("ToDoList with id " + id + " not found")
         );
@@ -45,19 +46,19 @@ public class ToDoListService {
         repository.deleteById(id);
     }
 
-    public ToDoList setName(Long id, String name) throws ToDoListNotFoundException {
+    public ToDoList setName(Long id, SingleValueDTO<String> name) throws ToDoListNotFoundException {
         logger.info(
-            String.format("Setting name of ToDoList (id: %d) to: %s", id, name)
+            String.format("Setting name of ToDoList (id: %d) to: %s", id, name.getValue())
         );
         ToDoList list = getToDoListById(id);
-        list.setName(name);
+        list.setName(name.getValue());
         return repository.save(list);
     }
 
     public ToDoList setDescription(Long id, SingleValueDTO<String> description) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
-                        description.hashCode(), id)
+                        description.getValue(), id)
         );
         ToDoList list = getToDoListById(id);
         list.setDescription(description.getValue());
