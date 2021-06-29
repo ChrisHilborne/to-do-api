@@ -1,98 +1,31 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.DataNotFoundException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
-import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 
 import java.util.List;
 
-@Service
-public class ToDoListService {
+public interface ToDoListService {
 
-    private final ToDoListRepository repository;
+    ToDoList getById(long id) throws ToDoListNotFoundException;
 
-    private final Logger logger = LoggerFactory.getLogger(ToDoListService.class);
+    ToDoList save(ToDoList list);
 
-    public ToDoListService(ToDoListRepository repository) {
-        this.repository = repository;
-    }
+    List<ToDoList> getAll();
 
-    public ToDoList saveToDoList(ToDoList list) {
-        logger.info("Saving ToDoList (name: " + list.getName() + ")");
-        return repository.save(list);
-    }
+    void delete(long id);
 
-    public ToDoList getToDoListById(Long id) throws ToDoListNotFoundException {
-        logger.info("Fetching ToDoList with id: " + id);
-        return repository.findById(id).orElseThrow(
-                () -> new ToDoListNotFoundException("ToDoList with id " + id + " not found")
-        );
-    }
+    ToDoList setName(long id, SingleValueDTO<String> name) throws ToDoListNotFoundException;
 
-    public List<ToDoList> getAllToDoList() {
-        logger.info("Fetching all ToDoLists");
-        return repository.findAll();
-    }
+    ToDoList setDescription(long id, SingleValueDTO<String> description) throws ToDoListNotFoundException;
 
-    public void deleteToDoList(Long id) {
-        logger.info("Deleting ToDoList (id: " + id + ")");
-        repository.deleteById(id);
-    }
+    ToDoList setActive(long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException;
 
-    public ToDoList setName(Long id, SingleValueDTO<String> name) throws ToDoListNotFoundException {
-        logger.info(
-            String.format("Setting name of ToDoList (id: %d) to: %s", id, name.getValue())
-        );
-        ToDoList list = getToDoListById(id);
-        list.setName(name.getValue());
-        return repository.save(list);
-    }
+    ToDoList addTask(long id, Task task) throws ToDoListNotFoundException;
 
-    public ToDoList setDescription(Long id, SingleValueDTO<String> description) throws ToDoListNotFoundException {
-        logger.info(
-                String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
-                        description.getValue(), id)
-        );
-        ToDoList list = getToDoListById(id);
-        list.setDescription(description.getValue());
-        return repository.save(list);
-    }
-
-    public ToDoList setActive(Long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException {
-        logger.info(
-                String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
-        );
-        ToDoList list = getToDoListById(id);
-        list.setActive(active.getValue());
-        return repository.save(list);
-    }
-
-    public ToDoList addTask(Long listId, Task task) throws ToDoListNotFoundException {
-        logger.info(
-                String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
-        );
-        ToDoList list = getToDoListById(listId);
-        task.setList(list);
-        list.addTask(task);
-        return repository.save(list);
-    }
-
-    public ToDoList removeTask(Long listId, Long taskId) throws TaskNotFoundException {
-        logger.info(
-                String.format("Removing Task (id: %d) from ToDoList (id; %d)", taskId, listId)
-        );
-        ToDoList list = getToDoListById(listId);
-        if (list.removeTask(taskId)) {
-            return repository.save(list);
-        } else
-            throw new TaskNotFoundException(
-                    String.format("List with id %d does not contain task with id %d", listId, taskId));
-    }
+    ToDoList removeTask(long listId, long taskId) throws TaskNotFoundException;
 }
