@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
@@ -140,6 +141,7 @@ class ToDoListServiceTest {
     void addDescription() {
         //given
         String description = "This is a To Do List";
+        SingleValueDTO singleValueDTO = new SingleValueDTO(description);
         ToDoList described = new ToDoList("test", description, testList.getTasks());
         described.setDateTimeCreated(now);
 
@@ -147,7 +149,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(described);
 
         //when
-        ToDoList result = service.setDescription(1L, description);
+        ToDoList result = service.setDescription(1L, singleValueDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -210,24 +212,28 @@ class ToDoListServiceTest {
     void removeTask() {
         //given
         Task toRemove = testList.getTasks().get(1);
+        toRemove.setTaskId(5L);
         ToDoList minusTask = new ToDoList("test", testList.getTasks());
         minusTask.setDateTimeCreated(now);
         minusTask.removeTask(toRemove.getTaskId());
 
-        given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
-        given(repository.save(any(ToDoList.class))).willReturn(minusTask);
 
         //when
+        when(repository.findById(1L)).thenReturn(Optional.ofNullable(testList));
+        when(repository.save(any(ToDoList.class))).thenReturn(minusTask);
         ToDoList result = service.removeTask(1L, toRemove.getTaskId());
 
         //verify
+        assertEquals(minusTask, result);
+
         verify(repository, times(1)).findById(1L);
         verify(repository, times(1)).save(any(ToDoList.class));
-        verifyNoMoreInteractions(repository);
-        verify(repository).save(toDoListCaptor.capture());
 
-        assertEquals(minusTask, result);
+        verify(repository).save(toDoListCaptor.capture());
         assertEquals(minusTask, toDoListCaptor.getValue());
+
+        verifyNoMoreInteractions(repository);
+
     }
 
     @Test

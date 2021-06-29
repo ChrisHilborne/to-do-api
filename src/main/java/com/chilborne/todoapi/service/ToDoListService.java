@@ -2,6 +2,7 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
@@ -53,13 +54,13 @@ public class ToDoListService {
         return repository.save(list);
     }
 
-    public ToDoList setDescription(Long id, String description) throws ToDoListNotFoundException {
+    public ToDoList setDescription(Long id, SingleValueDTO description) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
                         description.hashCode(), id)
         );
         ToDoList list = getToDoListById(id);
-        list.setDescription(description);
+        list.setDescription(description.getValue());
         return repository.save(list);
     }
 

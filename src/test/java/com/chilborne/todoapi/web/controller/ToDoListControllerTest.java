@@ -1,7 +1,6 @@
 package com.chilborne.todoapi.web.controller;
 
-import com.chilborne.todoapi.exception.TaskNotFoundException;
-import com.chilborne.todoapi.exception.ToDoListNotFoundException;
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListService;
@@ -23,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,7 +42,13 @@ class ToDoListControllerTest {
     ToDoListController controller;
 
     @Captor
-    ArgumentCaptor<ToDoList> captor;
+    ArgumentCaptor<ToDoList> toDoListCaptor;
+
+    @Captor
+    ArgumentCaptor<Long> idCaptor;
+
+    @Captor
+    ArgumentCaptor<SingleValueDTO> dtoCaptor;
 
     LocalDateTime now = LocalDateTime.now();
 
@@ -106,10 +110,10 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
-        verify(service).saveToDoList(captor.capture());
+        verify(service).saveToDoList(toDoListCaptor.capture());
         verifyNoMoreInteractions(service);
-        assertEquals(testList.getName(), captor.getValue().getName());
-        assertEquals(testList.getDescription(), captor.getValue().getDescription());
+        assertEquals(testList.getName(), toDoListCaptor.getValue().getName());
+        assertEquals(testList.getDescription(), toDoListCaptor.getValue().getDescription());
     }
 
     @Test
@@ -202,19 +206,31 @@ class ToDoListControllerTest {
     void setDescriptionShouldReturnUpdatedToDoList() throws Exception {
         //given
         String description = "This is a description";
+        SingleValueDTO descriptionDTO = new SingleValueDTO(description);
         ToDoList testList = new ToDoList("testTask", description);
 
+
         //when
-        when(service.setDescription(testList.getId(), description)).thenReturn(testList);
+        when(service.setDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
 
         //verify
-        mvc.perform(
+        MvcResult result = mvc.perform(
                 put(String.format("/list/%d/description", testList.getId()))
-                        .content("{ \"description\": \"" + description + "\"")
+                        .contentType("application/json")
+                        .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
                         .accept("application/json")
         )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value(description));
+                .andReturn();
+
+        verify(service).setDescription(anyLong(), any(SingleValueDTO.class));
+        verifyNoMoreInteractions(service);
+        
+        verify(service).setDescription(idCaptor.capture(), dtoCaptor.capture());
+        long passedId = idCaptor.getValue();
+        SingleValueDTO passedDTO = dtoCaptor.getValue();
+        assertEquals(testList.getId(), passedId);
+        assertEquals(description, passedDTO.getValue());
 
     }
 
