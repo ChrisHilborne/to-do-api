@@ -54,6 +54,13 @@ public class Task {
         this.description = description;
     }
 
+    public boolean complete() {
+        if (!this.active) return false;
+        this.active = false;
+        timeCompleted = LocalDateTime.now();
+        return true;
+    }
+
     public long getTaskId() {
         return id;
     }
