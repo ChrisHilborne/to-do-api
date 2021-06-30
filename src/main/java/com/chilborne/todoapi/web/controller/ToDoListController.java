@@ -23,7 +23,7 @@ public class ToDoListController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<ToDoList> getToDoList(@PathVariable long id) {
+    public ResponseEntity<ToDoList> getToDoListById(@PathVariable long id) {
         logger.info("Processing GET Request for ToDoList (id: " + id +")");
         ToDoList result = service.getToDoListById(id);
         return ResponseEntity.ok(result);

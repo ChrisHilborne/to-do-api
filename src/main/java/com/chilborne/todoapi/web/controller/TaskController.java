@@ -21,7 +21,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTask(@PathVariable long id) {
+    public ResponseEntity<Task> getTaskById(@PathVariable long id) {
         logger.info("Processing Request for Task id: " + id);
         Task result = service.getTaskById(id);
         return ResponseEntity.ok(result);
