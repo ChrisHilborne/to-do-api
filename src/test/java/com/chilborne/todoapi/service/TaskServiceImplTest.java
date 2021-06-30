@@ -99,13 +99,38 @@ class TaskServiceImplTest {
         verify(repository).save(taskCaptor.capture());
         Task passedTask = taskCaptor.getValue();
         assertAll("passedTask is equal to testTask apart from name",
+                () -> assertEquals(testTask.getToDoList(), passedTask.getToDoList()),
                 () -> assertEquals(testTask.getTaskId(), passedTask.getTaskId()),
                 () -> assertEquals(testTask.getTimeCreated(), passedTask.getTimeCreated()),
                 () -> assertEquals("new name", passedTask.getName()));
     }
 
     @Test
-    void setTaskDescription() {
+    void setTaskDescriptionShouldReturnUpdatedTask() {
+        //given
+        String description = "new description";
+        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
+        Task newName = new Task(testTask.getName(), description);
+        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
+        given(repository.save(testTask)).willReturn(newName);
+
+        //when
+        Task updatedTask = service.setTaskDescription(testTask.getTaskId(), descriptionDTO);
+
+        //verify
+        assertEquals(newName, updatedTask);
+        verify(repository).findById(50L);
+        verify(repository).save(any(Task.class));
+        verifyNoMoreInteractions(repository);
+
+        verify(repository).save(taskCaptor.capture());
+        Task passedTask = taskCaptor.getValue();
+        assertAll("passedTask is equal to testTask apart from description",
+                () -> assertEquals(testTask.getTaskId(), passedTask.getTaskId()),
+                () -> assertEquals(testTask.getToDoList(), passedTask.getToDoList()),
+                () -> assertEquals(testTask.getTimeCreated(), passedTask.getTimeCreated()),
+                () -> assertEquals(description, passedTask.getDescription()));
+
     }
 
     @Test
