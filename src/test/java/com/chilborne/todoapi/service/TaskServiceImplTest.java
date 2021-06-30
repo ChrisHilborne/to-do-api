@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -167,6 +169,24 @@ class TaskServiceImplTest {
         verifyNoMoreInteractions(repository);
 
         assertEquals(testTask, completeTask);
+    }
+
+    @Test
+    void completeTaskShouldThrowTaskAlreadyCompletedExceptionIfTaskHasBeenCompletedAlready() {
+        //given
+        testTask.complete();
+        String timeCompleted = testTask.getTimeCompleted()
+                .format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yy"));
+
+        //when
+        when(repository.findById(50L)).thenReturn(Optional.ofNullable(testTask));
+
+        //verify
+        Exception e = assertThrows(TaskAlreadyCompletedException.class,
+                () -> service.completeTask(50L));
+        assertEquals("This task was already completed at " + timeCompleted,
+                        e.getMessage());
+
     }
 
 }
