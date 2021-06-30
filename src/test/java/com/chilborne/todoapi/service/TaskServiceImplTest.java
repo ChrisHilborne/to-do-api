@@ -34,9 +34,11 @@ class TaskServiceImplTest {
 
     Task testTask;
 
+    ToDoList testList;
+
     @BeforeEach
     void init() {
-        ToDoList testList = new ToDoList("test list");
+        testList = new ToDoList("test list");
         testTask = new Task(testList, "test task");
         testTask.setTaskId(50L);
     }
@@ -124,12 +126,12 @@ class TaskServiceImplTest {
         verifyNoMoreInteractions(repository);
 
         verify(repository).save(taskCaptor.capture());
-        Task passedTask = taskCaptor.getValue();
-        assertAll("passedTask is equal to testTask apart from description",
-                () -> assertEquals(testTask.getTaskId(), passedTask.getTaskId()),
-                () -> assertEquals(testTask.getToDoList(), passedTask.getToDoList()),
-                () -> assertEquals(testTask.getTimeCreated(), passedTask.getTimeCreated()),
-                () -> assertEquals(description, passedTask.getDescription()));
+        Task savedTask = taskCaptor.getValue();
+        assertAll("savedTask is equal to testTask apart from description",
+                () -> assertEquals(testTask.getTaskId(), savedTask.getTaskId()),
+                () -> assertEquals(testTask.getToDoList(), savedTask.getToDoList()),
+                () -> assertEquals(testTask.getTimeCreated(), savedTask.getTimeCreated()),
+                () -> assertEquals(description, savedTask.getDescription()));
 
     }
 
@@ -138,6 +140,37 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void completeTask() {
+    void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
+        //given
+        Task completedTask = new Task(testList, testTask.getName());
+        completedTask.setTimeCreated(testTask.getTimeCreated());
+        completedTask.complete();
+
+        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
+        given(repository.save(any(Task.class))).willReturn(completedTask);
+
+        //when
+        Task result = service.completeTask(50L);
+
+        //verify
+        assertAll(
+                "result is equal to testTask is all ways except active and timeCompleted",
+                () -> assertEquals(testTask.getToDoList(), result.getToDoList()),
+                () -> assertEquals(testTask.getTimeCreated(), result.getTimeCompleted()),
+                () -> assertEquals(testTask.getToDoList(), result.getToDoList()),
+                () -> assertNotEquals(testList.isActive(), result.isActive()),
+                () -> assertNull(testTask.getTimeCompleted()),
+                () -> assertNotNull(result.getTimeCompleted())
+        );
+
+        verify(repository).findById(50L);
+        verify(repository).save(any(Task.class));
+        verifyNoMoreInteractions(repository);
+
+        verify(repository).save(taskCaptor.capture());
+        Task savedTask = taskCaptor.getValue();
+        assertEquals(completedTask, savedTask);
+
     }
+
 }
