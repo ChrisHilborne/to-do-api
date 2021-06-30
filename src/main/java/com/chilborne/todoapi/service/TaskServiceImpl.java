@@ -56,10 +56,9 @@ public class TaskServiceImpl implements TaskService {
             return saveTask(toComplete);
         }
         else {
-            throw new TaskAlreadyCompletedException(
-                    "This task was already completed at " +
-                    toComplete.getTimeCompleted()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yy")));
+            throw new TaskAlreadyCompletedException("This task was already completed at "
+                            + toComplete.getTimeCompleted().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yy"))
+            );
         }
     }
 }
