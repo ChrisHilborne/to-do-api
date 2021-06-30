@@ -2,15 +2,12 @@ package com.chilborne.todoapi.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import net.bytebuddy.dynamic.scaffold.MethodGraph;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "lists")
@@ -33,6 +30,7 @@ public class ToDoList {
     private LocalDateTime dateTimeCreated = LocalDateTime.now();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "list")
+    @JsonManagedReference
     private List<Task> tasks = new LinkedList<>();
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)

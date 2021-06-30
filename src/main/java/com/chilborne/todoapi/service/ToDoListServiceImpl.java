@@ -87,7 +87,7 @@ public class ToDoListServiceImpl implements ToDoListService{
                 String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
         );
         ToDoList toUpdate = getToDoListById(listId);
-        task.setList(toUpdate);
+        task.setToDoList(toUpdate);
         toUpdate.addTask(task);
         return saveToDoList(toUpdate);
     }

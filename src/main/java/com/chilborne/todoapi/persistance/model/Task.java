@@ -1,7 +1,7 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,10 +15,10 @@ public class Task {
     @Column(name = "task_id", unique = true, nullable = false)
     private long id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
-    @JsonIgnore
-    private ToDoList list;
+    private ToDoList toDoList;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -44,13 +44,13 @@ public class Task {
         this.name = name;
     }
 
-    public Task(ToDoList list, String name) {
+    public Task(ToDoList toDoList, String name) {
         this(name);
-        this.list = list;
+        this.toDoList = toDoList;
     }
 
-    public Task(ToDoList list, String name, String description) {
-        this(list, name);
+    public Task(ToDoList toDoList, String name, String description) {
+        this(toDoList, name);
         this.description = description;
     }
 
@@ -69,12 +69,12 @@ public class Task {
         this.id = taskId;
     }
 
-    public ToDoList getList() {
-        return list;
+    public ToDoList getToDoList() {
+        return toDoList;
     }
 
-    public void setList(ToDoList list) {
-        this.list = list;
+    public void setToDoList(ToDoList toDoList) {
+        this.toDoList = toDoList;
     }
 
     public String getName() {
