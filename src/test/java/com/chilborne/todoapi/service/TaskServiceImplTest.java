@@ -4,6 +4,7 @@ import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
+import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void saveTask() {
+    void saveTaskShouldReturnSavedTask() {
         //given
         given(repository.save(testTask)).willReturn(testTask);
 
@@ -79,7 +80,27 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void setTaskName() {
+    void setTaskNameShouldReturnUpdatedTask() {
+        //given
+        SingleValueDTO<String> nameDTO = new SingleValueDTO<>("new name");
+        Task newName = new Task("new name");
+        given(repository.save(testTask)).willReturn(newName);
+
+        //when
+        Task updatedTask = service.setTaskName(testTask.getTaskId(), nameDTO);
+
+        //verify
+        assertEquals(newName, updatedTask);
+        verify(repository).findById(50L);
+        verify(repository).save(any(Task.class));
+        verifyNoMoreInteractions(repository);
+
+        verify(repository).save(taskCaptor.capture());
+        Task passedTask = taskCaptor.getValue();
+        assertAll("passedTask is equal to testTask apart from name",
+                () -> assertEquals(testTask.getTaskId(), passedTask.getTaskId()),
+                () -> assertEquals(testTask.getTimeCreated(), passedTask.getTimeCreated()),
+                () -> assertEquals("new name", passedTask.getName()));
     }
 
     @Test
