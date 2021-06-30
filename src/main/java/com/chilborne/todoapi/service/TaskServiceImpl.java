@@ -33,7 +33,10 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task setTaskName(long id, SingleValueDTO<String> name) throws TaskNotFoundException {
-        return null;
+        logger.info(String.format("Setting Task (id:%d) name to: %s", id, name.getValue()));
+        Task toUpdate = getTaskById(id);
+        toUpdate.setName(name.getValue());
+        return repository.save(toUpdate);
     }
 
     @Override

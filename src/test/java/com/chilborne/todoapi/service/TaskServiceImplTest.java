@@ -84,6 +84,7 @@ class TaskServiceImplTest {
         //given
         SingleValueDTO<String> nameDTO = new SingleValueDTO<>("new name");
         Task newName = new Task("new name");
+        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
         given(repository.save(testTask)).willReturn(newName);
 
         //when
