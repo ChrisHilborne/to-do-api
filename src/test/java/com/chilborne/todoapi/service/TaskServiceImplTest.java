@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
@@ -54,7 +55,22 @@ class TaskServiceImplTest {
     }
 
     @Test
+    void getTaskByIdShouldThrowTaskNotFoundExceptionWhenItDoesNotExist() {
+        //given
+        given(repository.findById(50L)).willReturn(Optional.empty());
+
+        //verify
+        Exception e = assertThrows(TaskNotFoundException.class, () -> service.getTaskById(50L));
+        assertEquals("Task with id: 50 not found", e.getMessage());
+    }
+
+    @Test
     void saveTask() {
+        //given
+        given(repository.save(testTask)).willReturn(testTask);
+
+        //when
+        Task task =
     }
 
     @Test

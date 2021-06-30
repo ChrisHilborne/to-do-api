@@ -20,7 +20,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task getTaskById(long id) throws TaskNotFoundException {
-        return new Task("fails");
+        logger.info("Fetching Task id: " + id);
+        return repository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task with id: " + id + " not found"));
     }
 
     @Override
