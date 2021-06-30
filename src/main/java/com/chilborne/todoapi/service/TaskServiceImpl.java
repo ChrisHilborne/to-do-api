@@ -36,12 +36,15 @@ public class TaskServiceImpl implements TaskService {
         logger.info(String.format("Setting Task (id:%d) name to: %s", id, name.getValue()));
         Task toUpdate = getTaskById(id);
         toUpdate.setName(name.getValue());
-        return repository.save(toUpdate);
+        return saveTask(toUpdate);
     }
 
     @Override
     public Task setTaskDescription(long id, SingleValueDTO<String> description) throws TaskNotFoundException {
-        return null;
+        logger.info(String.format("Setting Task (id:%d) description to: %s", id, description.getValue()));
+        Task toUpdate = getTaskById(id);
+        toUpdate.setDescription(description.getValue());
+        return saveTask(toUpdate);
     }
 
     @Override
