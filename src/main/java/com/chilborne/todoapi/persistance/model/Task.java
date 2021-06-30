@@ -44,9 +44,14 @@ public class Task {
         this.name = name;
     }
 
+    public Task(String name, String description) {
+        this(name);
+        this.description = description;
+    }
+
     public Task(ToDoList list, String name) {
+        this(name);
         this.list = list;
-        this.name = name;
     }
 
     public Task(ToDoList list, String name, String description) {
@@ -69,7 +74,7 @@ public class Task {
         this.id = taskId;
     }
 
-    public ToDoList getList() {
+    public ToDoList getToDoList() {
         return list;
     }
 
