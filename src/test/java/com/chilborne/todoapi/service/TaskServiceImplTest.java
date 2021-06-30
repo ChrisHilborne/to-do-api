@@ -70,7 +70,12 @@ class TaskServiceImplTest {
         given(repository.save(testTask)).willReturn(testTask);
 
         //when
-        Task task =
+        Task result = service.saveTask(testTask);
+
+        //verify
+        assertEquals(testTask, result);
+        verify(repository).save(testTask);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test
