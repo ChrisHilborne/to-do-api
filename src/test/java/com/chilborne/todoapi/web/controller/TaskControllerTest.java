@@ -14,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.format.DateTimeFormatter;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,6 +45,9 @@ class TaskControllerTest {
 
     @Test
     void getTask() throws Exception {
+        //given
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd:MM.yy HH:mm:ss");
+
         //when
         when(service.getTaskById(50L)).thenReturn(testTask);
 
@@ -52,7 +57,12 @@ class TaskControllerTest {
                         .accept("application/json")
         )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.to_do_list.id").value(testTask.getToDoList().getId()));
+                .andExpect(jsonPath("$.name").value(testTask.getName()))
+                .andExpect(jsonPath("$.task_id").value(testTask.getTaskId()))
+                .andExpect(jsonPath("$.date_created").value(testTask.getTimeCreated().format(formatter)));
+
+        verify(service).getTaskById(50L);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
