@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,13 +35,14 @@ class TaskServiceImplTest {
 
     Task testTask;
 
-    ToDoList testList;
+    LocalDateTime now = LocalDateTime.now();
 
     @BeforeEach
     void init() {
-        testList = new ToDoList("test list");
+        ToDoList testList = new ToDoList("test list");
         testTask = new Task(testList, "test task");
         testTask.setTaskId(50L);
+        testTask.setTimeCreated(now);
     }
 
     @Test
@@ -93,18 +95,20 @@ class TaskServiceImplTest {
         Task updatedTask = service.setTaskName(testTask.getTaskId(), nameDTO);
 
         //verify
-        assertEquals(newName, updatedTask);
         verify(repository).findById(50L);
         verify(repository).save(any(Task.class));
         verifyNoMoreInteractions(repository);
 
         verify(repository).save(taskCaptor.capture());
-        Task passedTask = taskCaptor.getValue();
+        Task savedTask = taskCaptor.getValue();
         assertAll("passedTask is equal to testTask apart from name",
-                () -> assertEquals(testTask.getToDoList(), passedTask.getToDoList()),
-                () -> assertEquals(testTask.getTaskId(), passedTask.getTaskId()),
-                () -> assertEquals(testTask.getTimeCreated(), passedTask.getTimeCreated()),
-                () -> assertEquals("new name", passedTask.getName()));
+                () -> assertEquals(testTask.getToDoList(), savedTask.getToDoList()),
+                () -> assertEquals(testTask.getTaskId(), savedTask.getTaskId()),
+                () -> assertEquals(testTask.getTimeCreated(), savedTask.getTimeCreated()),
+                () -> assertEquals("new name", savedTask.getName()));
+
+        //check no changes are made between saving and returning updated Task
+        assertEquals(savedTask, updatedTask);
     }
 
     @Test
@@ -112,15 +116,14 @@ class TaskServiceImplTest {
         //given
         String description = "new description";
         SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
-        Task newName = new Task(testTask.getName(), description);
+        Task newDescription = new Task(testTask.getName(), description);
         given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(repository.save(testTask)).willReturn(newName);
+        given(repository.save(testTask)).willReturn(newDescription);
 
         //when
         Task updatedTask = service.setTaskDescription(testTask.getTaskId(), descriptionDTO);
 
         //verify
-        assertEquals(newName, updatedTask);
         verify(repository).findById(50L);
         verify(repository).save(any(Task.class));
         verifyNoMoreInteractions(repository);
@@ -133,6 +136,9 @@ class TaskServiceImplTest {
                 () -> assertEquals(testTask.getTimeCreated(), savedTask.getTimeCreated()),
                 () -> assertEquals(description, savedTask.getDescription()));
 
+
+        //check no changes are made between saving and returning updated Task
+        assertEquals(savedTask, updatedTask);
     }
 
     @Test
@@ -142,35 +148,25 @@ class TaskServiceImplTest {
     @Test
     void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
         //given
-        Task completedTask = new Task(testList, testTask.getName());
-        completedTask.setTimeCreated(testTask.getTimeCreated());
-        completedTask.complete();
-
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(repository.save(any(Task.class))).willReturn(completedTask);
+        Task mockTask = mock(Task.class);
+        testTask.complete();
 
         //when
-        Task result = service.completeTask(50L);
+        when(mockTask.complete()).thenReturn(true);
+        when(repository.findById(50L)).thenReturn(Optional.of(mockTask));
+        when(repository.save(mockTask)).thenReturn(testTask);
+
+        Task completeTask = service.completeTask(50L);
 
         //verify
-        assertAll(
-                "result is equal to testTask is all ways except active and timeCompleted",
-                () -> assertEquals(testTask.getToDoList(), result.getToDoList()),
-                () -> assertEquals(testTask.getTimeCreated(), result.getTimeCompleted()),
-                () -> assertEquals(testTask.getToDoList(), result.getToDoList()),
-                () -> assertNotEquals(testList.isActive(), result.isActive()),
-                () -> assertNull(testTask.getTimeCompleted()),
-                () -> assertNotNull(result.getTimeCompleted())
-        );
+        verify(mockTask).complete();
+        verifyNoMoreInteractions(mockTask);
 
         verify(repository).findById(50L);
-        verify(repository).save(any(Task.class));
+        verify(repository).save(mockTask);
         verifyNoMoreInteractions(repository);
 
-        verify(repository).save(taskCaptor.capture());
-        Task savedTask = taskCaptor.getValue();
-        assertEquals(completedTask, savedTask);
-
+        assertEquals(testTask, completeTask);
     }
 
 }
