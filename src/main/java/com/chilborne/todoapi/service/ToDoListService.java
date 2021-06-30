@@ -11,21 +11,21 @@ import java.util.List;
 
 public interface ToDoListService {
 
-    ToDoList getById(long id) throws ToDoListNotFoundException;
+    ToDoList getToDoListById(long id) throws ToDoListNotFoundException;
 
-    ToDoList save(ToDoList list);
+    ToDoList saveToDoList(ToDoList list);
 
-    List<ToDoList> getAll();
+    List<ToDoList> getAllToDoList();
 
-    void delete(long id);
+    void deleteToDoList(long id);
 
-    ToDoList setName(long id, SingleValueDTO<String> name) throws ToDoListNotFoundException;
+    ToDoList setToDoListName(long id, SingleValueDTO<String> name) throws ToDoListNotFoundException;
 
-    ToDoList setDescription(long id, SingleValueDTO<String> description) throws ToDoListNotFoundException;
+    ToDoList setToDoListDescription(long id, SingleValueDTO<String> description) throws ToDoListNotFoundException;
 
-    ToDoList setActive(long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException;
+    ToDoList setToDoListActive(long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException;
 
-    ToDoList addTask(long id, Task task) throws ToDoListNotFoundException;
+    ToDoList addTaskToDoList(long id, Task task) throws ToDoListNotFoundException;
 
-    ToDoList removeTask(long listId, long taskId) throws TaskNotFoundException;
+    ToDoList removeTaskToDoList(long listId, long taskId) throws TaskNotFoundException;
 }

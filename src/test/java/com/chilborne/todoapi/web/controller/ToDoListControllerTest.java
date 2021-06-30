@@ -71,7 +71,7 @@ class ToDoListControllerTest {
         testList.setDateTimeCreated(now);
 
         //when
-        when(service.getById(id)).thenReturn(testList);
+        when(service.getToDoListById(id)).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -83,7 +83,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.date_time_created").value(nowString)
                 );
 
-        verify(service).getById(0L);
+        verify(service).getToDoListById(0L);
         verifyNoMoreInteractions(service);
     }
 
@@ -100,7 +100,7 @@ class ToDoListControllerTest {
         testList.setDateTimeCreated(now);
 
         //when
-        when(service.save(any(ToDoList.class))).thenReturn(testList);
+        when(service.saveToDoList(any(ToDoList.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -112,7 +112,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
-        verify(service).save(toDoListCaptor.capture());
+        verify(service).saveToDoList(toDoListCaptor.capture());
         verifyNoMoreInteractions(service);
         assertEquals(testList.getName(), toDoListCaptor.getValue().getName());
         assertEquals(testList.getDescription(), toDoListCaptor.getValue().getDescription());
@@ -133,7 +133,7 @@ class ToDoListControllerTest {
 
 
         //when
-        when(service.setActive(anyLong(), any(SingleValueDTO.class))).thenReturn(inactiveList);
+        when(service.setToDoListActive(anyLong(), any(SingleValueDTO.class))).thenReturn(inactiveList);
 
         //verify
         mvc.perform(
@@ -146,10 +146,10 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.date_time_created").value(nowString));
-        verify(service).setActive(anyLong(), any(SingleValueDTO.class));
+        verify(service).setToDoListActive(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
 
-        verify(service).setActive(idCaptor.capture(), booleanDTOCaptor.capture());
+        verify(service).setToDoListActive(idCaptor.capture(), booleanDTOCaptor.capture());
         long passedId = idCaptor.getValue();
         SingleValueDTO<Boolean> passedDTO = booleanDTOCaptor.getValue();
         assertEquals(activeListId, passedId);
@@ -170,7 +170,7 @@ class ToDoListControllerTest {
         testList.addTask(testTask);
 
         //when
-        when(service.addTask(anyLong(), any(Task.class))).thenReturn(testList);
+        when(service.addTaskToDoList(anyLong(), any(Task.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -182,7 +182,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.tasks[0].name").value("task"));
 
-        verify(service).addTask(anyLong(), any(Task.class));
+        verify(service).addTaskToDoList(anyLong(), any(Task.class));
         verifyNoMoreInteractions(service);
 
     }
@@ -199,7 +199,7 @@ class ToDoListControllerTest {
         long idTaskToRemove = taskToRemove.getTaskId();
 
         //when
-        when(service.removeTask(idTestList, idTaskToRemove)).thenReturn(testList);
+        when(service.removeTaskToDoList(idTestList, idTaskToRemove)).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -208,7 +208,7 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tasks[0].name").value("task1"));
-        verify(service).removeTask(idTestList, idTaskToRemove);
+        verify(service).removeTaskToDoList(idTestList, idTaskToRemove);
         verifyNoMoreInteractions(service);
     }
 
@@ -222,7 +222,7 @@ class ToDoListControllerTest {
 
 
         //when
-        when(service.setDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
+        when(service.setToDoListDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -233,10 +233,10 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk());
 
-        verify(service).setDescription(anyLong(), any(SingleValueDTO.class));
+        verify(service).setToDoListDescription(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
         
-        verify(service).setDescription(idCaptor.capture(), stringDTOCaptor.capture());
+        verify(service).setToDoListDescription(idCaptor.capture(), stringDTOCaptor.capture());
         long passedId = idCaptor.getValue();
         SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
         assertEquals(testList.getId(), passedId);
@@ -253,7 +253,7 @@ class ToDoListControllerTest {
 
 
         //when
-        when(service.setName(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
+        when(service.setToDoListName(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
@@ -264,10 +264,10 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk());
 
-        verify(service).setName(anyLong(), any(SingleValueDTO.class));
+        verify(service).setToDoListName(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
 
-        verify(service).setName(idCaptor.capture(), stringDTOCaptor.capture());
+        verify(service).setToDoListName(idCaptor.capture(), stringDTOCaptor.capture());
         long passedId = idCaptor.getValue();
         SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
         assertEquals(testList.getId(), passedId);

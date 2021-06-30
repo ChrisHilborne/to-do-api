@@ -52,7 +52,7 @@ class ToDoListServiceTest {
         given(repository.save(testList)).willReturn(testList);
 
         //when
-        ToDoList result = service.save(testList);
+        ToDoList result = service.saveToDoList(testList);
 
         //verify
         verify(repository, times(1)).save(testList);
@@ -68,7 +68,7 @@ class ToDoListServiceTest {
                 .willReturn(Optional.ofNullable(testList));
 
         //when
-        ToDoList result = service.getById(1L);
+        ToDoList result = service.getToDoListById(1L);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -82,7 +82,7 @@ class ToDoListServiceTest {
         given(repository.findById(1L)).willReturn(Optional.empty());
 
         //when
-        Exception e = assertThrows(RuntimeException.class, () -> service.getById(1L));
+        Exception e = assertThrows(RuntimeException.class, () -> service.getToDoListById(1L));
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -96,7 +96,7 @@ class ToDoListServiceTest {
         given(repository.findAll()).willReturn(List.of(testList));
 
         //when
-        List<ToDoList> result = service.getAll();
+        List<ToDoList> result = service.getAllToDoList();
 
         //verify
         verify(repository, times(1)).findAll();
@@ -107,7 +107,7 @@ class ToDoListServiceTest {
     @Test
     void deleteToDoList() {
         //when
-        service.delete(1L);
+        service.deleteToDoList(1L);
 
         //verify
         verify(repository, times(1)).deleteById(1L);
@@ -126,7 +126,7 @@ class ToDoListServiceTest {
         given(repository.save(any())).willReturn(newName);
 
         //when
-        ToDoList result = service.setName(1L, nameDTO);
+        ToDoList result = service.setToDoListName(1L, nameDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -150,7 +150,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(described);
 
         //when
-        ToDoList result = service.setDescription(1L, singleValueDTO);
+        ToDoList result = service.setToDoListDescription(1L, singleValueDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -174,7 +174,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(deactivated);
 
         //when
-        ToDoList result = service.setActive(1L, activeDTO);
+        ToDoList result = service.setToDoListActive(1L, activeDTO);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -198,7 +198,7 @@ class ToDoListServiceTest {
         given(repository.save(any(ToDoList.class))).willReturn(newTask);
 
         //when
-        ToDoList result = service.addTask(1L, third);
+        ToDoList result = service.addTaskToDoList(1L, third);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -223,7 +223,7 @@ class ToDoListServiceTest {
         //when
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(testList));
         when(repository.save(any(ToDoList.class))).thenReturn(minusTask);
-        ToDoList result = service.removeTask(1L, toRemove.getTaskId());
+        ToDoList result = service.removeTaskToDoList(1L, toRemove.getTaskId());
 
         //verify
         assertEquals(minusTask, result);
@@ -245,7 +245,7 @@ class ToDoListServiceTest {
 
         //verify
         Exception e = assertThrows(RuntimeException.class,
-                () -> service.removeTask(testList.getId(), 500L));
+                () -> service.removeTaskToDoList(testList.getId(), 500L));
         assertEquals("List with id 0 does not contain task with id 500", e.getMessage());
     }
 
