@@ -1,6 +1,5 @@
 package com.chilborne.todoapi.service;
 
-import com.chilborne.todoapi.exception.DataNotFoundException;
 import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
@@ -47,11 +46,6 @@ public class TaskServiceImpl implements TaskService {
         Task toUpdate = getTaskById(id);
         toUpdate.setDescription(description.getValue());
         return saveTask(toUpdate);
-    }
-
-    @Override
-    public Task setTaskToDoList(long taskId, long toDoListId) throws DataNotFoundException {
-        return null;
     }
 
     @Override
