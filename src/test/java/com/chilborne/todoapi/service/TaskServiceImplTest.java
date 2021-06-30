@@ -37,6 +37,8 @@ class TaskServiceImplTest {
 
     Task testTask;
 
+    Task mockTask = mock(Task.class);
+
     LocalDateTime now = LocalDateTime.now();
 
     @BeforeEach
@@ -88,65 +90,56 @@ class TaskServiceImplTest {
     @Test
     void setTaskNameShouldReturnUpdatedTask() {
         //given
-        SingleValueDTO<String> nameDTO = new SingleValueDTO<>("new name");
-        Task newName = new Task("new name");
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(repository.save(testTask)).willReturn(newName);
+        String name = "new name";
+        testTask.setName(name);
+        SingleValueDTO<String> nameDTO = new SingleValueDTO<>(name);
+
+        given(repository.findById(50L)).willReturn(Optional.ofNullable(mockTask));
+        given(repository.save(mockTask)).willReturn(testTask);
+
 
         //when
-        Task updatedTask = service.setTaskName(testTask.getTaskId(), nameDTO);
+        Task updatedTask = service.setTaskName(50L, nameDTO);
 
         //verify
         verify(repository).findById(50L);
-        verify(repository).save(any(Task.class));
+        verify(repository).save(mockTask);
         verifyNoMoreInteractions(repository);
 
-        verify(repository).save(taskCaptor.capture());
-        Task savedTask = taskCaptor.getValue();
-        assertAll("passedTask is equal to testTask apart from name",
-                () -> assertEquals(testTask.getToDoList(), savedTask.getToDoList()),
-                () -> assertEquals(testTask.getTaskId(), savedTask.getTaskId()),
-                () -> assertEquals(testTask.getTimeCreated(), savedTask.getTimeCreated()),
-                () -> assertEquals("new name", savedTask.getName()));
+        verify(mockTask).setName(name);
+        verifyNoMoreInteractions(mockTask);
 
-        //check no changes are made between saving and returning updated Task
-        assertEquals(savedTask, updatedTask);
+        assertEquals(testTask, updatedTask);
     }
 
     @Test
     void setTaskDescriptionShouldReturnUpdatedTask() {
         //given
         String description = "new description";
+        testTask.setDescription(description);
         SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
-        Task newDescription = new Task(testTask.getName(), description);
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(repository.save(testTask)).willReturn(newDescription);
+
+        given(repository.findById(50L)).willReturn(Optional.ofNullable(mockTask));
+        given(repository.save(mockTask)).willReturn(testTask);
+
 
         //when
-        Task updatedTask = service.setTaskDescription(testTask.getTaskId(), descriptionDTO);
+        Task updatedTask = service.setTaskDescription(50L, descriptionDTO);
 
         //verify
         verify(repository).findById(50L);
-        verify(repository).save(any(Task.class));
+        verify(repository).save(mockTask);
         verifyNoMoreInteractions(repository);
 
-        verify(repository).save(taskCaptor.capture());
-        Task savedTask = taskCaptor.getValue();
-        assertAll("savedTask is equal to testTask apart from description",
-                () -> assertEquals(testTask.getTaskId(), savedTask.getTaskId()),
-                () -> assertEquals(testTask.getToDoList(), savedTask.getToDoList()),
-                () -> assertEquals(testTask.getTimeCreated(), savedTask.getTimeCreated()),
-                () -> assertEquals(description, savedTask.getDescription()));
+        verify(mockTask).setDescription(description);
+        verifyNoMoreInteractions(mockTask);
 
-
-        //check no changes are made between saving and returning updated Task
-        assertEquals(savedTask, updatedTask);
+        assertEquals(testTask, updatedTask);
     }
 
     @Test
     void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
         //given
-        Task mockTask = mock(Task.class);
         testTask.complete();
 
         //when
