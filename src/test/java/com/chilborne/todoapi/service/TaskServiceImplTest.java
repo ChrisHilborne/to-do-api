@@ -144,10 +144,6 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void setTaskToDoList() {
-    }
-
-    @Test
     void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
         //given
         Task mockTask = mock(Task.class);

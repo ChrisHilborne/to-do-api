@@ -70,6 +70,12 @@ public class ToDoList {
         return id;
     }
 
+    public void setId(long id) {
+        if (id > 0) {
+            this.id = id;
+        }
+    }
+
     public String getName() {
         return name;
     }
