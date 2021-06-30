@@ -55,9 +55,9 @@ public class ToDoListServiceImpl implements ToDoListService{
         logger.info(
             String.format("Setting name of ToDoList (id: %d) to: %s", id, name.getValue())
         );
-        ToDoList list = getToDoListById(id);
-        list.setName(name.getValue());
-        return repository.save(list);
+        ToDoList toUpdate = getToDoListById(id);
+        toUpdate.setName(name.getValue());
+        return saveToDoList(toUpdate);
     }
 
     @Override
@@ -66,9 +66,9 @@ public class ToDoListServiceImpl implements ToDoListService{
                 String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
                         description.getValue(), id)
         );
-        ToDoList list = getToDoListById(id);
-        list.setDescription(description.getValue());
-        return repository.save(list);
+        ToDoList toUpdate = getToDoListById(id);
+        toUpdate.setDescription(description.getValue());
+        return saveToDoList(toUpdate);
     }
 
     @Override
@@ -76,9 +76,9 @@ public class ToDoListServiceImpl implements ToDoListService{
         logger.info(
                 String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
         );
-        ToDoList list = getToDoListById(id);
-        list.setActive(active.getValue());
-        return repository.save(list);
+        ToDoList toUpdate = getToDoListById(id);
+        toUpdate.setActive(active.getValue());
+        return saveToDoList(toUpdate);
     }
 
     @Override
@@ -86,10 +86,10 @@ public class ToDoListServiceImpl implements ToDoListService{
         logger.info(
                 String.format("Adding Task (name: %s) to ToDoList (id: %d)", task.getName(), listId)
         );
-        ToDoList list = getToDoListById(listId);
-        task.setList(list);
-        list.addTask(task);
-        return repository.save(list);
+        ToDoList toUpdate = getToDoListById(listId);
+        task.setList(toUpdate);
+        toUpdate.addTask(task);
+        return saveToDoList(toUpdate);
     }
 
     @Override
@@ -97,9 +97,9 @@ public class ToDoListServiceImpl implements ToDoListService{
         logger.info(
                 String.format("Removing Task (id: %d) from ToDoList (id; %d)", taskId, listId)
         );
-        ToDoList list = getToDoListById(listId);
-        if (list.removeTask(taskId)) {
-            return repository.save(list);
+        ToDoList toUpdate = getToDoListById(listId);
+        if (toUpdate.removeTask(taskId)) {
+            return saveToDoList(toUpdate);
         } else
             throw new TaskNotFoundException(
                     String.format("List with id %d does not contain task with id %d", listId, taskId));
