@@ -1,6 +1,7 @@
 package com.chilborne.todoapi.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 
 import javax.persistence.*;
@@ -34,7 +35,7 @@ public class ToDoList {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "list")
     private List<Task> tasks = new LinkedList<>();
 
-    @Column(name = "ACTIVE", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
+    @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
     private boolean active = true;
 
     protected ToDoList() {}
