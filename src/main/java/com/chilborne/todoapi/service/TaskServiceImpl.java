@@ -9,6 +9,8 @@ import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
+
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository repository;
@@ -54,6 +56,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException {
-        return null;
+        logger.info("Completing task id: " + id);
+        Task toComplete = getTaskById(id);
+        if (toComplete.complete()) {
+            return saveTask(toComplete);
+        }
+        else {
+            throw new TaskAlreadyCompletedException(
+                    "This task was already completed at " +
+                    toComplete.getTimeCompleted()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss on dd/MM/yy")));
+        }
     }
 }
