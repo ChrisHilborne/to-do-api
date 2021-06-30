@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,9 +16,9 @@ public class Task {
     @Column(name = "task_id", unique = true, nullable = false)
     private long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
-    @JsonIgnore
     private ToDoList list;
 
     @Column(name = "name", nullable = false)
