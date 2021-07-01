@@ -16,10 +16,17 @@ public class ExceptionControllerAdvisor {
 
     private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvisor.class);
 
-    @ExceptionHandler({DataNotFoundException.class, TaskAlreadyCompletedException.class})
+    @ExceptionHandler({DataNotFoundException.class})
     public ErrorResponse handleDataNotFoundException(HttpServletRequest req, Exception e) {
         logger.error("Request: " + req.getRequestURI() + " raised " + e);
         return new ErrorResponse(HttpStatus.NOT_FOUND, e);
     }
+
+    @ExceptionHandler({TaskAlreadyCompletedException.class})
+    public ErrorResponse handleTaskAlreadyCompleteException(HttpServletRequest req, Exception e) {
+        logger.error("Request: " + req.getRequestURI() + " raised " + e);
+        return new ErrorResponse(HttpStatus.ALREADY_REPORTED, e);
+    }
+
 
 }
