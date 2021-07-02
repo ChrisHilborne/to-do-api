@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "tasks")
@@ -29,7 +30,7 @@ public class Task {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    private LocalDateTime timeCreated = LocalDateTime.now();
+    private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_finished", columnDefinition = "TIMESTAMP")
@@ -57,7 +58,7 @@ public class Task {
     public boolean complete() {
         if (!this.active) return false;
         this.active = false;
-        timeCompleted = LocalDateTime.now();
+        timeCompleted = LocalDateTime.now().withNano(0);
         return true;
     }
 
@@ -115,5 +116,33 @@ public class Task {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Task task = (Task) o;
+
+        if (id != task.id) return false;
+        if (active != task.active) return false;
+        if (!Objects.equals(toDoList, task.toDoList)) return false;
+        if (!Objects.equals(name, task.name)) return false;
+        if (!Objects.equals(description, task.description)) return false;
+        if (!Objects.equals(timeCreated, task.timeCreated)) return false;
+        return Objects.equals(timeCompleted, task.timeCompleted);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (toDoList != null ? toDoList.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
+        result = 31 * result + (timeCompleted != null ? timeCompleted.hashCode() : 0);
+        result = 31 * result + (active ? 1 : 0);
+        return result;
     }
 }
