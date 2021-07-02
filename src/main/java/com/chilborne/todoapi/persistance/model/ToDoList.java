@@ -27,9 +27,9 @@ public class ToDoList {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    private LocalDateTime dateTimeCreated = LocalDateTime.now();
+    private LocalDateTime dateTimeCreated = LocalDateTime.now().withNano(0);
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "list")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList")
     @JsonManagedReference
     private List<Task> tasks = new LinkedList<>();
 
