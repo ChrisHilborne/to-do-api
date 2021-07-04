@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ToDoListServiceTest {
+class ToDoListServiceImplTest {
 
     @Mock
     ToDoListRepository repository;
@@ -43,7 +43,7 @@ class ToDoListServiceTest {
         Task first = new Task(testList, "first");
         Task second = new Task(testList, "second");
         testList.setTasks(List.of(first, second));
-        testList.setDateTimeCreated(now);
+        testList.setTimeCreated(now);
     }
 
     @Test
@@ -120,7 +120,7 @@ class ToDoListServiceTest {
         String name = "new name";
         SingleValueDTO<String> nameDTO = new SingleValueDTO<>(name);
         ToDoList newName = new ToDoList(name, testList.getTasks());
-        newName.setDateTimeCreated(now);
+        newName.setTimeCreated(now);
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any())).willReturn(newName);
@@ -144,7 +144,7 @@ class ToDoListServiceTest {
         String description = "This is a To Do List";
         SingleValueDTO<String> singleValueDTO = new SingleValueDTO<>(description);
         ToDoList described = new ToDoList("test", description, testList.getTasks());
-        described.setDateTimeCreated(now);
+        described.setTimeCreated(now);
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any(ToDoList.class))).willReturn(described);
@@ -167,7 +167,7 @@ class ToDoListServiceTest {
         //given
         SingleValueDTO<Boolean> activeDTO = new SingleValueDTO<>(false);
         ToDoList deactivated = new ToDoList("test", testList.getTasks());
-        deactivated.setDateTimeCreated(now);
+        deactivated.setTimeCreated(now);
         deactivated.setActive(activeDTO.getValue());
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
@@ -189,16 +189,16 @@ class ToDoListServiceTest {
     @Test
     void addTask() {
         //given
-        Task third = new Task(testList, "third");
+        Task thirdTask = new Task(testList, "third");
         ToDoList newTask = new ToDoList("test", testList.getTasks());
-        newTask.setDateTimeCreated(now);
-        newTask.addTask(third);
+        newTask.setTimeCreated(now);
+        newTask.addTask(thirdTask);
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any(ToDoList.class))).willReturn(newTask);
 
         //when
-        ToDoList result = service.addTaskToDoList(1L, third);
+        ToDoList result = service.addTaskToDoList(1L, thirdTask);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -208,6 +208,9 @@ class ToDoListServiceTest {
 
         assertEquals(newTask, result);
         assertEquals(newTask, toDoListCaptor.getValue());
+
+        //check that thirdTask has had it's ToDoList set to testList
+        assertEquals(thirdTask.getToDoList(), testList);
     }
 
     @Test
@@ -216,7 +219,7 @@ class ToDoListServiceTest {
         Task toRemove = testList.getTasks().get(1);
         toRemove.setTaskId(5L);
         ToDoList minusTask = new ToDoList("test", testList.getTasks());
-        minusTask.setDateTimeCreated(now);
+        minusTask.setTimeCreated(now);
         minusTask.removeTask(toRemove.getTaskId());
 
 

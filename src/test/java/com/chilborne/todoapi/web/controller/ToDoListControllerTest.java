@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -69,7 +70,7 @@ class ToDoListControllerTest {
         long id = 0L;
         ToDoList testList = new ToDoList("test");
 
-        testList.setDateTimeCreated(now);
+        testList.setTimeCreated(now);
 
         //when
         when(service.getToDoListById(id)).thenReturn(testList);
@@ -81,7 +82,7 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.date_time_created").value(nowString)
+                .andExpect(jsonPath("$.time_created").value(nowString)
                 );
 
         verify(service).getToDoListById(0L);
@@ -98,14 +99,14 @@ class ToDoListControllerTest {
                       "description": "this is a test"
                 }""";
         ToDoList testList = new ToDoList("test", "this is a test");
-        testList.setDateTimeCreated(now);
+        testList.setTimeCreated(now);
 
         //when
         when(service.saveToDoList(any(ToDoList.class))).thenReturn(testList);
 
         //verify
         mvc.perform(
-                post("/list/new")
+                post("/list")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(testJson))
@@ -124,12 +125,12 @@ class ToDoListControllerTest {
         //given
         String activeJson = "{ \"value\" : \"false\" }";
         ToDoList activeList = new ToDoList("test");
-        activeList.setDateTimeCreated(now);
+        activeList.setTimeCreated(now);
         activeList.setActive(true);
         long activeListId = activeList.getId();
 
         ToDoList inactiveList = new ToDoList("test");
-        inactiveList.setDateTimeCreated(now);
+        inactiveList.setTimeCreated(now);
         inactiveList.setActive(false);
 
 
@@ -146,7 +147,7 @@ class ToDoListControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.date_time_created").value(nowString));
+                .andExpect(jsonPath("$.time_created").value(nowString));
         verify(service).setToDoListActive(anyLong(), any(SingleValueDTO.class));
         verifyNoMoreInteractions(service);
 
@@ -166,7 +167,7 @@ class ToDoListControllerTest {
                       "name": "task"
                 }""";
         ToDoList testList = new ToDoList("test");
-        testList.setDateTimeCreated(now);
+        testList.setTimeCreated(now);
         Task testTask = new Task(testList, "task");
         testList.addTask(testTask);
 
@@ -227,10 +228,10 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                put(String.format("/list/%d/description", testList.getId()))
-                        .contentType("application/json")
+                put("/list/{id}/description", testList.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
-                        .accept("application/json")
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk());
 
