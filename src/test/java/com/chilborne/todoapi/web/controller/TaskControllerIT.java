@@ -31,9 +31,6 @@ public class TaskControllerIT {
     MockMvc mvc;
 
     @Autowired
-    TaskController taskController;
-
-    @Autowired
     TaskRepository repository;
 
     Task testTask;

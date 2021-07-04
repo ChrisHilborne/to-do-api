@@ -27,9 +27,9 @@ public class ToDoList {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    private LocalDateTime dateTimeCreated = LocalDateTime.now().withNano(0);
+    private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Task> tasks = new LinkedList<>();
 
@@ -91,12 +91,12 @@ public class ToDoList {
         this.description = description;
     }
 
-    public LocalDateTime getDateTimeCreated() {
-        return LocalDateTime.of(dateTimeCreated.toLocalDate(), dateTimeCreated.toLocalTime());
+    public LocalDateTime getTimeCreated() {
+        return LocalDateTime.of(timeCreated.toLocalDate(), timeCreated.toLocalTime());
     }
 
-    public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
-        this.dateTimeCreated = dateTimeCreated;
+    public void setTimeCreated(LocalDateTime timeCreated) {
+        this.timeCreated = timeCreated;
     }
 
     public List<Task> getTasks() {
@@ -127,14 +127,14 @@ public class ToDoList {
 
         if (active != toDoList.active) return false;
         if (!name.equals(toDoList.name)) return false;
-        if (!dateTimeCreated.equals(toDoList.dateTimeCreated)) return false;
+        if (!timeCreated.equals(toDoList.timeCreated)) return false;
         return Objects.equals(tasks, toDoList.tasks);
     }
 
     @Override
     public int hashCode() {
         int result = name.hashCode();
-        result = 31 * result + dateTimeCreated.hashCode();
+        result = 31 * result + timeCreated.hashCode();
         result = 31 * result + (tasks != null ? tasks.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
         return result;
@@ -144,7 +144,7 @@ public class ToDoList {
     public String toString() {
         return "ToDoList {" +
                 "name='" + name + '\'' +
-                ", dateCreated=" + dateTimeCreated +
+                ", dateCreated=" + timeCreated +
                 ", tasks=" + tasks +
                 ", active=" + active +
                 " }";

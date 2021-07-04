@@ -30,7 +30,7 @@ public class ToDoListController {
 
     }
 
-    @PostMapping(value = "/new", produces = "application/json")
+    @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<ToDoList> postToDoList(@RequestBody ToDoList list) {
         logger.info("Processing POST request for new ToDoList");
         ToDoList result = service.saveToDoList(list);
