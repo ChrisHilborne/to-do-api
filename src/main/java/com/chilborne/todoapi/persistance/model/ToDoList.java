@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,14 +22,16 @@ public class ToDoList {
     private long id;
 
     @Column(name = "name", nullable = false)
+    @NotBlank(message = "name is compulsory")
     private String name;
 
-    @Lob
-    @Column(name = "desc", columnDefinition = "CLOB")
+    @Column(name = "desc")
+    @Size(min = 3, max = 255, message = "description must be between 3 and 255 characters long")
     private String description;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
+    @Null(message = "time_created is automatically generated on creation of ToDoList")
     private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
@@ -34,6 +39,7 @@ public class ToDoList {
     private List<Task> tasks = new LinkedList<>();
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
+    @Null(message = "ToDoList is automatically active when it is created")
     private boolean active = true;
 
     protected ToDoList() {}
