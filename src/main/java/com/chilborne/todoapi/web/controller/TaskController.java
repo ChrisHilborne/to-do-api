@@ -2,15 +2,17 @@ package com.chilborne.todoapi.web.controller;
 
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.service.TaskService;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping(value = "/task", consumes = "application/json", produces = "application/json")
 public class TaskController {
 
     private final TaskService service;
@@ -22,43 +24,26 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(@PathVariable long id) {
-        logger.info("Processing Request for Task id: " + id);
+        logger.info("Processing GET Request for Task id: " + id);
         Task result = service.getTaskById(id);
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/{id}/complete")
+    @PatchMapping("/{id}/complete")
     public ResponseEntity<Task> completeTask(@PathVariable long id) {
-        logger.info("Processing Request to Complete Task id: " + id);
+        logger.info("Processing PATCH Request to Complete Task id: " + id);
         Task result = service.completeTask(id);
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/{id}/name")
-    public ResponseEntity<Task> setTaskName(
+    @PutMapping("/{id}")
+    public ResponseEntity<Task> updateTask(
             @PathVariable long id,
-            @RequestBody SingleValueDTO<String> nameDTO)
-    {
-        logger.info(String.format(
-                "Processing Request to set Task (id:%d) name to: %s",
-                id,
-                nameDTO.getValue())
-        );
-        Task result = service.setTaskName(id, nameDTO);
+            @RequestBody Task task) {
+        logger.info("Processing PUT Request to update Task id: " + id);
+        Task result = service.updateTask(id, task);
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/{id}/description")
-    public ResponseEntity<Task> setTaskDescription(
-            @PathVariable long id,
-            @RequestBody SingleValueDTO<String> descriptionDTO)
-    {
-        logger.info(String.format(
-                "Processing Request to set Task (id:%d) description to: %s",
-                id,
-                descriptionDTO.getValue())
-        );
-        Task result = service.setTaskDescription(id, descriptionDTO);
-        return ResponseEntity.ok(result);
-    }
+
 }

@@ -5,7 +5,6 @@ import com.chilborne.todoapi.exception.ToDoListNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
