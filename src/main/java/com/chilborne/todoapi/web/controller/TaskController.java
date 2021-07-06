@@ -23,14 +23,16 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable long id) {
+    public ResponseEntity<Task> getTaskById(
+            @PathVariable long id) {
         logger.info("Processing GET Request for Task id: " + id);
         Task result = service.getTaskById(id);
         return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Task> completeTask(@PathVariable long id) {
+    public ResponseEntity<Task> completeTask(
+            @PathVariable long id) {
         logger.info("Processing PATCH Request to Complete Task id: " + id);
         Task result = service.completeTask(id);
         return ResponseEntity.ok(result);
@@ -39,7 +41,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(
             @PathVariable long id,
-            @RequestBody Task task) {
+            @Valid @RequestBody Task task) {
         logger.info("Processing PUT Request to update Task id: " + id);
         Task result = service.updateTask(id, task);
         return ResponseEntity.ok(result);

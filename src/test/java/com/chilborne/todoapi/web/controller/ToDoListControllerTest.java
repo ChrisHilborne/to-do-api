@@ -162,7 +162,8 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                patch("/list/" + testList.getTasks() + "/active/" + false)
+                patch("/list/{id}/active/{active}", testList.getId(), false)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
                 .andExpect(status().isOk())

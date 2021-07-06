@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -54,6 +55,7 @@ class TaskControllerTest {
     void init() {
         ToDoList testList = new ToDoList("test list");
         testTask = new Task(testList, "test task");
+        testTask.setTimeCreated(LocalDateTime.now());
     }
 
     @Test
@@ -67,9 +69,10 @@ class TaskControllerTest {
         //verify
         mvc.perform(
                 get("/task/50")
-                        .accept("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
         )
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(testTask.getName()))
                 .andExpect(jsonPath("$.task_id").value(testTask.getTaskId()))
                 .andExpect(jsonPath("$.time_created").value(timeCreated));
@@ -90,7 +93,8 @@ class TaskControllerTest {
         //verify
         mvc.perform(
                 patch("/task/50/complete")
-                .accept("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept("application/json")
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value("false"))

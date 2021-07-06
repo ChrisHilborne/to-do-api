@@ -35,7 +35,7 @@ public class ToDoList {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
-    @Column(name = "date_time_made", nullable = false , updatable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "date_time_made", updatable = false, columnDefinition = "TIMESTAMP")
     @Null(groups = OnPersist.class, message = "time_created is automatically generated on creation of ToDoList")
     private LocalDateTime timeCreated;
 

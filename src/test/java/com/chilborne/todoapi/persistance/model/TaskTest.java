@@ -44,7 +44,7 @@ class TaskTest {
         //verify
         assertFalse(completed);
         assertFalse(testTask.isActive());
-        assertEquals(now, testTask.getTimeCompleted());
+        assertEquals(now.withNano(0), testTask.getTimeCompleted());
         
     }
 }
