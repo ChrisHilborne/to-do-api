@@ -56,7 +56,7 @@ public class ToDoListController {
     @PatchMapping(value = "/{id}/task/add")
     public ResponseEntity<ToDoList> addTaskToList(
             @PathVariable long id,
-            @RequestBody Task task) {
+            @Valid @RequestBody Task task) {
         logger.info(String.format("Processing PATCH Request to add new Task (name: %s) to ToDoList (id: %d)", task.getName(), id));
         ToDoList result = service.addTaskToDoList(id, task);
         return ResponseEntity.ok(result);

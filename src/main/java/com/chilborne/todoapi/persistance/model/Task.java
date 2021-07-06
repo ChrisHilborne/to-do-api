@@ -1,10 +1,16 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.boot.convert.DataSizeUnit;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -24,18 +30,22 @@ public class Task {
     private ToDoList toDoList;
 
     @Column(name = "name", nullable = false)
+    @NotBlank(groups = OnPersist.class, message = "name is compulsory")
     private String name;
 
-    @Lob
-    @Column(name = "desc", columnDefinition = "CLOB")
+    @Column(name = "desc")
+    @Size(min = 3, max = 225, message = "description must be between 3 and 225 characters long")
     private String description;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
-    @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
+    @CreationTimestamp
+    @Column(name = "date_time_created", insertable = false, columnDefinition = "TIMESTAMP")
+    @Null(groups = OnPersist.class, message = "time_created is automatically generated")
+    private LocalDateTime timeCreated;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_finished", columnDefinition = "TIMESTAMP")
+    @Null(groups = OnPersist.class, message = "time_completed is automatically generated on task completion")
     private LocalDateTime timeCompleted;
 
     @Column(name = "active", columnDefinition = "boolean default true" ,nullable = false)
@@ -97,7 +107,7 @@ public class Task {
     }
 
     public LocalDateTime getTimeCreated() {
-        return timeCreated;
+        return timeCreated != null ? timeCreated.withNano(0) : null;
     }
 
     public void setTimeCreated(LocalDateTime timeCreated) {
@@ -105,7 +115,7 @@ public class Task {
     }
 
     public LocalDateTime getTimeCompleted() {
-        return timeCompleted;
+        return timeCompleted != null ? timeCompleted.withNano(0) : null;
     }
 
     public void setTimeCompleted(LocalDateTime timeCompleted) {
@@ -132,7 +142,7 @@ public class Task {
         if (!Objects.equals(toDoList, task.toDoList)) return false;
         if (!Objects.equals(name, task.name)) return false;
         if (!Objects.equals(description, task.description)) return false;
-        if (!Objects.equals(timeCreated, task.timeCreated)) return false;
+        if ((timeCreated != null && task.timeCreated != null) && !Objects.equals(timeCreated, task.timeCreated)) return false;
         return Objects.equals(timeCompleted, task.timeCompleted);
     }
 

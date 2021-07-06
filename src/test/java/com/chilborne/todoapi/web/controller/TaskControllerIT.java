@@ -64,8 +64,7 @@ public class TaskControllerIT {
         //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(testTask.getName()))
-                .andExpect(jsonPath("$.task_id").value(testTaskId))
-                .andExpect(jsonPath("$.time_created").value(testTask.getTimeCreated().format(FORMATTER)));
+                .andExpect(jsonPath("$.task_id").value(testTaskId));
     }
 
     @Test
@@ -86,7 +85,7 @@ public class TaskControllerIT {
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
-                patch("/task/" + testTaskId + "/complete")
+                patch("/task/{id}/complete", testTaskId)
                         .contentType(MediaType.APPLICATION_JSON)
         )
         //verify
@@ -97,7 +96,7 @@ public class TaskControllerIT {
         //check DB has been updated
         testTask.complete();
         Task savedTask = repository.findById(testTaskId).get();
-        assertEquals(savedTask, testTask);
+        assertTrue(savedTask.equals(testTask));
     }
 
     @Test
