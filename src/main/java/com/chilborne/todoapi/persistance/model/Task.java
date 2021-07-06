@@ -2,12 +2,14 @@ package com.chilborne.todoapi.persistance.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
+@DynamicUpdate
 @Table(name = "tasks")
 public class Task {
 

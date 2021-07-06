@@ -215,14 +215,14 @@ class ToDoListServiceImplTest {
         when(repository.existsById(testListId)).thenReturn(true);
         when(repository.save(testList)).thenReturn(testList);
 
-        ToDoList returned = service.updateToDoList(testListId, testList);
+        ToDoList updated = service.updateToDoList(testListId, testList);
 
         //verify
         verify(repository).existsById(testListId);
         verify(repository).save(testList);
         verifyNoMoreInteractions(repository);
 
-        assertEquals(testList, returned);
+        assertEquals(testList, updated);
     }
 
     @Test

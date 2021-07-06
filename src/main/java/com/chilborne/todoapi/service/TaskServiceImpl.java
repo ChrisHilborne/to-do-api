@@ -4,7 +4,6 @@ import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,29 +24,13 @@ public class TaskServiceImpl implements TaskService {
     public Task getTaskById(long id) throws TaskNotFoundException {
         logger.info("Fetching Task id: " + id);
         return repository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("Task with id: " + id + " not found"));
+                .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     @Override
     public Task saveTask(Task task) {
         logger.info("Saving task: " + task);
         return repository.save(task);
-    }
-
-    @Override
-    public Task setTaskName(long id, SingleValueDTO<String> name) throws TaskNotFoundException {
-        logger.info(String.format("Setting Task (id:%d) name to: %s", id, name.getValue()));
-        Task toUpdate = getTaskById(id);
-        toUpdate.setName(name.getValue());
-        return saveTask(toUpdate);
-    }
-
-    @Override
-    public Task setTaskDescription(long id, SingleValueDTO<String> description) throws TaskNotFoundException {
-        logger.info(String.format("Setting Task (id:%d) description to: %s", id, description.getValue()));
-        Task toUpdate = getTaskById(id);
-        toUpdate.setDescription(description.getValue());
-        return saveTask(toUpdate);
     }
 
     @Override
@@ -62,5 +45,13 @@ public class TaskServiceImpl implements TaskService {
                             + toComplete.getTimeCompleted().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yy"))
             );
         }
+    }
+
+    @Override
+    public Task updateTask(long id, Task task) throws TaskNotFoundException {
+        logger.info("Updating task id: " + id);
+        if (!repository.existsById(id)) throw new TaskNotFoundException(id);
+        task.setTaskId(id);
+        return saveTask(task);
     }
 }

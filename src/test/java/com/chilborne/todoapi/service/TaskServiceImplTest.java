@@ -5,7 +5,6 @@ import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,56 +87,6 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void setTaskNameShouldReturnUpdatedTask() {
-        //given
-        String name = "new name";
-        testTask.setName(name);
-        SingleValueDTO<String> nameDTO = new SingleValueDTO<>(name);
-
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(mockTask));
-        given(repository.save(mockTask)).willReturn(testTask);
-
-
-        //when
-        Task updatedTask = service.setTaskName(50L, nameDTO);
-
-        //verify
-        verify(repository).findById(50L);
-        verify(repository).save(mockTask);
-        verifyNoMoreInteractions(repository);
-
-        verify(mockTask).setName(name);
-        verifyNoMoreInteractions(mockTask);
-
-        assertEquals(testTask, updatedTask);
-    }
-
-    @Test
-    void setTaskDescriptionShouldReturnUpdatedTask() {
-        //given
-        String description = "new description";
-        testTask.setDescription(description);
-        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
-
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(mockTask));
-        given(repository.save(mockTask)).willReturn(testTask);
-
-
-        //when
-        Task updatedTask = service.setTaskDescription(50L, descriptionDTO);
-
-        //verify
-        verify(repository).findById(50L);
-        verify(repository).save(mockTask);
-        verifyNoMoreInteractions(repository);
-
-        verify(mockTask).setDescription(description);
-        verifyNoMoreInteractions(mockTask);
-
-        assertEquals(testTask, updatedTask);
-    }
-
-    @Test
     void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
         //given
         testTask.complete();
@@ -176,6 +125,46 @@ class TaskServiceImplTest {
         assertEquals("This task was already completed at " + timeCompleted,
                         e.getMessage());
     }
+
+    @Test
+    void updateTaskShouldReturnUpdatedTaskIfTaskAlreadyExists() {
+        //given
+        testTask.setName("this is a new name");
+        long testTaskId = testTask.getTaskId();
+
+        //when
+        when(repository.existsById(testTaskId)).thenReturn(true);
+        when(repository.save(testTask)).thenReturn(testTask);
+
+        Task updated = service.updateTask(testTaskId, testTask);
+
+        //verify
+        verify(repository).existsById(testTaskId);
+        verify(repository).save(testTask);
+        verifyNoMoreInteractions(repository);
+
+        assertEquals(testTask, updated);
+    }
+
+    @Test
+    void updatedTaskShouldThrowTaskNotFoundExceptionIfTaskDoesNotExist() {
+        //given
+        testTask.setName("this is a new name");
+        long testTaskId = testTask.getTaskId();
+
+        //when
+        when(repository.existsById(testTaskId)).thenReturn(false);
+
+        Exception e = assertThrows(
+                TaskNotFoundException.class,
+                () -> service.updateTask(testTaskId, testTask));
+
+        //verify
+        verify(repository).existsById(testTaskId);
+        verifyNoMoreInteractions(repository);
+
+    }
+
 
 
 }

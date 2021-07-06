@@ -2,9 +2,7 @@ package com.chilborne.todoapi.web.controller;
 
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
-import com.chilborne.todoapi.service.TaskService;
 import com.chilborne.todoapi.service.TaskServiceImpl;
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.format.DateTimeFormatter;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,7 +44,7 @@ class TaskControllerTest {
     ArgumentCaptor<Long> idCaptor;
 
     @Captor
-    ArgumentCaptor<SingleValueDTO<String>> dtoCaptor;
+    ArgumentCaptor<Task> taskCaptor;
 
     Task testTask;
 
@@ -69,7 +69,7 @@ class TaskControllerTest {
                 get("/task/50")
                         .accept("application/json")
         )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(testTask.getName()))
                 .andExpect(jsonPath("$.task_id").value(testTask.getTaskId()))
                 .andExpect(jsonPath("$.time_created").value(timeCreated));
@@ -89,7 +89,7 @@ class TaskControllerTest {
 
         //verify
         mvc.perform(
-                put("/task/50/complete")
+                patch("/task/50/complete")
                 .accept("application/json")
         )
                 .andExpect(status().isOk())
@@ -102,58 +102,42 @@ class TaskControllerTest {
     }
 
     @Test
-    void setTaskName() throws Exception {
+    void updateTaskShouldReturnUpdatedTask() throws Exception {
         //given
-        String name = "this is a name";
-        testTask.setName(name);
+        String taskJson = """
+                {
+                    "name" : "new name",
+                    "description" : "new description"
+                }
+                """;
+        testTask.setName("new name");
+        testTask.setDescription("new description");
 
         //when
-        when(service.setTaskName(anyLong(), any(SingleValueDTO.class))).thenReturn(testTask);
+        when(service.updateTask(anyLong(), any(Task.class))).thenReturn(testTask);
 
-        //verify
         mvc.perform(
-                put("/task/50/name")
-                        .contentType("application/json")
-                        .content("{ \"value\" : \"this is a name\"} ")
+                put("/task/{id}", testTask.getTaskId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(taskJson)
         )
+        //verify
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(name));
+                .andExpect(jsonPath("$.name").value("new name"))
+                .andExpect(jsonPath("$.description").value("new description"));
 
-        verify(service).setTaskName(idCaptor.capture(), dtoCaptor.capture());
+        verify(service).updateTask(idCaptor.capture(), taskCaptor.capture());
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();
-        assertEquals(50L, passedId);
+        assertEquals(testTask.getTaskId(), passedId);
 
-        SingleValueDTO<String> passedDTO = dtoCaptor.getValue();
-        assertEquals(name, passedDTO.getValue());
+        Task passedTask = taskCaptor.getValue();
+        assertAll("@passedTask properties match @testJson",
+                () -> assertEquals("new name", passedTask.getName()),
+                () -> assertEquals("new description", passedTask.getDescription()));
     }
 
-    @Test
-    void setTaskDescription() throws Exception {
-        //given
-        String description = "descriptions describe things that are describable";
-        testTask.setDescription(description);
 
-        //when
-        when(service.setTaskDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testTask);
 
-        //verify
-        mvc.perform(
-                put("/task/50/description")
-                        .contentType("application/json")
-                        .content("{ \"value\" : \"" + description + "\"} ")
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value(description));
-
-        verify(service).setTaskDescription(idCaptor.capture(), dtoCaptor.capture());
-        verifyNoMoreInteractions(service);
-
-        long passedId = idCaptor.getValue();
-        assertEquals(50L, passedId);
-
-        SingleValueDTO<String> passedDTO = dtoCaptor.getValue();
-        assertEquals(description, passedDTO.getValue());
-    }
 }

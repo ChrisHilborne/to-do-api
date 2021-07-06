@@ -10,11 +10,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import java.time.format.DateTimeFormatter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,6 +58,7 @@ public class TaskControllerIT {
         //when
         mvc.perform(
                 get("/task/" + testTaskId)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
         //verify
@@ -70,6 +73,7 @@ public class TaskControllerIT {
         //when
         mvc.perform(
                 get("/task/500")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
         //verify
@@ -79,80 +83,11 @@ public class TaskControllerIT {
     }
 
     @Test
-    void setTaskNameShouldReturnTaskWithNewName() throws Exception {
-        //given
-        String name = "new name";
-
-        //when
-        mvc.perform(
-                put("/task/" + testTaskId + "/name")
-                        .contentType("application/json")
-                        .content("{ \"value\":\"" + name + "\"}")
-        )
-        //verify
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.task_id").value(testTaskId));
-
-        //check DB has been updated
-        testTask.setName(name);
-        Task savedTask = repository.findById(testTaskId).get();
-        assertTrue(testTask.equals(savedTask));
-    }
-
-    @Test
-    void setTaskNameShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
-        //when
-        mvc.perform(
-                put("/task/500/name")
-                        .contentType("application/json")
-                        .content("{\"value\":\"new name\"}")
-        )
-        //verify
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").isNotEmpty());
-    }
-
-    @Test
-    void setTaskDescriptionShouldReturnTaskWithNewDescription() throws Exception {
-        //given
-        String description = "new description";
-
-        //when
-        mvc.perform(
-                put("/task/" + testTaskId + "/description")
-                        .contentType("application/json")
-                        .content("{ \"value\":\"" + description + "\"}")
-        )
-        //verify
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value(description))
-                .andExpect(jsonPath("$.task_id").value(testTaskId));
-
-        //check DB has been updated
-        testTask.setDescription(description);
-        Task savedTask = repository.findById(testTaskId).get();
-        assertTrue(testTask.equals(savedTask));
-    }
-
-    @Test
-    void setTaskDescriptionShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
-        //when
-        mvc.perform(
-                put("/task/500/description")
-                        .contentType("application/json")
-                        .content("{\"value\":\"new description\"}")
-        )
-        //verify
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").isNotEmpty());
-    }
-
-    @Test
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
-                put("/task/" + testTaskId + "/complete")
+                patch("/task/" + testTaskId + "/complete")
+                        .contentType(MediaType.APPLICATION_JSON)
         )
         //verify
                 .andExpect(status().isOk())
@@ -162,7 +97,7 @@ public class TaskControllerIT {
         //check DB has been updated
         testTask.complete();
         Task savedTask = repository.findById(testTaskId).get();
-        assertTrue(testTask.equals(savedTask));
+        assertEquals(savedTask, testTask);
     }
 
     @Test
@@ -173,7 +108,9 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/" + testTaskId + "/complete")
+                patch("/task/" + testTaskId + "/complete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 //verify
                 .andExpect(status().isAlreadyReported())
@@ -184,13 +121,57 @@ public class TaskControllerIT {
     void completeTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                put("/task/500/complete")
+                patch("/task/500/complete")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
                 //verify
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").isNotEmpty());
 
+    }
+
+    @Test
+    void updateTaskShouldReturnUpdatedTaskWhenTaskExists() throws Exception {
+        //given
+        String taskJson = """
+                {
+                    "name" : "new name",
+                    "description" : "new description"            
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/task/{id}", testTaskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(taskJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("new name"))
+                .andExpect(jsonPath("$.description").value("new description"));
+    }
+
+    @Test
+    void updateTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
+        //given
+        String taskJson = """
+                {
+                    "name" : "new name",
+                    "description" : "new description"            
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/task/{id}", 50)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(taskJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").isNotEmpty());
     }
 
 }
