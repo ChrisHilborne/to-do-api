@@ -9,14 +9,15 @@ import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class ToDoListServiceImpl implements ToDoListService{
+public class ToDoListServiceImpl implements ToDoListService {
 
     private final ToDoListRepository repository;
-
     private final Logger logger = LoggerFactory.getLogger(ToDoListServiceImpl.class);
 
     public ToDoListServiceImpl(ToDoListRepository repository) {
@@ -24,12 +25,14 @@ public class ToDoListServiceImpl implements ToDoListService{
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ToDoList saveToDoList(ToDoList list) {
         logger.info("Saving ToDoList (name: " + list.getName() + ")");
         return repository.save(list);
     }
 
     @Override
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public ToDoList getToDoListById(long id) throws ToDoListNotFoundException {
         logger.info("Fetching ToDoList with id: " + id);
         return repository.findById(id).orElseThrow(
@@ -38,12 +41,14 @@ public class ToDoListServiceImpl implements ToDoListService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ToDoList> getAllToDoList() {
         logger.info("Fetching all ToDoLists");
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public void deleteToDoList(long id) {
         logger.info("Deleting ToDoList (id: " + id + ")");
         repository.deleteById(id);

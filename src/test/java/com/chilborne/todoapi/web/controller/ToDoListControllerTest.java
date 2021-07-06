@@ -243,7 +243,6 @@ class ToDoListControllerTest {
         SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
         assertEquals(testList.getId(), passedId);
         assertEquals(description, passedDTO.getValue());
-
     }
 
     @Test

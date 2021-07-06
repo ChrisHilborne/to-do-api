@@ -10,7 +10,13 @@ spring:
     driverClassName: org.h2.Driver
     username: test
     password: test
-
   devtools:
     restart:
       log-condition-evaluation-delta=false:
+
+logging:
+  level:
+    org:
+      springframework:
+        transactional:
+          TRACE

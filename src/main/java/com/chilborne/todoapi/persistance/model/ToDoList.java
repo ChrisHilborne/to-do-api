@@ -1,12 +1,11 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Null;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ToDoList {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    @Null(message = "time_created is automatically generated on creation of ToDoList")
+    @Null(groups = OnPersist.class, message = "time_created is automatically generated")
     private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
@@ -39,7 +38,7 @@ public class ToDoList {
     private List<Task> tasks = new LinkedList<>();
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
-    @Null(message = "ToDoList is automatically active when it is created")
+    @Null(groups = OnPersist.class, message = "ToDoList is activated upon creation")
     private boolean active = true;
 
     protected ToDoList() {}

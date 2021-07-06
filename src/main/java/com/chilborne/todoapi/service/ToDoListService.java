@@ -1,11 +1,12 @@
 package com.chilborne.todoapi.service;
 
-import com.chilborne.todoapi.exception.DataNotFoundException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.web.dto.SingleValueDTO;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

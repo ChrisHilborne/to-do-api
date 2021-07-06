@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.chilborne.todoapi.service.ToDoListService;
 import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
@@ -8,7 +9,11 @@ import com.chilborne.todoapi.service.ToDoListServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraintvalidation.SupportedValidationTarget;
 
 @RestController
 @RequestMapping("/list")
@@ -31,7 +36,8 @@ public class ToDoListController {
     }
 
     @PostMapping(value = "", produces = "application/json")
-    public ResponseEntity<ToDoList> postToDoList(@RequestBody ToDoList list) {
+    @Validated({OnPersist.class})
+    public ResponseEntity<ToDoList> postToDoList(@Valid @RequestBody ToDoList list) {
         logger.info("Processing POST request for new ToDoList");
         ToDoList result = service.saveToDoList(list);
         return ResponseEntity.ok(result);
