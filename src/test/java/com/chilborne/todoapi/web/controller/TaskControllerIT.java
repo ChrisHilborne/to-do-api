@@ -173,4 +173,25 @@ public class TaskControllerIT {
                 .andExpect(jsonPath("$.error").isNotEmpty());
     }
 
+    @Test
+    void updateTaskShouldReturn400IfInputsAreNotValid() throws Exception {
+        //given
+        String taskJson = """
+                {
+                    "name" : "",
+                    "description" : "do"            
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/task/{id}", testTaskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(taskJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").isNotEmpty());
+    }
+
 }

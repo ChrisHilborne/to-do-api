@@ -196,6 +196,27 @@ public class ToDoListControllerIT {
                 .andExpect(jsonPath("$.error").isNotEmpty());
     }
 
+    @Test
+    void addTaskShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
+        //given
+        String task = """
+                {
+                    "name" : "",
+                    "description" : "do"
+                }
+                """;
+
+        //when
+        mvc.perform(
+                patch("/list/{id}/task/add", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(task)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").isNotEmpty());
+    }
+
 
     @Test
     void removeTaskShouldRemoveUpdatedToDoList() throws Exception {
@@ -239,7 +260,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    void updatedTaskShouldReturnUpdatedTask() throws Exception {
+    void updatedToDoListShouldReturnUpdatedToDoList() throws Exception {
         //given
         String testJson = """
                 {
@@ -262,7 +283,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    void updatedTaskShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
+    void updatedToDoListShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
         //given
         String testJson = """
                 {
@@ -283,7 +304,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    void updatedTaskShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
+    void updatedToDoListShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
         //given
         String testJson = """
                 {

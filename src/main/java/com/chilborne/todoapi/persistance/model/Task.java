@@ -40,7 +40,7 @@ public class Task {
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
     @Column(name = "date_time_created", insertable = false, columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_created is automatically generated")
+    @Null(groups = OnPersist.class, message = "time_created is automatically generated on task creation")
     private LocalDateTime timeCreated;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
@@ -48,8 +48,9 @@ public class Task {
     @Null(groups = OnPersist.class, message = "time_completed is automatically generated on task completion")
     private LocalDateTime timeCompleted;
 
-    @Column(name = "active", columnDefinition = "boolean default true" ,nullable = false)
-    private boolean active = true;
+    @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE" , nullable = false)
+    @Null(groups = OnPersist.class, message = "active is automatically set to true when on task creation")
+    private boolean active;
 
     protected Task() {}
 
@@ -68,7 +69,8 @@ public class Task {
     }
 
     public boolean complete() {
-        if (!this.active) return false;
+        //must check both @active and @timeComplete because @active is only instantiated when persisted in DB
+        if (!this.active && timeCompleted != null) return false;
         this.active = false;
         timeCompleted = LocalDateTime.now().withNano(0);
         return true;
@@ -107,6 +109,7 @@ public class Task {
     }
 
     public LocalDateTime getTimeCreated() {
+        //some tests do not save bean to DB - therefore timeCreated is never instantiated
         return timeCreated != null ? timeCreated.withNano(0) : null;
     }
 
@@ -142,6 +145,7 @@ public class Task {
         if (!Objects.equals(toDoList, task.toDoList)) return false;
         if (!Objects.equals(name, task.name)) return false;
         if (!Objects.equals(description, task.description)) return false;
+        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
         if ((timeCreated != null && task.timeCreated != null) && !Objects.equals(timeCreated, task.timeCreated)) return false;
         return Objects.equals(timeCompleted, task.timeCompleted);
     }

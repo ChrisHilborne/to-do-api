@@ -36,7 +36,7 @@ public class ToDoList {
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
     @Column(name = "date_time_made", updatable = false, columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_created is automatically generated on creation of ToDoList")
+    @Null(groups = OnPersist.class, message = "time_created is automatically generated on list creation")
     private LocalDateTime timeCreated;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
@@ -44,7 +44,7 @@ public class ToDoList {
     private List<Task> tasks = new LinkedList<>();
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
-    @Null(groups = OnPersist.class, message = "ToDoList is activated upon creation")
+    @Null(groups = OnPersist.class, message = "ToDoList is activated on list creation")
     private boolean active = true;
 
     protected ToDoList() {}
@@ -103,6 +103,7 @@ public class ToDoList {
     }
 
     public LocalDateTime getTimeCreated() {
+        //some tests do not save bean to DB - therefore timeCreated is never instantiated
         return timeCreated != null ? timeCreated.withNano(0) : null;
     }
 
@@ -115,6 +116,8 @@ public class ToDoList {
     }
 
     public void setTasks(List<Task> tasks) {
+        // Hibernate tracks collection to persist
+        // therefore we must use the same collection instance throughout the life of a ToDoList
         if (this.tasks != tasks) {
             this.tasks.clear();
             this.tasks.addAll(tasks);
