@@ -34,15 +34,20 @@ public class ToDoListControllerIT {
     @Autowired
     ToDoListRepository repository;
 
-    ToDoList testList;
+    ToDoList list;
+    long listId;
 
-    long testListId;
+    Task task;
+    long taskId;
 
     @BeforeEach
     void initData() {
-        testList = new ToDoList("test");
-        repository.save(testList);
-        testListId = testList.getId();
+        list = new ToDoList("test");
+        task = new Task(list, "task");
+        list.addTask(task);
+        repository.save(list);
+        listId = list.getId();
+        taskId = task.getTaskId();
     }
 
     @AfterEach
@@ -54,13 +59,14 @@ public class ToDoListControllerIT {
     void getToDoListByIdShouldReturnListWhenItExists() throws Exception {
         //when
         mvc.perform(
-                get("/list/{id}", testListId)
+                get("/list/{id}", listId)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
         //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.id").value(testListId));
+                .andExpect(jsonPath("$.id").value(listId));
     }
 
     @Test
@@ -68,6 +74,7 @@ public class ToDoListControllerIT {
         //when
         mvc.perform(
                 get("/list/{id}", 50)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
         //verify
@@ -94,7 +101,7 @@ public class ToDoListControllerIT {
                         .accept(MediaType.APPLICATION_JSON)
         )
                 //verify
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("new task"))
                 .andExpect(jsonPath("$.description").value("some adjectives"));
     }
@@ -121,17 +128,10 @@ public class ToDoListControllerIT {
 
     @Test
     void putActiveToDoListShouldReturnUpdatedToDoList() throws Exception {
-        //given
-        String booleanDTO = """
-                {
-                    "value" : "false"
-                }""";
-
         //when
         mvc.perform(
-                put("/list/{id}/active", testListId)
+                patch("/list/{id}/active/{active}", listId, false)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(booleanDTO)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 //verify
@@ -141,17 +141,10 @@ public class ToDoListControllerIT {
 
     @Test
     void putActiveToDoListShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
-        //given
-        String activeDTO = """
-                {
-                    "value" : "false"
-                }""";
-
         //when
         mvc.perform(
-                put("/list/{id}/active", 50)
+                patch("/list/{id}/active/true", 50)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(activeDTO)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 //verify
@@ -159,134 +152,11 @@ public class ToDoListControllerIT {
                 .andExpect(jsonPath("$.error").isNotEmpty());
     }
 
-    @Test
-    void setToDoListNameShouldReturnUpdatedToDoList() throws Exception {
-        //given
-        String nameDTO = """
-                {
-                    "value" : "this is a name"
-                }
-                """;
-
-        //when
-        mvc.perform(
-                put("/list/{id}/name", testListId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(nameDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-        //verify
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("this is a name"));
-    }
-
-    @Test
-    void setToDoListNameShouldReturnBadRequestWhenNameIsBlank() throws Exception {
-        //given
-        String nameDTO = """
-                {
-                    "value" : ""
-                }
-                """;
-
-        //when
-        mvc.perform(
-                put("/list/{id}/name", testListId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(nameDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                //verify
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void setToDoListNameShouldReturn404WithErrorMessageWhenListDoesNotExist() throws Exception {
-        //given
-        String nameDTO = """
-                {
-                    "value" : "this is a name"
-                }
-                """;
-
-        //when
-        mvc.perform(
-                put("/list/{id}/name", 50)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(nameDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                //verify
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").isNotEmpty());
-    }
-
-    @Test
-    void setToDoListDescriptionShouldReturnUpdatedToDoList() throws Exception {
-        //given
-        String descriptionDTO = """
-                {
-                    "value" : "this is a description"
-                }
-                """;
-
-        //when
-        mvc.perform(
-                put("/list/{id}/description", testListId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(descriptionDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                //verify
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("this is a description"));
-    }
-
-    @Test
-    void setToDoListDescriptionShouldReturn404WithErrorMessageWhenListDoesNotExist() throws Exception {
-        //given
-        String descriptionDTO = """
-                {
-                    "value" : "this is a description"
-                }
-                """;
-
-        //when
-        mvc.perform(
-                put("/list/{id}/description", 50)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(descriptionDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                //verify
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").isNotEmpty());
-    }
-
-    @Test
-    void setToDoListDescriptionShouldReturn400WithErrorMessageWhenDescriptionDoesNotMeetRequirements() throws Exception {
-        //given
-        String descriptionDTO = """
-                {
-                    "value" : "na"
-                }
-                """;
-        //when
-        mvc.perform(
-                put("/list/{id}/description", testList.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(descriptionDTO)
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-        //verify
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").isNotEmpty());
-    }
 
     @Test
     void addTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
-        String task = """
+        String taskJson = """
                 {
                     "name" : "task 2",
                     "description" : "task description"
@@ -295,14 +165,14 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/list/{id}/task/add", testListId)
+                patch("/list/{id}/task/add", listId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(task)
+                        .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tasks[0].name").value("task 2"))
-                .andExpect(jsonPath("$.tasks[0].description").value("task description"));
+                .andExpect(jsonPath("$.tasks[1].name").value("task 2"))
+                .andExpect(jsonPath("$.tasks[1].description").value("task description"));
     }
 
     @Test
@@ -317,7 +187,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/list/{id}/task/add", 50)
+                patch("/list/{id}/task/add", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(task)
                         .accept(MediaType.APPLICATION_JSON)
@@ -329,15 +199,10 @@ public class ToDoListControllerIT {
 
     @Test
     void removeTaskShouldRemoveUpdatedToDoList() throws Exception {
-        //given
-        Task taskToBeRemoved = new Task("task to be removed");
-        testList.addTask(taskToBeRemoved);
-        repository.save(testList);
-        ToDoList savedList = repository.findById(testListId).get();
-
         //when
         mvc.perform(
-                put("/list/{listId}/task/remove/{taskId}", testListId, taskToBeRemoved.getTaskId())
+                patch("/list/{listId}/task/remove/{taskId}", listId, taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
@@ -348,12 +213,13 @@ public class ToDoListControllerIT {
     void removeTaskShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
         //given
         Task taskToBeRemoved = new Task("task to be removed");
-        testList.addTask(taskToBeRemoved);
-        repository.save(testList);
+        list.addTask(taskToBeRemoved);
+        repository.save(list);
 
         //when
         mvc.perform(
-                put("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getTaskId())
+                patch("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getTaskId())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isNotFound())
@@ -364,10 +230,76 @@ public class ToDoListControllerIT {
     void removeTaskShouldReturn404AndErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                put("/list/{listId}/task/remove/{taskId}", testListId, 50)
+                patch("/list/{listId}/task/remove/{taskId}", listId, 50)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").isNotEmpty());
+    }
+
+    @Test
+    void updatedTaskShouldReturnUpdatedTask() throws Exception {
+        //given
+        String testJson = """
+                {
+                    "name" : "updated name",
+                    "description" : "updated description"
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/list/{id}", listId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(testJson)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("updated name"))
+                .andExpect(jsonPath("$.description").value("updated description"))
+                .andExpect(jsonPath("$.id").value(listId));
+    }
+
+    @Test
+    void updatedTaskShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
+        //given
+        String testJson = """
+                {
+                    "name" : "updated name",
+                    "description" : "updated description"
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/list/{id}", 50)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(testJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").isNotEmpty());
+    }
+
+    @Test
+    void updatedTaskShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
+        //given
+        String testJson = """
+                {
+                    "name" : "",
+                    "description" : "up"
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/list/{id}", listId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(testJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").isNotEmpty());
     }
 

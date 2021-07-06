@@ -1,6 +1,5 @@
 package com.chilborne.todoapi.web.controller;
 
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListServiceImpl;
@@ -22,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,28 +49,25 @@ class ToDoListControllerTest {
     ArgumentCaptor<Long> idCaptor;
 
     @Captor
-    ArgumentCaptor<SingleValueDTO<String>> stringDTOCaptor;
+    ArgumentCaptor<Boolean> booleanCaptor;
 
-    @Captor
-    ArgumentCaptor<SingleValueDTO<Boolean>> booleanDTOCaptor;
+    ToDoList testList;
 
     LocalDateTime now = LocalDateTime.now();
-
     String nowString;
 
     @BeforeEach
     void init() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         nowString = now.format(formatter);
+        testList = new ToDoList("test", "this is a test");
+        testList.setTimeCreated(now);
     }
 
     @Test
-    void getToDoListShouldWorldWhenListExists() throws Exception {
+    void getToDoListShouldWorkWhenListExists() throws Exception {
         //given
         long id = 0L;
-        ToDoList testList = new ToDoList("test");
-
-        testList.setTimeCreated(now);
 
         //when
         when(service.getToDoListById(id)).thenReturn(testList);
@@ -78,7 +75,8 @@ class ToDoListControllerTest {
         //verify
         mvc.perform(
                 get("/list/" + id)
-                        .accept("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
@@ -98,8 +96,6 @@ class ToDoListControllerTest {
                       "name": "test",
                       "description": "this is a test"
                 }""";
-        ToDoList testList = new ToDoList("test", "this is a test");
-        testList.setTimeCreated(now);
 
         //when
         when(service.saveToDoList(any(ToDoList.class))).thenReturn(testList);
@@ -110,7 +106,7 @@ class ToDoListControllerTest {
                         .accept("application/json")
                         .contentType("application/json")
                         .content(testJson))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
@@ -121,41 +117,66 @@ class ToDoListControllerTest {
     }
 
     @Test
+    void upDateToDoListShouldReturnUpdatedList() throws Exception {
+        //given
+        String testJson = """
+                {
+                    "name" : "this name was recently updated",
+                    "description" : "so was this description"
+                }
+                """;
+        testList.setName("this name was recently updated");
+        testList.setDescription("so was this description");
+        //when
+        when(service.updateToDoList(anyLong(), any(ToDoList.class))).thenReturn(testList);
+        mvc.perform(
+                put("/list/{id}", testList.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(testJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+        //verify
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("this name was recently updated"))
+                .andExpect(jsonPath("$.description").value("so was this description"))
+                .andExpect(jsonPath("$.id").value(testList.getId()));
+        verify(service).updateToDoList(idCaptor.capture(), toDoListCaptor.capture());
+        verifyNoMoreInteractions(service);
+
+        long passedId = idCaptor.getValue();
+        assertEquals(testList.getId(), passedId);
+        ToDoList passedToDoList = toDoListCaptor.getValue();
+        assertAll("@passedToDoList has name and description of @testJson",
+                () -> assertEquals("this name was recently updated", passedToDoList.getName()),
+                () -> assertEquals("so was this description", passedToDoList.getDescription()));
+
+    }
+
+    @Test
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
-        String activeJson = "{ \"value\" : \"false\" }";
-        ToDoList activeList = new ToDoList("test");
-        activeList.setTimeCreated(now);
-        activeList.setActive(true);
-        long activeListId = activeList.getId();
-
-        ToDoList inactiveList = new ToDoList("test");
-        inactiveList.setTimeCreated(now);
-        inactiveList.setActive(false);
-
+        testList.setActive(false);
 
         //when
-        when(service.setToDoListActive(anyLong(), any(SingleValueDTO.class))).thenReturn(inactiveList);
+        when(service.setToDoListActive(anyLong(), anyBoolean())).thenReturn(testList);
 
         //verify
         mvc.perform(
-                put("/list/" + activeListId + "/active/")
+                patch("/list/" + testList.getTasks() + "/active/" + false)
                         .accept("application/json")
-                        .contentType("application/json")
-                        .content(activeJson)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.time_created").value(nowString));
-        verify(service).setToDoListActive(anyLong(), any(SingleValueDTO.class));
+        verify(service).setToDoListActive(anyLong(), anyBoolean());
         verifyNoMoreInteractions(service);
 
-        verify(service).setToDoListActive(idCaptor.capture(), booleanDTOCaptor.capture());
+        verify(service).setToDoListActive(idCaptor.capture(), booleanCaptor.capture());
         long passedId = idCaptor.getValue();
-        SingleValueDTO<Boolean> passedDTO = booleanDTOCaptor.getValue();
-        assertEquals(activeListId, passedId);
-        assertEquals(false, passedDTO.getValue());
+        boolean passedBoolean = booleanCaptor.getValue();
+        assertEquals(testList.getId(), passedId);
+        assertEquals(false, passedBoolean);
 
     }
 
@@ -176,7 +197,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                put("/list/" + testList.getId() + "/task/add")
+                patch("/list/" + testList.getId() + "/task/add")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(taskJson))
@@ -194,6 +215,7 @@ class ToDoListControllerTest {
     void removeTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
         ToDoList testList = new ToDoList("testList");
+        testList.setTimeCreated(LocalDateTime.now());
         Task initialTask = new Task(testList, "task1");
         testList.addTask(initialTask);
         Task taskToRemove = new Task(testList, "task2");
@@ -205,74 +227,14 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                put(String.format("/list/%d/task/remove/%d", idTestList, idTaskToRemove))
-                .accept("application/json")
+                patch(String.format("/list/%d/task/remove/%d", idTestList, idTaskToRemove))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tasks[0].name").value("task1"));
         verify(service).removeTaskToDoList(idTestList, idTaskToRemove);
         verifyNoMoreInteractions(service);
-    }
-
-
-    @Test
-    void setDescriptionShouldReturnUpdatedToDoList() throws Exception {
-        //given
-        String description = "This is a description";
-        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(description);
-        ToDoList testList = new ToDoList("testList", description);
-
-
-        //when
-        when(service.setToDoListDescription(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
-
-        //verify
-        mvc.perform(
-                put("/list/{id}/description", testList.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andExpect(status().isOk());
-
-        verify(service).setToDoListDescription(anyLong(), any(SingleValueDTO.class));
-        verifyNoMoreInteractions(service);
-        
-        verify(service).setToDoListDescription(idCaptor.capture(), stringDTOCaptor.capture());
-        long passedId = idCaptor.getValue();
-        SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
-        assertEquals(testList.getId(), passedId);
-        assertEquals(description, passedDTO.getValue());
-    }
-
-    @Test
-    void setNameShouldReturnUpdatedToDoList() throws Exception {
-        //given
-        String name = "This is a name";
-        SingleValueDTO<String> descriptionDTO = new SingleValueDTO<>(name);
-        ToDoList testList = new ToDoList("testTask", name);
-
-
-        //when
-        when(service.setToDoListName(anyLong(), any(SingleValueDTO.class))).thenReturn(testList);
-
-        //verify
-        mvc.perform(
-                put(String.format("/list/%d/name", testList.getId()))
-                        .contentType("application/json")
-                        .content("{ \"value\": \"" + descriptionDTO.getValue() + "\" }")
-                        .accept("application/json")
-        )
-                .andExpect(status().isOk());
-
-        verify(service).setToDoListName(anyLong(), any(SingleValueDTO.class));
-        verifyNoMoreInteractions(service);
-
-        verify(service).setToDoListName(idCaptor.capture(), stringDTOCaptor.capture());
-        long passedId = idCaptor.getValue();
-        SingleValueDTO<String> passedDTO = stringDTOCaptor.getValue();
-        assertEquals(testList.getId(), passedId);
-        assertEquals(name, passedDTO.getValue());
     }
 
 }

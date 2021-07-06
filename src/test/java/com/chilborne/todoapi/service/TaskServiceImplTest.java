@@ -175,7 +175,7 @@ class TaskServiceImplTest {
                 () -> service.completeTask(50L));
         assertEquals("This task was already completed at " + timeCompleted,
                         e.getMessage());
-
     }
+
 
 }
