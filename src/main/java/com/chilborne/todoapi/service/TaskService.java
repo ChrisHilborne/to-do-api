@@ -6,7 +6,6 @@ import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.web.dto.SingleValueDTO;
 
 public interface TaskService {
-
     Task getTaskById(long id) throws TaskNotFoundException;
 
     Task saveTask(Task task);

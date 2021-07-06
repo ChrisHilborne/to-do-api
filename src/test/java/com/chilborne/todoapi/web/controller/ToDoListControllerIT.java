@@ -100,6 +100,26 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    void postNewToDoListShouldReturnBadRequestIfInputsAreNotValid() throws Exception {
+        //given
+        String toDoListJson = """
+                {
+                      "name": "",
+                      "description": "is",
+                      "active" : "false"
+                }""";
+
+        //when
+        mvc.perform(
+                post("/list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toDoListJson)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void putActiveToDoListShouldReturnUpdatedToDoList() throws Exception {
         //given
         String booleanDTO = """
@@ -161,7 +181,27 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    void setToDoListNameShouldReturn404WithErrorMessageWhenListDOesNotExist() throws Exception {
+    void setToDoListNameShouldReturnBadRequestWhenNameIsBlank() throws Exception {
+        //given
+        String nameDTO = """
+                {
+                    "value" : ""
+                }
+                """;
+
+        //when
+        mvc.perform(
+                put("/list/{id}/name", testListId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(nameDTO)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                //verify
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void setToDoListNameShouldReturn404WithErrorMessageWhenListDoesNotExist() throws Exception {
         //given
         String nameDTO = """
                 {
@@ -203,7 +243,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    void setToDoListDescriptionShouldReturn404WithErrorMessageWhenListDOesNotExist() throws Exception {
+    void setToDoListDescriptionShouldReturn404WithErrorMessageWhenListDoesNotExist() throws Exception {
         //given
         String descriptionDTO = """
                 {
@@ -220,6 +260,26 @@ public class ToDoListControllerIT {
         )
                 //verify
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").isNotEmpty());
+    }
+
+    @Test
+    void setToDoListDescriptionShouldReturn400WithErrorMessageWhenDescriptionDoesNotMeetRequirements() throws Exception {
+        //given
+        String descriptionDTO = """
+                {
+                    "value" : "na"
+                }
+                """;
+        //when
+        mvc.perform(
+                put("/list/{id}/description", testList.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(descriptionDTO)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+        //verify
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").isNotEmpty());
     }
 
@@ -273,11 +333,11 @@ public class ToDoListControllerIT {
         Task taskToBeRemoved = new Task("task to be removed");
         testList.addTask(taskToBeRemoved);
         repository.save(testList);
-        long taskId = repository.findById(testListId).get().getTasks().get(0).getTaskId();
+        ToDoList savedList = repository.findById(testListId).get();
 
         //when
         mvc.perform(
-                put("/list/{listId}/task/remove/{taskId}", testListId, taskId)
+                put("/list/{listId}/task/remove/{taskId}", testListId, taskToBeRemoved.getTaskId())
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
@@ -290,11 +350,10 @@ public class ToDoListControllerIT {
         Task taskToBeRemoved = new Task("task to be removed");
         testList.addTask(taskToBeRemoved);
         repository.save(testList);
-        long taskId = repository.findById(testListId).get().getTasks().get(0).getTaskId();
 
         //when
         mvc.perform(
-                put("/list/{listId}/task/remove/{taskId}", 50, taskId)
+                put("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getTaskId())
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isNotFound())
