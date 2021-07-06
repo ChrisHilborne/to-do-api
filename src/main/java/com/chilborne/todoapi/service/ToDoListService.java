@@ -20,11 +20,9 @@ public interface ToDoListService {
 
     void deleteToDoList(long id);
 
-    ToDoList setToDoListName(long id, SingleValueDTO<String> name) throws ToDoListNotFoundException;
+    ToDoList updateToDoList(long id, ToDoList toDoList);
 
-    ToDoList setToDoListDescription(long id, SingleValueDTO<String> description) throws ToDoListNotFoundException;
-
-    ToDoList setToDoListActive(long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException;
+    ToDoList setToDoListActive(long id, boolean active) throws ToDoListNotFoundException;
 
     ToDoList addTaskToDoList(long id, Task task) throws ToDoListNotFoundException;
 

@@ -36,7 +36,7 @@ public class ToDoListServiceImpl implements ToDoListService {
     public ToDoList getToDoListById(long id) throws ToDoListNotFoundException {
         logger.info("Fetching ToDoList with id: " + id);
         return repository.findById(id).orElseThrow(
-                () -> new ToDoListNotFoundException("ToDoList with id " + id + " not found")
+                () -> new ToDoListNotFoundException(id)
         );
     }
 
@@ -54,35 +54,21 @@ public class ToDoListServiceImpl implements ToDoListService {
         repository.deleteById(id);
     }
 
-
     @Override
-    public ToDoList setToDoListName(long id, SingleValueDTO<String> name) throws ToDoListNotFoundException {
-        logger.info(
-            String.format("Setting name of ToDoList (id: %d) to: %s", id, name.getValue())
-        );
-        ToDoList toUpdate = getToDoListById(id);
-        toUpdate.setName(name.getValue());
-        return saveToDoList(toUpdate);
+    public ToDoList updateToDoList(long id, ToDoList toDoList) {
+        if (!repository.existsById(id)) throw new ToDoListNotFoundException(id);
+        toDoList.setId(id);
+        return saveToDoList(toDoList);
     }
 
-    @Override
-    public ToDoList setToDoListDescription(long id, SingleValueDTO<String> description) throws ToDoListNotFoundException {
-        logger.info(
-                String.format("Adding Description (hashcode: %s) to ToDoList (id: %d)",
-                        description.getValue(), id)
-        );
-        ToDoList toUpdate = getToDoListById(id);
-        toUpdate.setDescription(description.getValue());
-        return saveToDoList(toUpdate);
-    }
 
     @Override
-    public ToDoList setToDoListActive(long id, SingleValueDTO<Boolean> active) throws ToDoListNotFoundException {
+    public ToDoList setToDoListActive(long id, boolean active) throws ToDoListNotFoundException {
         logger.info(
                 String.format("Setting ToDoList (id: %d) Active to: %b", id, active)
         );
         ToDoList toUpdate = getToDoListById(id);
-        toUpdate.setActive(active.getValue());
+        toUpdate.setActive(active);
         return saveToDoList(toUpdate);
     }
 

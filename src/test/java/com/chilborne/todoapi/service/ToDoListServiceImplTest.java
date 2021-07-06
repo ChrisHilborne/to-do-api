@@ -1,6 +1,6 @@
 package com.chilborne.todoapi.service;
 
-import com.chilborne.todoapi.web.dto.SingleValueDTO;
+import com.chilborne.todoapi.exception.ToDoListNotFoundException;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
@@ -115,66 +115,18 @@ class ToDoListServiceImplTest {
     }
 
     @Test
-    void setName() {
-        //given
-        String name = "new name";
-        SingleValueDTO<String> nameDTO = new SingleValueDTO<>(name);
-        ToDoList newName = new ToDoList(name, testList.getTasks());
-        newName.setTimeCreated(now);
-
-        given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
-        given(repository.save(any())).willReturn(newName);
-
-        //when
-        ToDoList result = service.setToDoListName(1L, nameDTO);
-
-        //verify
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(ToDoList.class));
-        verifyNoMoreInteractions(repository);
-
-        verify(repository).save(toDoListCaptor.capture());
-        assertEquals(newName, result);
-        assertEquals(newName, toDoListCaptor.getValue());
-    }
-
-    @Test
-    void addDescription() {
-        //given
-        String description = "This is a To Do List";
-        SingleValueDTO<String> singleValueDTO = new SingleValueDTO<>(description);
-        ToDoList described = new ToDoList("test", description, testList.getTasks());
-        described.setTimeCreated(now);
-
-        given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
-        given(repository.save(any(ToDoList.class))).willReturn(described);
-
-        //when
-        ToDoList result = service.setToDoListDescription(1L, singleValueDTO);
-
-        //verify
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(ToDoList.class));
-        verifyNoMoreInteractions(repository);
-        verify(repository).save(toDoListCaptor.capture());
-
-        assertEquals(described, result);
-        assertEquals(described, toDoListCaptor.getValue());
-    }
-
-    @Test
     void setActive() {
         //given
-        SingleValueDTO<Boolean> activeDTO = new SingleValueDTO<>(false);
+        boolean active = false;
         ToDoList deactivated = new ToDoList("test", testList.getTasks());
         deactivated.setTimeCreated(now);
-        deactivated.setActive(activeDTO.getValue());
+        deactivated.setActive(active);
 
         given(repository.findById(1L)).willReturn(Optional.ofNullable(testList));
         given(repository.save(any(ToDoList.class))).willReturn(deactivated);
 
         //when
-        ToDoList result = service.setToDoListActive(1L, activeDTO);
+        ToDoList result = service.setToDoListActive(1L, active);
 
         //verify
         verify(repository, times(1)).findById(1L);
@@ -250,6 +202,47 @@ class ToDoListServiceImplTest {
         Exception e = assertThrows(RuntimeException.class,
                 () -> service.removeTaskToDoList(testList.getId(), 500L));
         assertEquals("List with id 0 does not contain task with id 500", e.getMessage());
+    }
+
+
+    @Test
+    void updateListShouldReturnUpdatedTaskIfTaskAlreadyExists() {
+        //given
+        testList.setName("this is another name");
+        long testListId = testList.getId();
+
+        //when
+        when(repository.existsById(testListId)).thenReturn(true);
+        when(repository.save(testList)).thenReturn(testList);
+
+        ToDoList returned = service.updateToDoList(testListId, testList);
+
+        //verify
+        verify(repository).existsById(testListId);
+        verify(repository).save(testList);
+        verifyNoMoreInteractions(repository);
+
+        assertEquals(testList, returned);
+    }
+
+    @Test
+    void updateListShouldThrowToDoListNotFoundExceptionIfListDoesNotExist() {
+        //given
+        testList.setName("this is another name");
+        long testListId = testList.getId();
+
+        //when
+        when(repository.existsById(testListId)).thenReturn(false);
+
+        Exception e = assertThrows(
+                ToDoListNotFoundException.class,
+                () -> service.updateToDoList(testListId, testList));
+
+        //verify
+        verify(repository).existsById(testListId);
+        verifyNoMoreInteractions(repository);
+
+
     }
 
 }

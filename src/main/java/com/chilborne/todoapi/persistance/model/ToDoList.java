@@ -3,15 +3,20 @@ package com.chilborne.todoapi.persistance.model;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
+@DynamicUpdate
 @Table(name = "lists")
 public class ToDoList {
 
@@ -29,9 +34,10 @@ public class ToDoList {
     private String description;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
-    @Column(name = "date_time_made", nullable = false, columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_created is automatically generated")
-    private LocalDateTime timeCreated = LocalDateTime.now().withNano(0);
+    @CreationTimestamp
+    @Column(name = "date_time_made", nullable = false , updatable = false, columnDefinition = "TIMESTAMP")
+    @Null(groups = OnPersist.class, message = "time_created is automatically generated on creation of ToDoList")
+    private LocalDateTime timeCreated;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
     @JsonManagedReference
@@ -97,7 +103,7 @@ public class ToDoList {
     }
 
     public LocalDateTime getTimeCreated() {
-        return LocalDateTime.of(timeCreated.toLocalDate(), timeCreated.toLocalTime());
+        return timeCreated != null ? timeCreated.withNano(0) : null;
     }
 
     public void setTimeCreated(LocalDateTime timeCreated) {
@@ -139,7 +145,7 @@ public class ToDoList {
     @Override
     public int hashCode() {
         int result = name.hashCode();
-        result = 31 * result + timeCreated.hashCode();
+        result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
         result = 31 * result + (tasks != null ? tasks.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
         return result;
