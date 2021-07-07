@@ -2,14 +2,15 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
+import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.model.Task;
 
 public interface TaskService {
-    Task getTaskById(long id) throws TaskNotFoundException;
+    TaskDto getTaskById(long id) throws TaskNotFoundException;
 
-    Task saveTask(Task task);
+    TaskDto saveTask(Task task);
 
-    Task completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException;
+    TaskDto completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException;
 
-    Task updateTask(long id, Task task);
+    TaskDto updateTask(long id, TaskDto task);
 }

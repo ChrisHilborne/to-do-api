@@ -27,7 +27,6 @@ public class JacksonJsonConfig {
             builder.simpleDateFormat(dateFormat);
             builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
             builder.serializers(new LocalDateSerializer(dateFormatter));
-            builder.serializers(new LocalDateSerializer(dateFormatter));
             builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
             builder.indentOutput(true);
             builder.defaultViewInclusion(true);

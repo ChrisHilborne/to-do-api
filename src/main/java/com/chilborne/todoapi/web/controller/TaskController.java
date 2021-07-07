@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.service.TaskService;
 import org.slf4j.Logger;
@@ -23,27 +24,27 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(
+    public ResponseEntity<TaskDto> getTaskById(
             @PathVariable long id) {
         logger.info("Processing GET Request for Task id: " + id);
-        Task result = service.getTaskById(id);
+        TaskDto result = service.getTaskById(id);
         return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Task> completeTask(
+    public ResponseEntity<TaskDto> completeTask(
             @PathVariable long id) {
         logger.info("Processing PATCH Request to Complete Task id: " + id);
-        Task result = service.completeTask(id);
+        TaskDto result = service.completeTask(id);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(
+    public ResponseEntity<TaskDto> updateTask(
             @PathVariable long id,
-            @Valid @RequestBody Task task) {
+            @Valid @RequestBody TaskDto task) {
         logger.info("Processing PUT Request to update Task id: " + id);
-        Task result = service.updateTask(id, task);
+        TaskDto result = service.updateTask(id, task);
         return ResponseEntity.ok(result);
     }
 

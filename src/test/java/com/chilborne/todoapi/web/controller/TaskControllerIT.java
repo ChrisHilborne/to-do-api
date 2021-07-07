@@ -16,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,8 +35,7 @@ public class TaskControllerIT {
     TaskRepository repository;
 
     Task testTask;
-
-    long testTaskId;
+    long ID;
 
     private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
@@ -45,7 +43,7 @@ public class TaskControllerIT {
     void initialiseTaskData() {
         testTask = new Task("test task");
         repository.save(testTask);
-        testTaskId = testTask.getTaskId();
+        ID = testTask.getId();
     }
 
     @AfterEach
@@ -57,14 +55,14 @@ public class TaskControllerIT {
     void getTaskShouldReturnTaskWhenTheTaskExists() throws Exception {
         //when
         mvc.perform(
-                get("/task/" + testTaskId)
+                get("/task/" + ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
         //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(testTask.getName()))
-                .andExpect(jsonPath("$.task_id").value(testTaskId));
+                .andExpect(jsonPath("$.task_id").value(ID));
     }
 
     @Test
@@ -85,17 +83,17 @@ public class TaskControllerIT {
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
-                patch("/task/{id}/complete", testTaskId)
+                patch("/task/{id}/complete", ID)
                         .contentType(MediaType.APPLICATION_JSON)
         )
         //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
-                .andExpect(jsonPath("$.time_completed").isNotEmpty());
+                .andExpect(jsonPath("$.date_time_finished").isNotEmpty());
 
         //check DB has been updated
         testTask.complete();
-        Task savedTask = repository.findById(testTaskId).get();
+        Task savedTask = repository.findById(ID).get();
         assertTrue(savedTask.equals(testTask));
     }
 
@@ -107,7 +105,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                patch("/task/" + testTaskId + "/complete")
+                patch("/task/" + ID + "/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -142,7 +140,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/{id}", testTaskId)
+                put("/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -185,7 +183,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/{id}", testTaskId)
+                put("/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)

@@ -1,11 +1,11 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.boot.convert.DataSizeUnit;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -52,7 +52,7 @@ public class Task {
     @Null(groups = OnPersist.class, message = "active is automatically set to true when on task creation")
     private boolean active;
 
-    protected Task() {}
+    public Task() {}
 
     public Task(String name) {
         this.name = name;
@@ -76,12 +76,12 @@ public class Task {
         return true;
     }
 
-    public long getTaskId() {
+    public long getId() {
         return id;
     }
 
-    public void setTaskId(long taskId) {
-        this.id = taskId;
+    public void setId(long Id) {
+        this.id = Id;
     }
 
     public ToDoList getToDoList() {
@@ -148,6 +148,21 @@ public class Task {
         //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
         if ((timeCreated != null && task.timeCreated != null) && !Objects.equals(timeCreated, task.timeCreated)) return false;
         return Objects.equals(timeCompleted, task.timeCompleted);
+    }
+
+    /**
+     * This is a utility method to help test returned Dto from TaskService
+     * @param taskDto
+     * @return boolean
+     */
+    public boolean equalsDto(TaskDto taskDto) {
+        if (id != taskDto.getTaskId()) return false;
+        if (active != taskDto.isActive()) return false;
+        if (!Objects.equals(name, taskDto.getName())) return false;
+        if (!Objects.equals(description, taskDto.getDescription())) return false;
+        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
+        if ((timeCreated != null && taskDto.getDateTimeMade() != null) && !Objects.equals(this.getTimeCreated(), taskDto.getDateTimeMade())) return false;
+        return Objects.equals(timeCompleted, taskDto.getDateTimeFinished());
     }
 
     @Override

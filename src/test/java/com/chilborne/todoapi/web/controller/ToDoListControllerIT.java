@@ -47,7 +47,7 @@ public class ToDoListControllerIT {
         list.addTask(task);
         repository.save(list);
         listId = list.getId();
-        taskId = task.getTaskId();
+        taskId = task.getId();
     }
 
     @AfterEach
@@ -239,7 +239,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getTaskId())
+                patch("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )

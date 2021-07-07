@@ -2,6 +2,8 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
+import com.chilborne.todoapi.persistance.dto.TaskDto;
+import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
 import org.slf4j.Logger;
@@ -14,29 +16,34 @@ import java.time.format.DateTimeFormatter;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository repository;
+    private final TaskMapper mapper;
     private final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
 
-    public TaskServiceImpl(TaskRepository repository) {
+    public TaskServiceImpl(TaskRepository repository, TaskMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
+
     @Override
-    public Task getTaskById(long id) throws TaskNotFoundException {
+    public TaskDto getTaskById(long id) throws TaskNotFoundException {
         logger.info("Fetching Task id: " + id);
-        return repository.findById(id)
+        Task returned = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
+        return mapper.convert(returned);
     }
 
     @Override
-    public Task saveTask(Task task) {
+    public TaskDto saveTask(Task task) {
         logger.info("Saving task: " + task);
-        return repository.save(task);
+        Task savedTask = repository.save(task);
+        return mapper.convert(savedTask);
     }
 
     @Override
-    public Task completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException {
+    public TaskDto completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException {
         logger.info("Completing task id: " + id);
-        Task toComplete = getTaskById(id);
+        Task toComplete = repository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
         if (toComplete.complete()) {
             return saveTask(toComplete);
         }
@@ -48,10 +55,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTask(long id, Task task) throws TaskNotFoundException {
+    public TaskDto updateTask(long id, TaskDto taskDto) throws TaskNotFoundException {
         logger.info("Updating task id: " + id);
         if (!repository.existsById(id)) throw new TaskNotFoundException(id);
-        task.setTaskId(id);
-        return saveTask(task);
+        Task toUpdate = mapper.convert(taskDto);
+        toUpdate.setId(id);
+        return saveTask(toUpdate);
     }
 }
