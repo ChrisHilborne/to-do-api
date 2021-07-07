@@ -2,6 +2,8 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
 import com.chilborne.todoapi.exception.TaskNotFoundException;
+import com.chilborne.todoapi.persistance.dto.TaskDto;
+import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
@@ -28,6 +30,11 @@ class TaskServiceImplTest {
     @Mock
     TaskRepository repository;
 
+    @Mock
+    TaskMapper mockMapper;
+
+    TaskMapper mapper = TaskMapper.INSTANCE;
+
     @InjectMocks
     TaskServiceImpl service;
 
@@ -35,31 +42,34 @@ class TaskServiceImplTest {
     ArgumentCaptor<Task> taskCaptor;
 
     Task testTask;
-
+    TaskDto testDto;
     Task mockTask = mock(Task.class);
-
     LocalDateTime now = LocalDateTime.now();
 
     @BeforeEach
     void init() {
         ToDoList testList = new ToDoList("test list");
         testTask = new Task(testList, "test task");
-        testTask.setTaskId(50L);
+        testTask.setId(50L);
         testTask.setTimeCreated(now);
+        testDto = mapper.convert(testTask);
     }
 
     @Test
     void getTaskByIdShouldReturnCorrectTaskWhenItExists() {
         //given
         given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
+        given(mockMapper.convert(testTask)).willReturn(mapper.convert(testTask));
 
         //when
-        Task result = service.getTaskById(50L);
+        TaskDto result = service.getTaskById(50L);
 
         //verify
-        assertEquals(testTask, result);
+        assertTrue(testTask.equalsDto(result));
         verify(repository).findById(50L);
         verifyNoMoreInteractions(repository);
+        verify(mockMapper).convert(testTask);
+        verifyNoMoreInteractions(mockMapper);
     }
 
     @Test
@@ -76,14 +86,17 @@ class TaskServiceImplTest {
     void saveTaskShouldReturnSavedTask() {
         //given
         given(repository.save(testTask)).willReturn(testTask);
+        given(mockMapper.convert(testTask)).willReturn(mapper.convert(testTask));
 
         //when
-        Task result = service.saveTask(testTask);
+        TaskDto result = service.saveTask(testTask);
 
         //verify
-        assertEquals(testTask, result);
+        assertTrue(testTask.equalsDto(result));
         verify(repository).save(testTask);
         verifyNoMoreInteractions(repository);
+        verify(mockMapper).convert(testTask);
+        verifyNoMoreInteractions(mockMapper);
     }
 
     @Test
@@ -95,8 +108,9 @@ class TaskServiceImplTest {
         when(mockTask.complete()).thenReturn(true);
         when(repository.findById(50L)).thenReturn(Optional.of(mockTask));
         when(repository.save(mockTask)).thenReturn(testTask);
+        when(mockMapper.convert(testTask)).thenReturn(mapper.convert(testTask));
 
-        Task completeTask = service.completeTask(50L);
+        TaskDto completeTask = service.completeTask(50L);
 
         //verify
         verify(mockTask).complete();
@@ -106,7 +120,7 @@ class TaskServiceImplTest {
         verify(repository).save(mockTask);
         verifyNoMoreInteractions(repository);
 
-        assertEquals(testTask, completeTask);
+        assertTrue(testTask.equalsDto(completeTask));
     }
 
     @Test
@@ -129,39 +143,44 @@ class TaskServiceImplTest {
     @Test
     void updateTaskShouldReturnUpdatedTaskIfTaskAlreadyExists() {
         //given
-        testTask.setName("this is a new name");
-        long testTaskId = testTask.getTaskId();
+        testDto.setName("this is a new name");
+        long testTaskId = testDto.getTaskId();
 
         //when
         when(repository.existsById(testTaskId)).thenReturn(true);
-        when(repository.save(testTask)).thenReturn(testTask);
+        when(repository.save(any(Task.class))).thenReturn(testTask);
+        when(mockMapper.convert(testDto)).thenReturn(mapper.convert(testDto));
+        when(mockMapper.convert(testTask)).thenReturn(mapper.convert(testTask));
 
-        Task updated = service.updateTask(testTaskId, testTask);
+        TaskDto updated = service.updateTask(testTaskId, testDto);
 
         //verify
         verify(repository).existsById(testTaskId);
-        verify(repository).save(testTask);
+        verify(repository).save(any(Task.class));
         verifyNoMoreInteractions(repository);
+        verify(mockMapper).convert(testTask);
+        verifyNoMoreInteractions(mockMapper);
 
-        assertEquals(testTask, updated);
+        assertTrue(testTask.equalsDto(updated));
     }
 
     @Test
     void updatedTaskShouldThrowTaskNotFoundExceptionIfTaskDoesNotExist() {
         //given
-        testTask.setName("this is a new name");
-        long testTaskId = testTask.getTaskId();
+        testDto.setName("this is a new name");
+        long testTaskId = testDto.getTaskId();
 
         //when
         when(repository.existsById(testTaskId)).thenReturn(false);
 
         Exception e = assertThrows(
                 TaskNotFoundException.class,
-                () -> service.updateTask(testTaskId, testTask));
+                () -> service.updateTask(testTaskId, testDto));
 
         //verify
         verify(repository).existsById(testTaskId);
         verifyNoMoreInteractions(repository);
+        verifyNoInteractions(mockMapper);
 
     }
 

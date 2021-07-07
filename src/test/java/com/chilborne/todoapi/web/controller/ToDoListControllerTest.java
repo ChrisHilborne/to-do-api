@@ -221,7 +221,7 @@ class ToDoListControllerTest {
         testList.addTask(initialTask);
         Task taskToRemove = new Task(testList, "task2");
         long idTestList = testList.getId();
-        long idTaskToRemove = taskToRemove.getTaskId();
+        long idTaskToRemove = taskToRemove.getId();
 
         //when
         when(service.removeTaskToDoList(idTestList, idTaskToRemove)).thenReturn(testList);

@@ -18,9 +18,9 @@ class ToDoListTest {
     void init() {
         list = new ToDoList("To Do");
         first = new Task(list, "First");
-        first.setTaskId(1L);
+        first.setId(1L);
         second = new Task(list, "Second");
-        second.setTaskId(2L);
+        second.setId(2L);
     }
 
     @Test
@@ -41,7 +41,7 @@ class ToDoListTest {
         list.setTasks(List.of(first, second));
 
         //when
-        boolean removed = list.removeTask(second.getTaskId());
+        boolean removed = list.removeTask(second.getId());
 
         //verify
         assertEquals(List.of(first), list.getTasks());

@@ -1,5 +1,7 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.dto.TaskDto;
+import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.TaskServiceImpl;
@@ -38,18 +40,17 @@ class TaskControllerTest {
     @MockBean
     TaskServiceImpl service;
 
-    @InjectMocks
-    TaskController controller;
-
     @Captor
     ArgumentCaptor<Long> idCaptor;
 
     @Captor
-    ArgumentCaptor<Task> taskCaptor;
+    ArgumentCaptor<TaskDto> taskCaptor;
+
+    TaskMapper mapper = TaskMapper.INSTANCE;
 
     Task testTask;
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     @BeforeEach
     void init() {
@@ -64,7 +65,7 @@ class TaskControllerTest {
         String timeCreated = testTask.getTimeCreated().format(formatter);
 
         //when
-        when(service.getTaskById(50L)).thenReturn(testTask);
+        when(service.getTaskById(50L)).thenReturn(mapper.convert(testTask));
 
         //verify
         mvc.perform(
@@ -74,8 +75,8 @@ class TaskControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(testTask.getName()))
-                .andExpect(jsonPath("$.task_id").value(testTask.getTaskId()))
-                .andExpect(jsonPath("$.time_created").value(timeCreated));
+                .andExpect(jsonPath("$.task_id").value(testTask.getId()))
+                .andExpect(jsonPath("$.date_time_made").value(timeCreated));
 
         verify(service).getTaskById(50L);
         verifyNoMoreInteractions(service);
@@ -88,7 +89,7 @@ class TaskControllerTest {
         String timeCompleted = testTask.getTimeCompleted().format(formatter);
 
         //when
-        when(service.completeTask(50)).thenReturn(testTask);
+        when(service.completeTask(50)).thenReturn(mapper.convert(testTask));
 
         //verify
         mvc.perform(
@@ -98,7 +99,7 @@ class TaskControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value("false"))
-                .andExpect(jsonPath("$.time_completed").value(timeCompleted));
+                .andExpect(jsonPath("$.date_time_finished").value(timeCompleted));
 
         verify(service).completeTask(50L);
         verifyNoMoreInteractions(service);
@@ -118,10 +119,10 @@ class TaskControllerTest {
         testTask.setDescription("new description");
 
         //when
-        when(service.updateTask(anyLong(), any(Task.class))).thenReturn(testTask);
+        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convert(testTask));
 
         mvc.perform(
-                put("/task/{id}", testTask.getTaskId())
+                put("/task/{id}", testTask.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
         )
@@ -134,9 +135,9 @@ class TaskControllerTest {
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();
-        assertEquals(testTask.getTaskId(), passedId);
+        assertEquals(testTask.getId(), passedId);
 
-        Task passedTask = taskCaptor.getValue();
+        TaskDto passedTask = taskCaptor.getValue();
         assertAll("@passedTask properties match @testJson",
                 () -> assertEquals("new name", passedTask.getName()),
                 () -> assertEquals("new description", passedTask.getDescription()));

@@ -169,16 +169,16 @@ class ToDoListServiceImplTest {
     void removeTask() {
         //given
         Task toRemove = testList.getTasks().get(1);
-        toRemove.setTaskId(5L);
+        toRemove.setId(5L);
         ToDoList minusTask = new ToDoList("test", testList.getTasks());
         minusTask.setTimeCreated(now);
-        minusTask.removeTask(toRemove.getTaskId());
+        minusTask.removeTask(toRemove.getId());
 
 
         //when
         when(repository.findById(1L)).thenReturn(Optional.ofNullable(testList));
         when(repository.save(any(ToDoList.class))).thenReturn(minusTask);
-        ToDoList result = service.removeTaskToDoList(1L, toRemove.getTaskId());
+        ToDoList result = service.removeTaskToDoList(1L, toRemove.getId());
 
         //verify
         assertEquals(minusTask, result);

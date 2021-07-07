@@ -73,7 +73,7 @@ public class ToDoList {
     }
 
     public boolean removeTask(long taskId) {
-        return this.tasks.removeIf(task -> task.getTaskId() == taskId);
+        return this.tasks.removeIf(task -> task.getId() == taskId);
     }
 
     public long getId() {
