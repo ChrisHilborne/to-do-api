@@ -52,14 +52,14 @@ class TaskServiceImplTest {
         testTask = new Task(testList, "test task");
         testTask.setId(50L);
         testTask.setTimeCreated(now);
-        testDto = mapper.convertTaskToDto(testTask);
+        testDto = mapper.convertTask(testTask);
     }
 
     @Test
     void getTaskByIdShouldReturnCorrectTaskWhenItExists() {
         //given
         given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(mockMapper.convertTaskToDto(testTask)).willReturn(mapper.convertTaskToDto(testTask));
+        given(mockMapper.convertTask(testTask)).willReturn(mapper.convertTask(testTask));
 
         //when
         TaskDto result = service.getTaskById(50L);
@@ -68,7 +68,7 @@ class TaskServiceImplTest {
         assertTrue(testTask.equalsDto(result));
         verify(repository).findById(50L);
         verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTaskToDto(testTask);
+        verify(mockMapper).convertTask(testTask);
         verifyNoMoreInteractions(mockMapper);
     }
 
@@ -86,7 +86,7 @@ class TaskServiceImplTest {
     void saveTaskShouldReturnSavedTask() {
         //given
         given(repository.save(testTask)).willReturn(testTask);
-        given(mockMapper.convertTaskToDto(testTask)).willReturn(mapper.convertTaskToDto(testTask));
+        given(mockMapper.convertTask(testTask)).willReturn(mapper.convertTask(testTask));
 
         //when
         TaskDto result = service.saveTask(testTask);
@@ -95,7 +95,7 @@ class TaskServiceImplTest {
         assertTrue(testTask.equalsDto(result));
         verify(repository).save(testTask);
         verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTaskToDto(testTask);
+        verify(mockMapper).convertTask(testTask);
         verifyNoMoreInteractions(mockMapper);
     }
 
@@ -108,7 +108,7 @@ class TaskServiceImplTest {
         when(mockTask.complete()).thenReturn(true);
         when(repository.findById(50L)).thenReturn(Optional.of(mockTask));
         when(repository.save(mockTask)).thenReturn(testTask);
-        when(mockMapper.convertTaskToDto(testTask)).thenReturn(mapper.convertTaskToDto(testTask));
+        when(mockMapper.convertTask(testTask)).thenReturn(mapper.convertTask(testTask));
 
         TaskDto completeTask = service.completeTask(50L);
 
@@ -149,8 +149,8 @@ class TaskServiceImplTest {
         //when
         when(repository.existsById(testTaskId)).thenReturn(true);
         when(repository.save(any(Task.class))).thenReturn(testTask);
-        when(mockMapper.convertDtoToTask(testDto)).thenReturn(mapper.convertDtoToTask(testDto));
-        when(mockMapper.convertTaskToDto(testTask)).thenReturn(mapper.convertTaskToDto(testTask));
+        when(mockMapper.convertTaskDto(testDto)).thenReturn(mapper.convertTaskDto(testDto));
+        when(mockMapper.convertTask(testTask)).thenReturn(mapper.convertTask(testTask));
 
         TaskDto updated = service.updateTask(testTaskId, testDto);
 
@@ -158,7 +158,7 @@ class TaskServiceImplTest {
         verify(repository).existsById(testTaskId);
         verify(repository).save(any(Task.class));
         verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTaskToDto(testTask);
+        verify(mockMapper).convertTask(testTask);
         verifyNoMoreInteractions(mockMapper);
 
         assertTrue(testTask.equalsDto(updated));

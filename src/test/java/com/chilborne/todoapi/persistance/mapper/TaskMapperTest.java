@@ -26,7 +26,7 @@ class TaskMapperTest {
         task.setTimeCreated(now);
 
         //when
-        TaskDto taskDto = mapper.convertTaskToDto(task);
+        TaskDto taskDto = mapper.convertTask(task);
 
         //verify
         assertTrue(task.equalsDto(taskDto));
@@ -42,7 +42,7 @@ class TaskMapperTest {
         dto.setDateTimeMade(now);
 
         //when
-        Task task = mapper.convertDtoToTask(dto);
+        Task task = mapper.convertTaskDto(dto);
 
         //verify
         assertTrue(task.equalsDto(dto));

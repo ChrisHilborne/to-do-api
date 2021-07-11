@@ -31,10 +31,10 @@ public class ToDoListMapperTest {
         list.addTask(task);
 
         //when
-        ToDoListDto dto = mapper.convertToDoListToDto(list);
+        ToDoListDto dto = mapper.convertToDoList(list);
 
         //verify
-        assertTrue(list.equalDto(dto));
+        assertTrue(list.equalsDto(dto));
     }
 
     @Test
@@ -48,9 +48,9 @@ public class ToDoListMapperTest {
         dto.setTasks(List.of(new Task("NAME")));
 
         //when
-        ToDoList list = mapper.convertDtoToToDoList(dto);
+        ToDoList list = mapper.convertListDto(dto);
 
         //verify
-        assertTrue(list.equalDto(dto));
+        assertTrue(list.equalsDto(dto));
     }
 }

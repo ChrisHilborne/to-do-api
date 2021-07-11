@@ -139,7 +139,7 @@ public class ToDoList {
      * @param dto
      * @return boolean
      */
-    public boolean equalDto(ToDoListDto dto) {
+    public boolean equalsDto(ToDoListDto dto) {
         if (active != dto.isActive()) return false;
         if (!name.equals(dto.getName())) return false;
         if ((timeCreated != null && dto.getDateTimeMade() != null)

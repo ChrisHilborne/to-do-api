@@ -1,11 +1,9 @@
-package com.chilborne.todoapi.web.controller;
+package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.dto.TaskDto;
-import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

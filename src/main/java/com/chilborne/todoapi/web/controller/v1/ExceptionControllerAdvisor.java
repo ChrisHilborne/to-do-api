@@ -1,4 +1,4 @@
-package com.chilborne.todoapi.web.controller;
+package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.exception.DataNotFoundException;
 import com.chilborne.todoapi.exception.TaskAlreadyCompletedException;
@@ -6,7 +6,6 @@ import com.chilborne.todoapi.web.error.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 @ControllerAdvice
 public class ExceptionControllerAdvisor {

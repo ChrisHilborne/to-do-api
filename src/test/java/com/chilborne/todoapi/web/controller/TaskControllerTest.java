@@ -5,6 +5,7 @@ import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.TaskServiceImpl;
+import com.chilborne.todoapi.web.controller.v1.TaskController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +65,7 @@ class TaskControllerTest {
         String timeCreated = testTask.getTimeCreated().format(formatter);
 
         //when
-        when(service.getTaskById(50L)).thenReturn(mapper.convertTaskToDto(testTask));
+        when(service.getTaskById(50L)).thenReturn(mapper.convertTask(testTask));
 
         //verify
         mvc.perform(
@@ -88,7 +89,7 @@ class TaskControllerTest {
         String timeCompleted = testTask.getTimeCompleted().format(formatter);
 
         //when
-        when(service.completeTask(50)).thenReturn(mapper.convertTaskToDto(testTask));
+        when(service.completeTask(50)).thenReturn(mapper.convertTask(testTask));
 
         //verify
         mvc.perform(
@@ -118,7 +119,7 @@ class TaskControllerTest {
         testTask.setDescription("new description");
 
         //when
-        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTaskToDto(testTask));
+        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTask(testTask));
 
         mvc.perform(
                 put("/task/{id}", testTask.getId())
