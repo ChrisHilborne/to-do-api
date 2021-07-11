@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -65,7 +64,7 @@ class TaskControllerTest {
         String timeCreated = testTask.getTimeCreated().format(formatter);
 
         //when
-        when(service.getTaskById(50L)).thenReturn(mapper.convert(testTask));
+        when(service.getTaskById(50L)).thenReturn(mapper.convertTaskToDto(testTask));
 
         //verify
         mvc.perform(
@@ -89,7 +88,7 @@ class TaskControllerTest {
         String timeCompleted = testTask.getTimeCompleted().format(formatter);
 
         //when
-        when(service.completeTask(50)).thenReturn(mapper.convert(testTask));
+        when(service.completeTask(50)).thenReturn(mapper.convertTaskToDto(testTask));
 
         //verify
         mvc.perform(
@@ -119,7 +118,7 @@ class TaskControllerTest {
         testTask.setDescription("new description");
 
         //when
-        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convert(testTask));
+        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTaskToDto(testTask));
 
         mvc.perform(
                 put("/task/{id}", testTask.getId())

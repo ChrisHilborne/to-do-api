@@ -1,11 +1,7 @@
 package com.chilborne.todoapi.persistance.dto;
 
-import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.boot.convert.DataSizeUnit;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
@@ -13,8 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class TaskDto {
-
-    public TaskDto() { }
 
     private long taskId;
 
@@ -34,6 +28,8 @@ public class TaskDto {
 
     @Null(groups = OnPersist.class, message = "active is automatically set to true on task creation")
     private boolean active;
+
+    public TaskDto() { }
 
     public long getTaskId() {
         return taskId;

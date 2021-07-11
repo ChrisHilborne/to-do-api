@@ -15,12 +15,12 @@ public interface TaskMapper {
     @Mapping(source = "id", target = "taskId")
     @Mapping(source = "timeCreated", target = "dateTimeMade")
     @Mapping(source = "timeCompleted", target = "dateTimeFinished")
-    TaskDto convert(@NotNull Task task);
+    TaskDto convertTaskToDto(@NotNull Task task);
 
     @Mapping(source = "taskId", target = "id")
     @Mapping(source = "dateTimeMade", target = "timeCreated")
     @Mapping(source = "dateTimeFinished", target = "timeCompleted")
-    Task convert(@NotNull TaskDto taskDto);
+    Task convertDtoToTask(@NotNull TaskDto taskDto);
 
 
 }
