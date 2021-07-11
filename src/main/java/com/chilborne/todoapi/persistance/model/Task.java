@@ -1,16 +1,12 @@
 package com.chilborne.todoapi.persistance.model;
 
 import com.chilborne.todoapi.persistance.dto.TaskDto;
-import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Null;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -30,26 +26,21 @@ public class Task {
     private ToDoList toDoList;
 
     @Column(name = "name", nullable = false)
-    @NotBlank(groups = OnPersist.class, message = "name is compulsory")
     private String name;
 
     @Column(name = "desc")
-    @Size(min = 3, max = 225, message = "description must be between 3 and 225 characters long")
     private String description;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
     @Column(name = "date_time_created", insertable = false, columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_created is automatically generated on task creation")
     private LocalDateTime timeCreated;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Column(name = "date_time_finished", columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_completed is automatically generated on task completion")
     private LocalDateTime timeCompleted;
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE" , nullable = false)
-    @Null(groups = OnPersist.class, message = "active is automatically set to true when on task creation")
     private boolean active;
 
     public Task() {}
@@ -133,6 +124,21 @@ public class Task {
         this.active = active;
     }
 
+    /**
+     * This is a utility method to help test returned Dto from TaskService
+     * @param taskDto
+     * @return boolean
+     */
+    public boolean equalsDto(TaskDto taskDto) {
+        if (id != taskDto.getTaskId()) return false;
+        if (active != taskDto.isActive()) return false;
+        if (!Objects.equals(name, taskDto.getName())) return false;
+        if (!Objects.equals(description, taskDto.getDescription())) return false;
+        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
+        if ((timeCreated != null && taskDto.getDateTimeMade() != null) && !Objects.equals(this.getTimeCreated(), taskDto.getDateTimeMade())) return false;
+        return Objects.equals(timeCompleted, taskDto.getDateTimeFinished());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -148,21 +154,6 @@ public class Task {
         //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
         if ((timeCreated != null && task.timeCreated != null) && !Objects.equals(timeCreated, task.timeCreated)) return false;
         return Objects.equals(timeCompleted, task.timeCompleted);
-    }
-
-    /**
-     * This is a utility method to help test returned Dto from TaskService
-     * @param taskDto
-     * @return boolean
-     */
-    public boolean equalsDto(TaskDto taskDto) {
-        if (id != taskDto.getTaskId()) return false;
-        if (active != taskDto.isActive()) return false;
-        if (!Objects.equals(name, taskDto.getName())) return false;
-        if (!Objects.equals(description, taskDto.getDescription())) return false;
-        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
-        if ((timeCreated != null && taskDto.getDateTimeMade() != null) && !Objects.equals(this.getTimeCreated(), taskDto.getDateTimeMade())) return false;
-        return Objects.equals(timeCompleted, taskDto.getDateTimeFinished());
     }
 
     @Override

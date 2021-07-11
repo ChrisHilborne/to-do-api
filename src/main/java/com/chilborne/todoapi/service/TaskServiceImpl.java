@@ -30,14 +30,14 @@ public class TaskServiceImpl implements TaskService {
         logger.info("Fetching Task id: " + id);
         Task returned = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
-        return mapper.convert(returned);
+        return mapper.convertTaskToDto(returned);
     }
 
     @Override
     public TaskDto saveTask(Task task) {
         logger.info("Saving task: " + task);
         Task savedTask = repository.save(task);
-        return mapper.convert(savedTask);
+        return mapper.convertTaskToDto(savedTask);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDto updateTask(long id, TaskDto taskDto) throws TaskNotFoundException {
         logger.info("Updating task id: " + id);
         if (!repository.existsById(id)) throw new TaskNotFoundException(id);
-        Task toUpdate = mapper.convert(taskDto);
+        Task toUpdate = mapper.convertDtoToTask(taskDto);
         toUpdate.setId(id);
         return saveTask(toUpdate);
     }

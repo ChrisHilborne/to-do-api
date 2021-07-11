@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.persistance.model;
 
+import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -47,7 +48,7 @@ public class ToDoList {
     @Null(groups = OnPersist.class, message = "ToDoList is activated on list creation")
     private boolean active = true;
 
-    protected ToDoList() {}
+    public ToDoList() {}
 
     public ToDoList(String name) {
         this.name = name;
@@ -130,6 +131,20 @@ public class ToDoList {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    /**
+     * Utility method to check equality between ToDoList and ToDoListDto in tests
+     *
+     * @param dto
+     * @return boolean
+     */
+    public boolean equalDto(ToDoListDto dto) {
+        if (active != dto.isActive()) return false;
+        if (!name.equals(dto.getName())) return false;
+        if ((timeCreated != null && dto.getDateTimeMade() != null)
+                && !this.getTimeCreated().equals(dto.getDateTimeMade())) return false;
+        return Objects.equals(tasks, dto.getTasks());
     }
 
     @Override
