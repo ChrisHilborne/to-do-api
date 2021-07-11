@@ -2,6 +2,7 @@ package com.chilborne.todoapi.persistance.mapper;
 
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.model.ToDoList;
+import org.jetbrains.annotations.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -13,9 +14,9 @@ public interface ToDoListMapper {
 
     @Mapping(source = "id", target = "listId")
     @Mapping(source = "timeCreated", target = "dateTimeMade")
-    ToDoListDto convertToDoListToDto(ToDoList list);
+    ToDoListDto convertToDoList(@NotNull ToDoList list);
 
     @Mapping(source = "listId", target = "id")
     @Mapping(source = "dateTimeMade", target = "timeCreated")
-    ToDoList convertDtoToToDoList(ToDoListDto dto);
+    ToDoList convertListDto(@NotNull ToDoListDto dto);
 }

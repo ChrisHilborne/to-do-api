@@ -19,7 +19,8 @@ public class TaskServiceImpl implements TaskService {
     private final TaskMapper mapper;
     private final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
 
-    public TaskServiceImpl(TaskRepository repository, TaskMapper mapper) {
+    public TaskServiceImpl(TaskRepository repository,
+                           TaskMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
@@ -30,14 +31,14 @@ public class TaskServiceImpl implements TaskService {
         logger.info("Fetching Task id: " + id);
         Task returned = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
-        return mapper.convertTaskToDto(returned);
+        return mapper.convertTask(returned);
     }
 
     @Override
     public TaskDto saveTask(Task task) {
         logger.info("Saving task: " + task);
         Task savedTask = repository.save(task);
-        return mapper.convertTaskToDto(savedTask);
+        return mapper.convertTask(savedTask);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDto updateTask(long id, TaskDto taskDto) throws TaskNotFoundException {
         logger.info("Updating task id: " + id);
         if (!repository.existsById(id)) throw new TaskNotFoundException(id);
-        Task toUpdate = mapper.convertDtoToTask(taskDto);
+        Task toUpdate = mapper.convertTaskDto(taskDto);
         toUpdate.setId(id);
         return saveTask(toUpdate);
     }

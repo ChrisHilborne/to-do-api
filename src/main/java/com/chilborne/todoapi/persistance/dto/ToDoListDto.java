@@ -2,6 +2,7 @@ package com.chilborne.todoapi.persistance.dto;
 
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
@@ -22,6 +23,7 @@ public class ToDoListDto {
     @Size(min = 3, max = 255, message = "description must be between 3 and 255 characters long")
     private String description;
 
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @Null(groups = OnPersist.class, message = "date_time_made is automatically generated on list creation")
     private LocalDateTime dateTimeMade;
 

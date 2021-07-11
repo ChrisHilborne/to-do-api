@@ -1,14 +1,18 @@
 package com.chilborne.todoapi.web.controller;
 
+import com.chilborne.todoapi.persistance.dto.TaskDto;
+import com.chilborne.todoapi.persistance.dto.ToDoListDto;
+import com.chilborne.todoapi.persistance.mapper.TaskMapper;
+import com.chilborne.todoapi.persistance.mapper.ToDoListMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListServiceImpl;
+import com.chilborne.todoapi.web.controller.v1.ToDoListController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,8 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,11 +42,11 @@ class ToDoListControllerTest {
     @MockBean
     ToDoListServiceImpl service;
 
-    @InjectMocks
-    ToDoListController controller;
-
     @Captor
     ArgumentCaptor<ToDoList> toDoListCaptor;
+
+    @Captor
+    ArgumentCaptor<ToDoListDto> dtoCaptor;
 
     @Captor
     ArgumentCaptor<Long> idCaptor;
@@ -52,6 +55,10 @@ class ToDoListControllerTest {
     ArgumentCaptor<Boolean> booleanCaptor;
 
     ToDoList testList;
+    ToDoListDto testDto;
+
+    ToDoListMapper toDoListMapper = ToDoListMapper.INSTANCE;
+    TaskMapper taskMapper = TaskMapper.INSTANCE;
 
     LocalDateTime now = LocalDateTime.now();
     String nowString;
@@ -62,6 +69,8 @@ class ToDoListControllerTest {
         nowString = now.format(formatter);
         testList = new ToDoList("test", "this is a test");
         testList.setTimeCreated(now);
+
+        testDto = toDoListMapper.convertToDoList(testList);
     }
 
     @Test
@@ -70,20 +79,20 @@ class ToDoListControllerTest {
         long id = 0L;
 
         //when
-        when(service.getToDoListById(id)).thenReturn(testList);
+        when(service.getToDoListDtoById(id)).thenReturn(testDto);
 
         //verify
         mvc.perform(
-                get("/list/" + id)
+                get("/v1/list/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.time_created").value(nowString)
+                .andExpect(jsonPath("$.date_time_made").value(nowString)
                 );
 
-        verify(service).getToDoListById(0L);
+        verify(service).getToDoListDtoById(0L);
         verifyNoMoreInteractions(service);
     }
 
@@ -98,11 +107,11 @@ class ToDoListControllerTest {
                 }""";
 
         //when
-        when(service.saveToDoList(any(ToDoList.class))).thenReturn(testList);
+        when(service.saveToDoList(any(ToDoListDto.class))).thenReturn(testDto);
 
         //verify
         mvc.perform(
-                post("/list")
+                post("/v1/list")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(testJson))
@@ -110,10 +119,9 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
-        verify(service).saveToDoList(toDoListCaptor.capture());
+        verify(service).saveToDoList(dtoCaptor.capture());
         verifyNoMoreInteractions(service);
-        assertEquals(testList.getName(), toDoListCaptor.getValue().getName());
-        assertEquals(testList.getDescription(), toDoListCaptor.getValue().getDescription());
+        assertTrue(testList.equalsDto(dtoCaptor.getValue()));
     }
 
     @Test
@@ -127,10 +135,11 @@ class ToDoListControllerTest {
                 """;
         testList.setName("this name was recently updated");
         testList.setDescription("so was this description");
+        testDto = toDoListMapper.convertToDoList(testList);
         //when
-        when(service.updateToDoList(anyLong(), any(ToDoList.class))).thenReturn(testList);
+        when(service.updateToDoList(anyLong(), any(ToDoListDto.class))).thenReturn(testDto);
         mvc.perform(
-                put("/list/{id}", testList.getId())
+                put("/v1/list/{id}", testList.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -139,13 +148,13 @@ class ToDoListControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("this name was recently updated"))
                 .andExpect(jsonPath("$.description").value("so was this description"))
-                .andExpect(jsonPath("$.id").value(testList.getId()));
-        verify(service).updateToDoList(idCaptor.capture(), toDoListCaptor.capture());
+                .andExpect(jsonPath("$.list_id").value(testList.getId()));
+        verify(service).updateToDoList(idCaptor.capture(), dtoCaptor.capture());
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();
         assertEquals(testList.getId(), passedId);
-        ToDoList passedToDoList = toDoListCaptor.getValue();
+        ToDoListDto passedToDoList = dtoCaptor.getValue();
         assertAll("@passedToDoList has name and description of @testJson",
                 () -> assertEquals("this name was recently updated", passedToDoList.getName()),
                 () -> assertEquals("so was this description", passedToDoList.getDescription()));
@@ -156,20 +165,21 @@ class ToDoListControllerTest {
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
         testList.setActive(false);
+        testDto.setActive(false);
 
         //when
-        when(service.setToDoListActive(anyLong(), anyBoolean())).thenReturn(testList);
+        when(service.setToDoListActive(anyLong(), anyBoolean())).thenReturn(testDto);
 
         //verify
         mvc.perform(
-                patch("/list/{id}/active/{active}", testList.getId(), false)
+                patch("/v1/list/{id}/active/{active}", testList.getId(), false)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.time_created").value(nowString));
+                .andExpect(jsonPath("$.date_time_made").value(nowString));
         verify(service).setToDoListActive(anyLong(), anyBoolean());
         verifyNoMoreInteractions(service);
 
@@ -177,7 +187,7 @@ class ToDoListControllerTest {
         long passedId = idCaptor.getValue();
         boolean passedBoolean = booleanCaptor.getValue();
         assertEquals(testList.getId(), passedId);
-        assertEquals(false, passedBoolean);
+        assertFalse(passedBoolean);
 
     }
 
@@ -193,12 +203,14 @@ class ToDoListControllerTest {
         Task testTask = new Task(testList, "task");
         testList.addTask(testTask);
 
+        testDto = toDoListMapper.convertToDoList(testList);
+
         //when
-        when(service.addTaskToDoList(anyLong(), any(Task.class))).thenReturn(testList);
+        when(service.addTaskToDoList(anyLong(), any(TaskDto.class))).thenReturn(testDto);
 
         //verify
         mvc.perform(
-                patch("/list/" + testList.getId() + "/task/add")
+                patch("/v1/list/" + testList.getId() + "/task/add")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(taskJson))
@@ -206,7 +218,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.tasks[0].name").value("task"));
 
-        verify(service).addTaskToDoList(anyLong(), any(Task.class));
+        verify(service).addTaskToDoList(anyLong(), any(TaskDto.class));
         verifyNoMoreInteractions(service);
 
     }
@@ -223,12 +235,14 @@ class ToDoListControllerTest {
         long idTestList = testList.getId();
         long idTaskToRemove = taskToRemove.getId();
 
+        testDto = toDoListMapper.convertToDoList(testList);
+
         //when
-        when(service.removeTaskToDoList(idTestList, idTaskToRemove)).thenReturn(testList);
+        when(service.removeTaskToDoList(idTestList, idTaskToRemove)).thenReturn(testDto);
 
         //verify
         mvc.perform(
-                patch(String.format("/list/%d/task/remove/%d", idTestList, idTaskToRemove))
+                patch(String.format("/v1/list/%d/task/remove/%d", idTestList, idTaskToRemove))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )

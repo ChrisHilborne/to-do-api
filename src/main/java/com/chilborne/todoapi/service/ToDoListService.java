@@ -2,6 +2,8 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
+import com.chilborne.todoapi.persistance.dto.TaskDto;
+import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,19 +13,21 @@ import java.util.List;
 
 public interface ToDoListService {
 
-    ToDoList getToDoListById(long id) throws ToDoListNotFoundException;
+    ToDoListDto getToDoListDtoById(long id) throws ToDoListNotFoundException;
 
-    ToDoList saveToDoList(ToDoList list);
+    ToDoListDto saveToDoList(ToDoList list);
 
-    List<ToDoList> getAllToDoList();
+    ToDoListDto saveToDoList(ToDoListDto listDto);
+
+    List<ToDoListDto> getAllToDoList();
 
     void deleteToDoList(long id);
 
-    ToDoList updateToDoList(long id, ToDoList toDoList);
+    ToDoListDto updateToDoList(long id, ToDoListDto toDoList);
 
-    ToDoList setToDoListActive(long id, boolean active) throws ToDoListNotFoundException;
+    ToDoListDto setToDoListActive(long id, boolean active) throws ToDoListNotFoundException;
 
-    ToDoList addTaskToDoList(long id, Task task) throws ToDoListNotFoundException;
+    ToDoListDto addTaskToDoList(long id, TaskDto task) throws ToDoListNotFoundException;
 
-    ToDoList removeTaskToDoList(long listId, long taskId) throws TaskNotFoundException;
+    ToDoListDto removeTaskToDoList(long listId, long taskId) throws TaskNotFoundException;
 }

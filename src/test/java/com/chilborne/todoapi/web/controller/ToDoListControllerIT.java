@@ -59,21 +59,21 @@ public class ToDoListControllerIT {
     void getToDoListByIdShouldReturnListWhenItExists() throws Exception {
         //when
         mvc.perform(
-                get("/list/{id}", listId)
+                get("/v1/list/{id}", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
         //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.id").value(listId));
+                .andExpect(jsonPath("$.list_id").value(listId));
     }
 
     @Test
     void getToDoListByIdShouldReturn404WIthErrorMessageWhenListDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                get("/list/{id}", 50)
+                get("/v1/list/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -95,7 +95,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                post("/list")
+                post("/v1/list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newTaskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -118,7 +118,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                post("/list")
+                post("/v1/list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toDoListJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -130,7 +130,7 @@ public class ToDoListControllerIT {
     void putActiveToDoListShouldReturnUpdatedToDoList() throws Exception {
         //when
         mvc.perform(
-                patch("/list/{id}/active/{active}", listId, false)
+                patch("/v1/list/{id}/active/{active}", listId, false)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -143,7 +143,7 @@ public class ToDoListControllerIT {
     void putActiveToDoListShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/list/{id}/active/true", 50)
+                patch("/v1/list/{id}/active/true", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -165,7 +165,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/list/{id}/task/add", listId)
+                patch("/v1/list/{id}/task/add", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -187,7 +187,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/list/{id}/task/add", 50)
+                patch("/v1/list/{id}/task/add", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(task)
                         .accept(MediaType.APPLICATION_JSON)
@@ -208,7 +208,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/list/{id}/task/add", taskId)
+                patch("/v1/list/{id}/task/add", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(task)
                         .accept(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ public class ToDoListControllerIT {
     void removeTaskShouldRemoveUpdatedToDoList() throws Exception {
         //when
         mvc.perform(
-                patch("/list/{listId}/task/remove/{taskId}", listId, taskId)
+                patch("/v1/list/{listId}/task/remove/{taskId}", listId, taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -239,7 +239,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getId())
+                patch("/v1/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -251,7 +251,7 @@ public class ToDoListControllerIT {
     void removeTaskShouldReturn404AndErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/list/{listId}/task/remove/{taskId}", listId, 50)
+                patch("/v1/list/{listId}/task/remove/{taskId}", listId, 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -271,7 +271,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/list/{id}", listId)
+                put("/v1/list/{id}", listId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testJson)
                 .accept(MediaType.APPLICATION_JSON)
@@ -279,7 +279,7 @@ public class ToDoListControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("updated name"))
                 .andExpect(jsonPath("$.description").value("updated description"))
-                .andExpect(jsonPath("$.id").value(listId));
+                .andExpect(jsonPath("$.list_id").value(listId));
     }
 
     @Test
@@ -294,7 +294,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/list/{id}", 50)
+                put("/v1/list/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -315,7 +315,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/list/{id}", listId)
+                put("/v1/list/{id}", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)
