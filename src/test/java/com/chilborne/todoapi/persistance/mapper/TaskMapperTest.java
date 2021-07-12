@@ -29,7 +29,7 @@ class TaskMapperTest {
         TaskDto taskDto = mapper.convertTask(task);
 
         //verify
-        assertTrue(task.equalsDto(taskDto));
+        assertTrue(mapper.compare(task, taskDto));
     }
 
     @Test
@@ -45,6 +45,41 @@ class TaskMapperTest {
         Task task = mapper.convertTaskDto(dto);
 
         //verify
-        assertTrue(task.equalsDto(dto));
+        assertTrue(mapper.compare(task, dto));
+    }
+
+    @Test
+    void compareTaskToDtoShouldReturnTrueWhenTheyAreEqual() {
+        //given
+        Task task = new Task("task");
+        task.setTimeCreated(now);
+        task.setActive(false);
+
+        TaskDto dto = new TaskDto();
+        dto.setName("task");
+        dto.setDateTimeMade(now);
+        dto.setActive(false);
+
+        //when
+        boolean areEqual = mapper.compare(task, dto);
+
+        //verify
+        assertTrue(areEqual);
+    }
+
+    @Test
+    void compareTaskToDtoShouldReturnFalseWhenTheyAreEqual() {
+        //given
+        Task task = new Task("task");
+        task.setTimeCreated(now);
+        task.setActive(false);
+
+        TaskDto dto = new TaskDto();
+
+        //when
+        boolean areEqual = mapper.compare(task, dto);
+
+        //verify
+        assertFalse(areEqual);
     }
 }
