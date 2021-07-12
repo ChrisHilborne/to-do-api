@@ -124,21 +124,6 @@ public class Task {
         this.active = active;
     }
 
-    /**
-     * This is a utility method to help test returned Dto from TaskService
-     * @param taskDto
-     * @return boolean
-     */
-    public boolean equalsDto(TaskDto taskDto) {
-        if (id != taskDto.getTaskId()) return false;
-        if (active != taskDto.isActive()) return false;
-        if (!Objects.equals(name, taskDto.getName())) return false;
-        if (!Objects.equals(description, taskDto.getDescription())) return false;
-        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
-        if ((timeCreated != null && taskDto.getDateTimeMade() != null) && !Objects.equals(this.getTimeCreated(), taskDto.getDateTimeMade())) return false;
-        return Objects.equals(timeCompleted, taskDto.getDateTimeFinished());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

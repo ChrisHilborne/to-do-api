@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Objects;
+
 @Mapper(componentModel = "spring")
 public interface TaskMapper {
 
@@ -21,6 +23,23 @@ public interface TaskMapper {
     @Mapping(source = "dateTimeMade", target = "timeCreated")
     @Mapping(source = "dateTimeFinished", target = "timeCompleted")
     Task convertTaskDto(@NotNull TaskDto taskDto);
+
+    /**
+     * utility method for testing equality between Task and TaskDto
+     *
+     * @param task
+     * @param dto
+     * @return boolean
+     */
+    default boolean compare(Task task, TaskDto dto) {
+        if (task.getId() != dto.getTaskId()) return false;
+        if (task.isActive() != task.isActive()) return false;
+        if (!Objects.equals(task.getName(), dto.getName())) return false;
+        if (!Objects.equals(task.getDescription(), dto.getDescription())) return false;
+        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
+        if ((task.getTimeCompleted() != null && dto.getDateTimeMade() != null) && !Objects.equals(task.getTimeCreated(), dto.getDateTimeMade())) return false;
+        return Objects.equals(task.getTimeCompleted(), dto.getDateTimeFinished());
+    }
 
 
 }

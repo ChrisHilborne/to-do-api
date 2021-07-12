@@ -65,7 +65,7 @@ class TaskServiceImplTest {
         TaskDto result = service.getTaskById(50L);
 
         //verify
-        assertTrue(testTask.equalsDto(result));
+        assertTrue(mapper.compare(testTask, result));
         verify(repository).findById(50L);
         verifyNoMoreInteractions(repository);
         verify(mockMapper).convertTask(testTask);
@@ -92,7 +92,7 @@ class TaskServiceImplTest {
         TaskDto result = service.saveTask(testTask);
 
         //verify
-        assertTrue(testTask.equalsDto(result));
+        assertTrue(mapper.compare(testTask, result));
         verify(repository).save(testTask);
         verifyNoMoreInteractions(repository);
         verify(mockMapper).convertTask(testTask);
@@ -120,7 +120,7 @@ class TaskServiceImplTest {
         verify(repository).save(mockTask);
         verifyNoMoreInteractions(repository);
 
-        assertTrue(testTask.equalsDto(completeTask));
+        assertTrue(mapper.compare(testTask, completeTask));
     }
 
     @Test
@@ -161,7 +161,7 @@ class TaskServiceImplTest {
         verify(mockMapper).convertTask(testTask);
         verifyNoMoreInteractions(mockMapper);
 
-        assertTrue(testTask.equalsDto(updated));
+        assertTrue(mapper.compare(testTask, updated));
     }
 
     @Test
@@ -183,6 +183,7 @@ class TaskServiceImplTest {
         verifyNoInteractions(mockMapper);
 
     }
+
 
 
 
