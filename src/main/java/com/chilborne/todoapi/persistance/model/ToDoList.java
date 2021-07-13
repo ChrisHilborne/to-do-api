@@ -133,19 +133,6 @@ public class ToDoList {
         this.active = active;
     }
 
-    /**
-     * Utility method to check equality between ToDoList and ToDoListDto in tests
-     *
-     * @param dto
-     * @return boolean
-     */
-    public boolean equalsDto(ToDoListDto dto) {
-        if (active != dto.isActive()) return false;
-        if (!name.equals(dto.getName())) return false;
-        if ((timeCreated != null && dto.getDateTimeMade() != null)
-                && !this.getTimeCreated().equals(dto.getDateTimeMade())) return false;
-        return Objects.equals(tasks, dto.getTasks());
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -121,7 +121,7 @@ class ToDoListControllerTest {
                 );
         verify(service).saveToDoList(dtoCaptor.capture());
         verifyNoMoreInteractions(service);
-        assertTrue(testList.equalsDto(dtoCaptor.getValue()));
+        assertTrue(toDoListMapper.compare(testList, dtoCaptor.getValue()));
     }
 
     @Test
