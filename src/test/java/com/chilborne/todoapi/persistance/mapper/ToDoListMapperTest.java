@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -34,7 +35,7 @@ public class ToDoListMapperTest {
         ToDoListDto dto = mapper.convertToDoList(list);
 
         //verify
-        assertTrue(list.equalsDto(dto));
+        assertTrue(mapper.compare(list, dto));
     }
 
     @Test
@@ -51,6 +52,42 @@ public class ToDoListMapperTest {
         ToDoList list = mapper.convertListDto(dto);
 
         //verify
-        assertTrue(list.equalsDto(dto));
+        assertTrue(mapper.compare(list, dto));
+    }
+
+    @Test
+    public void CompareShouldReturnTrueWhenToDoListAndDtoAreEqual() {
+        //given
+        ToDoList list = new ToDoList("NAME", "DESC");
+        list.setActive(false);
+        list.setTimeCreated(now);
+
+        ToDoListDto dto = new ToDoListDto();
+        dto.setName("NAME");
+        dto.setDescription("DESC");
+        dto.setActive(false);
+        dto.setDateTimeMade(now);
+
+        //when
+        boolean areEqual = mapper.compare(list, dto);
+
+        //verify
+        assertTrue(areEqual);
+    }
+
+    @Test
+    void compareShouldReturnFalseWhenToDoListAndDtoAreNotTheSame() {
+        //given
+        ToDoList list = new ToDoList("NAME", "DESC");
+        list.setActive(false);
+        list.setTimeCreated(now);
+
+        ToDoListDto dto = new ToDoListDto();
+
+        //when
+        boolean areEqual = mapper.compare(list, dto);
+
+        //verify
+        assertFalse(areEqual);
     }
 }

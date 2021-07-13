@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Objects;
+
 @Mapper(componentModel = "spring")
 public interface ToDoListMapper {
 
@@ -19,4 +21,19 @@ public interface ToDoListMapper {
     @Mapping(source = "listId", target = "id")
     @Mapping(source = "dateTimeMade", target = "timeCreated")
     ToDoList convertListDto(@NotNull ToDoListDto dto);
+
+    /**
+     * Utility method for testing equality between ToDoList and ToDoListDto
+     *
+     * @param list
+     * @param dto
+     * @return boolean
+     */
+    default boolean compare(ToDoList list, ToDoListDto dto) {
+        if (list.isActive() != dto.isActive()) return false;
+        if (!list.getName().equals(dto.getName())) return false;
+        if ((list.getTimeCreated() != null && dto.getDateTimeMade() != null)
+                && !list.getTimeCreated().equals(dto.getDateTimeMade())) return false;
+        return Objects.equals(list.getTasks(), dto.getTasks());
+    }
 }

@@ -76,7 +76,7 @@ class ToDoListServiceImplTest {
         verifyNoMoreInteractions(repository);
         verify(mockListMapper).convertToDoList(testList);
         verifyNoMoreInteractions(mockListMapper);
-        assertTrue(testList.equalsDto(result));
+        assertTrue(toDoListMapper.compare(testList, result));
     }
 
 
@@ -95,7 +95,7 @@ class ToDoListServiceImplTest {
         verifyNoMoreInteractions(repository);
         verify(mockListMapper).convertToDoList(testList);
         verifyNoMoreInteractions(mockListMapper);
-        assertTrue(testList.equalsDto(result));
+        assertTrue(toDoListMapper.compare(testList, result));
     }
 
     @Test
@@ -130,7 +130,7 @@ class ToDoListServiceImplTest {
         verifyNoMoreInteractions(mockListMapper);
 
         assertEquals(result.size(), 1);
-        assertTrue(testList.equalsDto(result.get(0)));
+        assertTrue(toDoListMapper.compare(testList, result.get(0)));
     }
 
     @Test
@@ -167,7 +167,7 @@ class ToDoListServiceImplTest {
         verifyNoMoreInteractions(mockListMapper);
 
         verify(repository).save(toDoListCaptor.capture());
-        assertTrue(deactivated.equalsDto(result));
+        assertTrue(toDoListMapper.compare(deactivated, result));
         assertEquals(deactivated, toDoListCaptor.getValue());
     }
 
@@ -202,7 +202,7 @@ class ToDoListServiceImplTest {
         verifyNoMoreInteractions(mockListMapper);
 
         verify(repository).save(toDoListCaptor.capture());
-        assertTrue(listWithThirdTask.equalsDto(result));
+        assertTrue(toDoListMapper.compare(listWithThirdTask, result));
         assertEquals(listWithThirdTask, toDoListCaptor.getValue());
 
         //check that thirdTask has had it's ToDoList set to testList
@@ -228,7 +228,7 @@ class ToDoListServiceImplTest {
         ToDoListDto result = service.removeTaskToDoList(1L, toRemove.getId());
 
         //verify
-        assertTrue(minusTask.equalsDto(result));
+        assertTrue(toDoListMapper.compare(minusTask, result));
 
         verify(repository).findById(1L);
         verify(repository).save(any(ToDoList.class));
@@ -282,7 +282,7 @@ class ToDoListServiceImplTest {
         verify(mockListMapper).convertToDoList(testList);
         verifyNoMoreInteractions(mockListMapper);
 
-        assertTrue(testList.equalsDto(updated));
+        assertTrue(toDoListMapper.compare(testList, updated));
     }
 
     @Test
