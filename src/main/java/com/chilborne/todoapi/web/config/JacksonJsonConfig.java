@@ -1,4 +1,4 @@
-package com.chilborne.todoapi.web.util;
+package com.chilborne.todoapi.web.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -113,7 +114,7 @@ public class ToDoList {
     }
 
     public List<Task> getTasks() {
-        return List.copyOf(tasks);
+        return tasks != null ? List.copyOf(tasks) : null;
     }
 
     public void setTasks(List<Task> tasks) {
@@ -133,7 +134,6 @@ public class ToDoList {
         this.active = active;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -143,15 +143,16 @@ public class ToDoList {
 
         if (active != toDoList.active) return false;
         if (!name.equals(toDoList.name)) return false;
-        if (!timeCreated.equals(toDoList.timeCreated)) return false;
-        return Objects.equals(tasks, toDoList.tasks);
+        if (description != null ? !description.equals(toDoList.description) : toDoList.description != null)
+            return false;
+        return timeCreated != null ? timeCreated.equals(toDoList.timeCreated) : toDoList.timeCreated == null;
     }
 
     @Override
     public int hashCode() {
         int result = name.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
-        result = 31 * result + (tasks != null ? tasks.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
         return result;
     }
