@@ -36,7 +36,7 @@ public abstract class ToDoListMapper {
      * @return boolean
      */
     public boolean compare(ToDoList list, ToDoListDto dto) {
-        if (dto.getUrl() != null && dto.getUrl().endsWith(String.valueOf(list.getId()))) return false;
+        if (dto.getUrl() != null && !dto.getUrl().endsWith(String.valueOf(list.getId()))) return false;
         if (list.isActive() != dto.isActive()) return false;
         if (!list.getName().equals(dto.getName())) return false;
         if ((list.getTimeCreated() != null && dto.getDateTimeMade() != null)
