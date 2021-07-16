@@ -8,19 +8,25 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.Objects;
 
+import static com.chilborne.todoapi.web.controller.v1.ToDoListController.TO_DO_LIST_ROOT_URL;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ToDoListMapper {
+public abstract class ToDoListMapper {
 
-    ToDoListMapper INSTANCE = Mappers.getMapper(ToDoListMapper.class);
+    public static ToDoListMapper INSTANCE = Mappers.getMapper(ToDoListMapper.class);
 
+    @BeforeMapping
+    protected void addUrlToListDot(@MappingTarget ToDoListDto dto, ToDoList list) {
+        dto.setUrl(TO_DO_LIST_ROOT_URL + "/" + list.getId());
+    }
 
     @Mapping(source = "id", target = "listId")
     @Mapping(source = "timeCreated", target = "dateTimeMade")
-    ToDoListDto convertToDoList(@NotNull ToDoList list);
+    public abstract ToDoListDto convertToDoList(@NotNull ToDoList list);
 
     @Mapping(source = "listId", target = "id")
     @Mapping(source = "dateTimeMade", target = "timeCreated")
-    ToDoList convertListDto(@NotNull ToDoListDto dto);
+    public abstract ToDoList convertListDto(@NotNull ToDoListDto dto);
 
     /**
      * Utility method for testing equality between ToDoList and ToDoListDto
@@ -29,7 +35,8 @@ public interface ToDoListMapper {
      * @param dto
      * @return boolean
      */
-    default boolean compare(ToDoList list, ToDoListDto dto) {
+    public boolean compare(ToDoList list, ToDoListDto dto) {
+        if (dto.getUrl() != null && dto.getUrl().endsWith(String.valueOf(list.getId()))) return false;
         if (list.isActive() != dto.isActive()) return false;
         if (!list.getName().equals(dto.getName())) return false;
         if ((list.getTimeCreated() != null && dto.getDateTimeMade() != null)
