@@ -1,13 +1,10 @@
 package com.chilborne.todoapi.persistance.model;
 
-import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
-import springfox.documentation.annotations.ApiIgnore;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;

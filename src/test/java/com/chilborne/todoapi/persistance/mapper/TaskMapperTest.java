@@ -8,6 +8,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 
+import static com.chilborne.todoapi.web.controller.v1.TaskController.TASK_ROOT_URL;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -40,6 +41,7 @@ class TaskMapperTest {
         dto.setName("this object transfers data");
         dto.setActive(false);
         dto.setDateTimeMade(now);
+        dto.setUrl(TASK_ROOT_URL + "/" + 50L);
 
         //when
         Task task = mapper.convertTaskDto(dto);
@@ -59,6 +61,7 @@ class TaskMapperTest {
         dto.setName("task");
         dto.setDateTimeMade(now);
         dto.setActive(false);
+        dto.setUrl(TASK_ROOT_URL + "/" + task.getId());
 
         //when
         boolean areEqual = mapper.compare(task, dto);
