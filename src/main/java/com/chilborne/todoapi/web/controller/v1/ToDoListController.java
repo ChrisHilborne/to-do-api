@@ -6,6 +6,8 @@ import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.chilborne.todoapi.service.ToDoListService;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.service.ToDoListServiceImpl;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Api(value = "To Do List Controller")
 @RestController
 @RequestMapping(path = "v1/list", consumes = "application/json", produces = "application/json")
 public class ToDoListController {
+
+    public static final String TO_DO_LIST_ROOT_URL = "http://localhost:8080/vi/list";
 
     private final ToDoListService service;
 
@@ -27,6 +32,7 @@ public class ToDoListController {
         this.service = service;
     }
 
+    @ApiOperation(value = "Find To-Do List by Id")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ToDoListDto> getToDoListById(
             @PathVariable long id) {
@@ -35,6 +41,7 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
+    @ApiOperation(value = "New To-Do List", code = 401)
     @PostMapping(value = "")
     @Validated({OnPersist.class})
     public ResponseEntity<ToDoListDto> newToDoList(
@@ -44,6 +51,7 @@ public class ToDoListController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
+    @ApiOperation(value = "Change whether To-Do List is active")
     @PatchMapping(value = "/{id}/active/{active}")
     public ResponseEntity<ToDoListDto> setActive(
             @PathVariable long id,
@@ -54,6 +62,7 @@ public class ToDoListController {
 
     }
 
+    @ApiOperation(value = "Add a new Task to To-Do List", notes = "Must provide Task to be added in Request Body")
     @PatchMapping(value = "/{id}/task/add")
     public ResponseEntity<ToDoListDto> addTaskToList(
             @PathVariable long id,
@@ -63,6 +72,7 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
+    @ApiOperation(value = "Remove a Task from To-Do List")
     @PatchMapping(value = "/{listId}/task/remove/{taskId}")
     public ResponseEntity<ToDoListDto> removeTaskFromList(
             @PathVariable long listId,
@@ -72,6 +82,7 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
+    @ApiOperation(value = "Update To-Do List", notes = "Any fields provided will be updated, except list_id and date_time_created")
     @PutMapping(value ="/{id}")
     public ResponseEntity<ToDoListDto> updateToDoList(
             @PathVariable long id,

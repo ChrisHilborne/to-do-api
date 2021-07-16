@@ -1,6 +1,5 @@
 package com.chilborne.todoapi.persistance.model;
 
-import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.CreationTimestamp;
@@ -60,7 +59,7 @@ public class Task {
     }
 
     public boolean complete() {
-        //must check both @active and @timeComplete because @active is only instantiated when persisted in DB
+        //must check both @active and @timeComplete because @active is only populated when persisted in DB
         if (!this.active && timeCompleted != null) return false;
         this.active = false;
         timeCompleted = LocalDateTime.now().withNano(0);
@@ -100,7 +99,7 @@ public class Task {
     }
 
     public LocalDateTime getTimeCreated() {
-        //some tests do not save bean to DB - therefore timeCreated is never instantiated
+        //some tests do not save POJO to DB - therefore timeCreated is never instantiated
         return timeCreated != null ? timeCreated.withNano(0) : null;
     }
 
@@ -131,21 +130,16 @@ public class Task {
 
         Task task = (Task) o;
 
-        if (id != task.id) return false;
         if (active != task.active) return false;
-        if (!Objects.equals(toDoList, task.toDoList)) return false;
-        if (!Objects.equals(name, task.name)) return false;
-        if (!Objects.equals(description, task.description)) return false;
-        //timeCreated is instantiated when bean is saved to DB for the first time - some unit tests don't use the DB
-        if ((timeCreated != null && task.timeCreated != null) && !Objects.equals(timeCreated, task.timeCreated)) return false;
-        return Objects.equals(timeCompleted, task.timeCompleted);
+        if (!name.equals(task.name)) return false;
+        if (description != null ? !description.equals(task.description) : task.description != null) return false;
+        if (timeCreated != null ? !timeCreated.equals(task.timeCreated) : task.timeCreated != null) return false;
+        return timeCompleted != null ? timeCompleted.equals(task.timeCompleted) : task.timeCompleted == null;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + (toDoList != null ? toDoList.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
+        int result = name.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (timeCreated != null ? timeCreated.hashCode() : 0);
         result = 31 * result + (timeCompleted != null ? timeCompleted.hashCode() : 0);
