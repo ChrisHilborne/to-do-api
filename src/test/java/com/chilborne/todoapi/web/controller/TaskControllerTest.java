@@ -69,7 +69,7 @@ class TaskControllerTest {
 
         //verify
         mvc.perform(
-                get("/task/50")
+                get("/v1/task/50")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -93,7 +93,7 @@ class TaskControllerTest {
 
         //verify
         mvc.perform(
-                patch("/task/50/complete")
+                patch("/v1/task/50/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -122,7 +122,7 @@ class TaskControllerTest {
         when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTask(testTask));
 
         mvc.perform(
-                put("/task/{id}", testTask.getId())
+                put("/v1/task/{id}", testTask.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
         )

@@ -16,6 +16,9 @@ import java.util.Objects;
 @ApiModel(value = "To-Do List")
 public class ToDoListDto {
 
+    @ApiModelProperty(name = "list_id")
+    private long listId;
+
     @NotBlank(groups = OnPersist.class, message = "name is compulsory")
     private String name;
 
@@ -33,10 +36,15 @@ public class ToDoListDto {
     @Null(groups = OnPersist.class, message = "To-Do List is activated on creation")
     private boolean active = true;
 
-    @Null(groups = OnPersist.class, message = "url is auto-generated on list creation")
-    private String url;
-
     public ToDoListDto() {
+    }
+
+    public long getListId() {
+        return listId;
+    }
+
+    public void setListId(long listId) {
+        this.listId = listId;
     }
 
     public String getName() {
@@ -79,13 +87,6 @@ public class ToDoListDto {
         this.active = active;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 
     @Override
     public boolean equals(Object o) {

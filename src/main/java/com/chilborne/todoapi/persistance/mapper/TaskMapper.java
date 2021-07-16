@@ -5,11 +5,12 @@ import com.chilborne.todoapi.persistance.dto.TaskDto;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Objects;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
 
     TaskMapper INSTANCE = Mappers.getMapper(TaskMapper.class);
@@ -17,12 +18,11 @@ public interface TaskMapper {
     @Mapping(source = "id", target = "taskId")
     @Mapping(source = "timeCreated", target = "dateTimeMade")
     @Mapping(source = "timeCompleted", target = "dateTimeFinished")
-    TaskDto convertTask(@NotNull Task task);
+    TaskDto convertTask(Task task);
 
-    @Mapping(source = "taskId", target = "id")
     @Mapping(source = "dateTimeMade", target = "timeCreated")
     @Mapping(source = "dateTimeFinished", target = "timeCompleted")
-    Task convertTaskDto(@NotNull TaskDto taskDto);
+    Task convertTaskDto(TaskDto taskDto);
 
     /**
      * utility method for testing equality between Task and TaskDto
@@ -32,7 +32,6 @@ public interface TaskMapper {
      * @return boolean
      */
     default boolean compare(Task task, TaskDto dto) {
-        if (task.getId() != dto.getTaskId()) return false;
         if (task.isActive() != task.isActive()) return false;
         if (!Objects.equals(task.getName(), dto.getName())) return false;
         if (!Objects.equals(task.getDescription(), dto.getDescription())) return false;

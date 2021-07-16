@@ -71,11 +71,14 @@
 			<artifactId>mapstruct</artifactId>
 			<version>1.4.2.Final</version>
 		</dependency>
+        <dependency>
+            <groupId>net.ifok.swagger</groupId>
+            <artifactId>swagger-boot-starter</artifactId>
+            <version>2.10.2</version>
+        </dependency>
 
 
-
-
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
