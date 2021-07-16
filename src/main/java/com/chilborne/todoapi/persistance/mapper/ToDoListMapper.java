@@ -3,9 +3,7 @@ package com.chilborne.todoapi.persistance.mapper;
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import org.jetbrains.annotations.NotNull;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Objects;
@@ -14,6 +12,7 @@ import java.util.Objects;
 public interface ToDoListMapper {
 
     ToDoListMapper INSTANCE = Mappers.getMapper(ToDoListMapper.class);
+
 
     @Mapping(source = "id", target = "listId")
     @Mapping(source = "timeCreated", target = "dateTimeMade")
