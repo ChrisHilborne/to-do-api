@@ -64,6 +64,7 @@ public class ToDoListController {
 
     @ApiOperation(value = "Add a new Task to To-Do List", notes = "Must provide Task to be added in Request Body")
     @PatchMapping(value = "/{id}/task/add")
+    @Validated({OnPersist.class})
     public ResponseEntity<ToDoListDto> addTaskToList(
             @PathVariable long id,
             @Valid @RequestBody TaskDto task) {
