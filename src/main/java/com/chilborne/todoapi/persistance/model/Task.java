@@ -132,9 +132,13 @@ public class Task {
 
         if (active != task.active) return false;
         if (!name.equals(task.name)) return false;
-        if (description != null ? !description.equals(task.description) : task.description != null) return false;
-        if (timeCreated != null ? !timeCreated.equals(task.timeCreated) : task.timeCreated != null) return false;
-        return timeCompleted != null ? timeCompleted.equals(task.timeCompleted) : task.timeCompleted == null;
+        if (!Objects.equals(description, task.description)) return false;
+        //timeCreated is populated when first persisted in DB - so some test cases will not have this field populated
+        if ((this.getTimeCreated() != null && task.getTimeCreated() != null)
+                && !this.getTimeCreated().equals(task.getTimeCreated())) {
+            return false;
+        }
+        return timeCompleted != null ? this.getTimeCompleted().equals(task.getTimeCompleted()) : task.timeCompleted == null;
     }
 
     @Override

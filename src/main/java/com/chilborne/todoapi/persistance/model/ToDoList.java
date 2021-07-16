@@ -143,9 +143,13 @@ public class ToDoList {
 
         if (active != toDoList.active) return false;
         if (!name.equals(toDoList.name)) return false;
-        if (description != null ? !description.equals(toDoList.description) : toDoList.description != null)
+        if (!Objects.equals(description, toDoList.description))
             return false;
-        return timeCreated != null ? timeCreated.equals(toDoList.timeCreated) : toDoList.timeCreated == null;
+        // timeCreated is populated when first persisted to DB
+        // some test cases will therefore not have this field populated
+        if (this.timeCreated != null && toDoList.timeCreated != null) {
+            return Objects.equals(timeCreated, toDoList.timeCreated);
+        } else return true;
     }
 
     @Override

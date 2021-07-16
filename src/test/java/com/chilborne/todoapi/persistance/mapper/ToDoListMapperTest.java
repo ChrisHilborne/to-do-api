@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.persistance.mapper;
 
+import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
@@ -46,7 +47,10 @@ public class ToDoListMapperTest {
         dto.setDateTimeMade(now);
         dto.setName(NAME);
         dto.setDescription(DESC);
-        dto.setTasks(List.of(new Task("NAME")));
+
+        TaskDto taskDto = new TaskDto();
+        taskDto.setName("NAME");
+        dto.setTasks(List.of(taskDto));
 
         //when
         ToDoList list = mapper.convertListDto(dto);

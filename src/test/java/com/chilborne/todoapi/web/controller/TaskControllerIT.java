@@ -55,7 +55,7 @@ public class TaskControllerIT {
     void getTaskShouldReturnTaskWhenTheTaskExists() throws Exception {
         //when
         mvc.perform(
-                get("/task/" + ID)
+                get("/v1/task/" + ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -69,7 +69,7 @@ public class TaskControllerIT {
     void getTaskByIdShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                get("/task/500")
+                get("/v1/task/500")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -83,7 +83,7 @@ public class TaskControllerIT {
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
-                patch("/task/{id}/complete", ID)
+                patch("/v1/task/{id}/complete", ID)
                         .contentType(MediaType.APPLICATION_JSON)
         )
         //verify
@@ -105,7 +105,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                patch("/task/" + ID + "/complete")
+                patch("/v1/task/" + ID + "/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -118,7 +118,7 @@ public class TaskControllerIT {
     void completeTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/task/500/complete")
+                patch("/v1/task/500/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -140,7 +140,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/{id}", ID)
+                put("/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -162,7 +162,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/{id}", 50)
+                put("/v1/task/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -183,7 +183,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/task/{id}", ID)
+                put("/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
