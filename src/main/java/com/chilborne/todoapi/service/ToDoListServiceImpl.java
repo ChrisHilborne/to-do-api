@@ -133,6 +133,6 @@ public class ToDoListServiceImpl implements ToDoListService {
             return saveToDoList(toUpdate);
         } else
             throw new TaskNotFoundException(
-                    String.format("List with id %d does not contain task with id %d", listId, taskId));
+                    String.format("to_do_list with id:%d does not contain task with id:%d", listId, taskId));
     }
 }

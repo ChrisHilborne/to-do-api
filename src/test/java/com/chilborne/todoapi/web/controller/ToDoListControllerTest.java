@@ -162,6 +162,20 @@ class ToDoListControllerTest {
     }
 
     @Test
+    void deleteToDoListShouldReturn201() throws Exception {
+        //when
+        mvc.perform(
+                delete("/v1/list/{id}", testList.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isNoContent());
+
+        verify(service).deleteToDoList(testList.getId());
+        verifyNoMoreInteractions(service);
+    }
+
+    @Test
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
         testList.setActive(false);
@@ -174,7 +188,7 @@ class ToDoListControllerTest {
         mvc.perform(
                 patch("/v1/list/{id}/active/{active}", testList.getId(), false)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept("application/json")
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))

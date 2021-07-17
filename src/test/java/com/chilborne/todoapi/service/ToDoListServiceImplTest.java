@@ -110,7 +110,7 @@ class ToDoListServiceImplTest {
         verify(repository, times(1)).findById(1L);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(mockListMapper);
-        assertEquals("ToDoList with id 1 not found", e.getMessage());
+        assertEquals("to_do_list with id:1 not found", e.getMessage());
     }
 
     @Test
@@ -252,7 +252,7 @@ class ToDoListServiceImplTest {
         //verify
         Exception e = assertThrows(RuntimeException.class,
                 () -> service.removeTaskToDoList(testList.getId(), 500L));
-        assertEquals("List with id 0 does not contain task with id 500", e.getMessage());
+        assertEquals("to_do_list with id:0 does not contain task with id:500", e.getMessage());
     }
 
 

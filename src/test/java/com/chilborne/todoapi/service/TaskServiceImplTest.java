@@ -79,7 +79,7 @@ class TaskServiceImplTest {
 
         //verify
         Exception e = assertThrows(TaskNotFoundException.class, () -> service.getTaskById(50L));
-        assertEquals("Task with id: 50 not found", e.getMessage());
+        assertEquals("Task with id:50 not found", e.getMessage());
     }
 
     @Test
