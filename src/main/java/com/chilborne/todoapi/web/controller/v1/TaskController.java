@@ -2,9 +2,7 @@ package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.service.TaskService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +26,9 @@ public class TaskController {
     }
 
     @ApiOperation(value = "Find Task by Id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "TaskNotFoundException -> Task with id:{task_id} not found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<TaskDto> getTaskById(
             @PathVariable long id) {
@@ -37,6 +38,10 @@ public class TaskController {
     }
 
     @ApiOperation(value = "Mark Task as Complete", notes = "Once completed a Task cannot be reactivated, date_time_finished will be generated automatically")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "TaskNotFoundException -> Task with id:{task_id} not found"),
+            @ApiResponse(code = 208, message = "TaskAlreadyCompletedException -> This task was already completed at {date_time_finished}")
+    })
     @PatchMapping("/{id}/complete")
     public ResponseEntity<TaskDto> completeTask(
             @PathVariable long id) {
@@ -46,6 +51,10 @@ public class TaskController {
     }
 
     @ApiOperation(value = "Update Task")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "TaskNotFoundException -> Task with id:{task_id} not found"),
+            @ApiResponse(code = 400, message = "InvalidDataException : { {task_property} : {constraint message} }")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<TaskDto> updateTask(
             @PathVariable long id,

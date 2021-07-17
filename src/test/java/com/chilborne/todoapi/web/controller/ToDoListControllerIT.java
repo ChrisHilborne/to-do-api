@@ -16,6 +16,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -124,6 +126,20 @@ public class ToDoListControllerIT {
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteToDoListShouldDeleteObjectFromDB() throws Exception {
+        //when
+        mvc.perform(
+                delete("/v1/list/{id}", listId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+                //verify
+                .andExpect(status().isNoContent());
+
+        assertTrue(repository.findById(listId).isEmpty());
     }
 
     @Test
