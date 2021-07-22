@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Objects;
 
 import static com.chilborne.todoapi.web.controller.v1.ToDoListController.TO_DO_LIST_ROOT_URL;
 
@@ -17,6 +16,7 @@ public abstract class ToDoListMapper {
 
     @BeforeMapping
     protected void addUrlToListDot(@MappingTarget ToDoListDto dto, ToDoList list) {
+        dto.setUsername(list.getUser() != null ? list.getUser().getUsername() : null);
         dto.setUrl(TO_DO_LIST_ROOT_URL + "/" + list.getId());
     }
 
@@ -39,6 +39,8 @@ public abstract class ToDoListMapper {
         if (dto.getUrl() != null && !dto.getUrl().endsWith(String.valueOf(list.getId()))) return false;
         if (list.isActive() != dto.isActive()) return false;
         if (!list.getName().equals(dto.getName())) return false;
+        if ((list.getUser() != null && dto.getUsername() != null)
+                &&  !list.getUser().getUsername().equals(dto.getUsername())) return false;
         if ((list.getTimeCreated() != null && dto.getDateTimeMade() != null)
                 && !list.getTimeCreated().equals(dto.getDateTimeMade())) return false;
         return list.getTasks().size() == dto.getTasks().size();
