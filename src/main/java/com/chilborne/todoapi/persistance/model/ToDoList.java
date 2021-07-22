@@ -1,6 +1,7 @@
 package com.chilborne.todoapi.persistance.model;
 
 import com.chilborne.todoapi.persistance.validation.OnPersist;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,6 +43,11 @@ public class ToDoList {
     @JsonManagedReference
     private List<Task> tasks = new LinkedList<>();
 
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
     @Null(groups = OnPersist.class, message = "ToDoList is activated on list creation")
     private boolean active = true;
@@ -72,7 +78,8 @@ public class ToDoList {
     }
 
     public boolean removeTask(long taskId) {
-        return this.tasks.removeIf(task -> task.getId() == taskId);
+        return this.tasks.removeIf(
+                task -> task.getId() == taskId);
     }
 
     public long getId() {
