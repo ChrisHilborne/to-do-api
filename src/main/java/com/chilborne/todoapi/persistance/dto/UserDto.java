@@ -1,16 +1,12 @@
 package com.chilborne.todoapi.persistance.dto;
 
-import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class UserDto {
 
@@ -20,7 +16,8 @@ public class UserDto {
     @JsonIgnore
     private String password;
 
-    private Email email;
+    @Email(message = "email not valid")
+    private String email;
 
     @ApiModelProperty(name = "to_do_lists")
     private List<ToDoListDto> toDoLists = new ArrayList<>();
@@ -44,11 +41,11 @@ public class UserDto {
         this.password = password;
     }
 
-    public Email getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(Email email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 

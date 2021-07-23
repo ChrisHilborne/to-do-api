@@ -5,13 +5,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
 
-    UserDto getUserByUserName(String username);
+    UserDto getUserDtoByUserName(String username);
 
     UserDto createUser(UserDto user);
 
     UserDto updateUser(UserDto user);
 
-    void changePassword(String oldPwd, String newPwd);
+    void changePassword(String username, CharSequence newPwd);
 
     boolean userExists(String username);
 
