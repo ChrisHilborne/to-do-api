@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
-
 import static com.chilborne.todoapi.web.controller.v1.ToDoListController.TO_DO_LIST_ROOT_URL;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)

@@ -3,6 +3,7 @@ package com.chilborne.todoapi.persistance.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -26,19 +27,16 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = false, columnDefinition = "VARCHAR")
     private String password;
 
     @Column(name = "email")
-    private Email email;
+    private String email;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "to_do_lists")
     private List<ToDoList> toDoLists = new ArrayList<>();
-
-    @Column(name = "authorities")
-    private Collection<GrantedAuthority> authorities;
 
     public User() { }
 
@@ -75,11 +73,11 @@ public class User {
         this.password = password;
     }
 
-    public Email getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(Email email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -95,11 +93,4 @@ public class User {
 
     }
 
-    public Collection<GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Collection<GrantedAuthority> authorities) {
-        this.authorities = authorities;
-    }
 }

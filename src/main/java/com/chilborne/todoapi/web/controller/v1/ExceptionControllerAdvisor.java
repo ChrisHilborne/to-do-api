@@ -41,7 +41,7 @@ public class ExceptionControllerAdvisor {
     public ErrorResponse handleConstraintViolationException(
             HttpServletRequest req,
             ConstraintViolationException e) {
-        logger.error("Request: " + req.getRequestURI() + " raided " + e);
+        logger.error("Request: " + req.getRequestURI() + " raised " + e);
         HashMap<String, String> errors = new HashMap<>();
         for (ConstraintViolation<?> constraintViolation: e.getConstraintViolations()) {
             errors.put(constraintViolation.getRootBean().toString(), constraintViolation.getMessage());
@@ -53,7 +53,7 @@ public class ExceptionControllerAdvisor {
     public ErrorResponse handleMethodArgumentNotValidException(
             HttpServletRequest req,
             MethodArgumentNotValidException e) {
-        logger.error("Request: " + req.getRequestURI() + " raided " + e);
+        logger.error("Request: " + req.getRequestURI() + " raised " + e);
         HashMap<String, String> errors = new HashMap<>();
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
