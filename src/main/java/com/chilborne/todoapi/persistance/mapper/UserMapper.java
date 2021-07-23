@@ -8,12 +8,13 @@ import com.chilborne.todoapi.persistance.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class UserMapper {
 
-    private static UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+    public static UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     public UserDto convertUser(User user) {
         UserDto dto = new UserDto();
@@ -37,6 +38,20 @@ public abstract class UserMapper {
                 .map(this::convertToDoListDto)
                 .collect(Collectors.toList()));
         return user;
+    }
+
+    /**
+     * Utility method to test equality between mapped objects.
+     *
+     * @param user User
+     * @param dto UserDto
+     * @return boolean
+     */
+    public boolean compare(User user, UserDto dto) {
+        if (!user.getUsername().equals(dto.getUsername())) return false;
+        if (!user.getPassword().equals(dto.getPassword())) return false;
+        if (!user.getEmail().equals(dto.getEmail())) return false;
+        return user.getToDoLists().size() == dto.getToDoLists().size();
     }
 
     public abstract ToDoListDto convertToDoList(ToDoList toDoList);
