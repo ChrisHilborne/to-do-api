@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 class TaskMapperTest {
 
-
     TaskMapper mapper = TaskMapper.INSTANCE;
 
     LocalDateTime now = LocalDateTime.now();
