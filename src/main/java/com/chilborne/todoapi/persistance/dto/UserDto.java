@@ -7,6 +7,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UserDto {
 
@@ -23,6 +24,16 @@ public class UserDto {
     private List<ToDoListDto> toDoLists = new ArrayList<>();
 
     public UserDto() {
+    }
+
+    public UserDto(
+            @NotNull(message = "username is compulsory") String username,
+            String password,
+            @Email(message = "email not valid") String email)
+    {
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
     public String getUsername() {
@@ -55,5 +66,27 @@ public class UserDto {
 
     public void setToDoLists(List<ToDoListDto> toDoLists) {
         this.toDoLists = toDoLists;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserDto userDto = (UserDto) o;
+
+        if (!username.equals(userDto.username)) return false;
+        if (!password.equals(userDto.password)) return false;
+        if (!Objects.equals(email, userDto.email)) return false;
+        return Objects.equals(toDoLists, userDto.toDoLists);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (toDoLists != null ? toDoLists.hashCode() : 0);
+        return result;
     }
 }

@@ -2,6 +2,7 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
+import com.chilborne.todoapi.exception.UsernameAlreadyExistsException;
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.model.Task;
@@ -30,4 +31,6 @@ public interface ToDoListService {
     ToDoListDto addTaskToDoList(long id, TaskDto task) throws ToDoListNotFoundException;
 
     ToDoListDto removeTaskToDoList(long listId, long taskId) throws TaskNotFoundException;
+
+
 }

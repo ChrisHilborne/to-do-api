@@ -1,5 +1,6 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.UsernameAlreadyExistsException;
 import com.chilborne.todoapi.persistance.dto.UserDto;
 import com.chilborne.todoapi.persistance.mapper.UserMapper;
 import com.chilborne.todoapi.persistance.model.User;
@@ -11,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import javax.validation.constraints.Email;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,7 +36,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserDtoByUserName(String username) {
+    public UserDto getUserByUsername(String username) {
         logger.info("Fetching User with username {}", username);
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User with username" + username + "does not exist"));
@@ -54,6 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        checkUsernameIsUnique(userDto.getUsername());
         logger.info("Creating new user: {}", userDto.getUsername());
         User entity = mapper.convertUserDto(userDto);
         entity.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -61,32 +66,51 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(UserDto user) {
-        logger.info("Updating user: {} with the following properties {}", user.getUsername(), user.toString());
-        User toUpdate = mapper.convertUserDto(user);
-        if (!user.getPassword().equals(toUpdate.getPassword())) {
-            throw new UnsupportedOperationException("To update password use the /{userid}/password endpoint");
-        }
-        toUpdate.setUserId(getUser(user.getUsername()).getUserId());
+    public UserDto changeUsername(UserDto dto, String username) {
+        checkUsernameIsUnique(username);
+        logger.info("Changing username for User:{} to {}", dto.getUsername(), username);
+        User toUpdate = getUser(dto.getUsername());
+        toUpdate.setUsername(username);
         return saveUser(toUpdate);
     }
 
     @Override
-    public void changePassword(String username, CharSequence newPwd) {
-        logger.info("Changing password for User: {}", username);
-        User entity = getUser(username);
-        entity.setPassword(passwordEncoder.encode(newPwd));
-        saveUser(entity);
+    public UserDto changeEmail(UserDto dto, @Email String email) {
+        logger.info("Changing User:{} email to {}",dto.getUsername(), email);
+        User toUpdate = getUser(dto.getUsername());
+        toUpdate.setEmail(email);
+        return saveUser(toUpdate);
     }
 
     @Override
-    public boolean userExists(String username) {
-        return repository.existsByUsername(username);
+    public void changePassword(UserDto dto, String newPwd) {
+        logger.info("Changing password for User: {}", dto.getUsername());
+        User toUpdate = getUser(dto.getUsername());
+        toUpdate.setPassword(passwordEncoder.encode(newPwd));
+        saveUser(toUpdate);
+    }
+
+
+    @Override
+    public void checkUsernameIsUnique(String username) throws UsernameAlreadyExistsException {
+        if (repository.existsByUsername(username)) {
+            throw new UsernameAlreadyExistsException(username);
+        }
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new UserPrincipal(repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with username: " + username + "does not exist")));
+        return new UserPrincipal(getUser(username));
     }
+
+    /**
+     * Method to fetch User Entity from DB using UserDto username and return fetched User Entity Id
+     *
+     * @param dto UserDto
+     * @return UUID userId
+     */
+    private UUID getUserId(UserDto dto) {
+        return getUser(dto.getUsername()).getUserId();
+    }
+
 }
