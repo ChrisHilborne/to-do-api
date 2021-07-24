@@ -7,10 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @DynamicUpdate
@@ -39,6 +36,16 @@ public class User {
     private List<ToDoList> toDoLists = new ArrayList<>();
 
     public User() { }
+
+    public User(
+            String username,
+            String password,
+            String email)
+    {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
 
     public void addToDoList(ToDoList toDoList) {
         toDoLists.add(toDoList);
@@ -90,7 +97,29 @@ public class User {
             this.toDoLists.clear();
             this.toDoLists.addAll(toDoLists);
         }
-
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (!Objects.equals(userId, user.userId)) return false;
+        if (!username.equals(user.username)) return false;
+        if (!password.equals(user.password)) return false;
+        if (!Objects.equals(email, user.email)) return false;
+        return Objects.equals(toDoLists, user.toDoLists);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userId != null ? userId.hashCode() : 0;
+        result = 31 * result + username.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (toDoLists != null ? toDoLists.hashCode() : 0);
+        return result;
+    }
 }

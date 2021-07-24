@@ -1,19 +1,22 @@
 package com.chilborne.todoapi.service;
 
+import com.chilborne.todoapi.exception.UsernameAlreadyExistsException;
 import com.chilborne.todoapi.persistance.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import javax.validation.constraints.Email;
+
 public interface UserService extends UserDetailsService {
 
-    UserDto getUserDtoByUserName(String username);
+    UserDto getUserByUsername(String username);
 
-    UserDto createUser(UserDto user);
+    UserDto createUser(UserDto dto);
 
-    UserDto updateUser(UserDto user);
+    UserDto changeUsername(UserDto dto, String username);
 
-    void changePassword(String username, CharSequence newPwd);
+    UserDto changeEmail(UserDto dto, @Email String email);
 
-    boolean userExists(String username);
+    void changePassword(UserDto dto, String newPwd);
 
-
+    void checkUsernameIsUnique(String username) throws UsernameAlreadyExistsException;
 }
