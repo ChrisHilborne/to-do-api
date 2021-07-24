@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
-@DirtiesContext
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc

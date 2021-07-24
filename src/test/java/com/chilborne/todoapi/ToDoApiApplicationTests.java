@@ -6,7 +6,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@DirtiesContext
 class ToDoApiApplicationTests {
 
 	@Test
