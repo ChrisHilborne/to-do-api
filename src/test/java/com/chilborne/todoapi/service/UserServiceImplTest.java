@@ -143,7 +143,7 @@ class UserServiceImplTest {
         given(mapper.convertUser(updatedUser)).willReturn(updatedDto);
 
         //when
-        UserDto returned = service.changeUsername(dto, NEW_USERNAME);
+        UserDto returned = service.changeUsername(USERNAME, NEW_USERNAME);
 
 
         //verify
@@ -168,7 +168,7 @@ class UserServiceImplTest {
 
         //verify
         assertThrows(UsernameAlreadyExistsException.class,
-                () -> service.changeUsername(dto, USERNAME));
+                () -> service.changeUsername(USERNAME, USERNAME));
     }
 
     @Test
@@ -183,7 +183,7 @@ class UserServiceImplTest {
         given(mapper.convertUser(updatedUser)).willReturn(updatedDto);
 
         //when
-        UserDto returned = service.changeEmail(dto, NEW_EMAIL);
+        UserDto returned = service.changeEmail(USERNAME, NEW_EMAIL);
 
         //verify
         verify(repository).findByUsername(USERNAME);
@@ -202,16 +202,16 @@ class UserServiceImplTest {
     @Test
     void changePasswordShouldChangeUserPasswordAfterEncodingIt() {
         //given
-        final String newPass = "WEAK PASSWORD";
-        final String encodedNewPass = "KAEW ADROSPSW";
-        User updatedUser = new User(USERNAME, encodedNewPass, EMAIL);
+        final String NEW_PASSWORD = "WEAK PASSWORD";
+        final String ENCODED_NEW_PASSWORD = "KAEW ADROSPSW";
+        User updatedUser = new User(USERNAME, ENCODED_NEW_PASSWORD, EMAIL);
 
         given(repository.findByUsername(USERNAME)).willReturn(Optional.ofNullable(user));
         given(repository.save(any(User.class))).willReturn(updatedUser);
-        given(passwordEncoder.encode(newPass)).willReturn(encodedNewPass);
+        given(passwordEncoder.encode(NEW_PASSWORD)).willReturn(ENCODED_NEW_PASSWORD);
 
         //when
-        service.changePassword(dto, newPass);
+        service.changePassword(USERNAME, NEW_PASSWORD);
 
         //verify
         verify(repository).findByUsername(USERNAME);
@@ -220,33 +220,40 @@ class UserServiceImplTest {
 
         //check saved User has new password encoded
         User passedUser = userCaptor.getValue();
-        assertEquals(encodedNewPass, passedUser.getPassword());
+        assertEquals(ENCODED_NEW_PASSWORD, passedUser.getPassword());
 
-        verify(passwordEncoder).encode(newPass);
+        verify(passwordEncoder).encode(NEW_PASSWORD);
         verifyNoMoreInteractions(passwordEncoder); 
     }
 
     @Test
-    void checkUsernameIsUniqueShouldNotThrowExceptionWhenUsernameDoesNotExist() {
+    void checkUsernameIsUniqueShouldReturnTrueWhenUsernameDoesNotExist() {
         //given
         given(repository.existsByUsername(USERNAME)).willReturn(false);
 
         //when
-        service.checkUsernameIsUnique(USERNAME);
+        boolean isUnique = service.isUsernameUnique(USERNAME);
 
         //verify
         verify(repository).existsByUsername(USERNAME);
         verifyNoMoreInteractions(repository);
+
+        assertTrue(isUnique);
     }
 
     @Test
-    void checkUsernameIsUniqueShouldThrowExceptionWhenUsernameExists() {
+    void checkUsernameIsUniqueShouldReturnFalseWhenUsernameExists() {
         //given
         given(repository.existsByUsername(USERNAME)).willReturn(true);
 
+        //when
+        boolean isUnique = service.isUsernameUnique(USERNAME);
+
         //verify
-        assertThrows(UsernameAlreadyExistsException.class,
-                () -> service.checkUsernameIsUnique(USERNAME));
+        verify(repository).existsByUsername(USERNAME);
+        verifyNoMoreInteractions(repository);
+
+        assertFalse(isUnique);
     }
 
     @Test
@@ -275,5 +282,29 @@ class UserServiceImplTest {
         //verify
         assertThrows(UsernameNotFoundException.class,
                 () -> service.loadUserByUsername(USERNAME));
+    }
+
+    @Test
+    void deleteUserShouldCallDeleteByUsernameInRepositoryWhenUserExists() {
+        //given
+        given(repository.existsByUsername(USERNAME)).willReturn(true);
+
+        //when
+        service.deleteUser(USERNAME);
+
+        //verify
+        verify(repository).existsByUsername(USERNAME);
+        verify(repository).deleteByUsername(USERNAME);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void deleteUserShouldThrowExceptionIfUserDoesNotExist() {
+        //given
+        given(repository.existsByUsername(USERNAME)).willReturn(false);
+
+        //verify
+        assertThrows(UsernameNotFoundException.class,
+                () -> service.deleteUser(USERNAME));
     }
 }
