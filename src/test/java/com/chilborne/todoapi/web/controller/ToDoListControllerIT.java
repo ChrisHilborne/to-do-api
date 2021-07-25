@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,10 +58,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void getToDoListByIdShouldReturnListWhenItExists() throws Exception {
         //when
         mvc.perform(
-                get("/v1/list/{id}", listId)
+                get("/api/v1/list/{id}", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -71,10 +73,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void getToDoListByIdShouldReturn404WIthErrorMessageWhenListDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                get("/v1/list/{id}", 50)
+                get("/api/v1/list/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -84,6 +87,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void newToDoListShouldReturnCreatedList() throws Exception {
         //given
         String newTaskJson =
@@ -96,7 +100,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                post("/v1/list")
+                post("/api/v1/list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newTaskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -108,6 +112,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void postNewToDoListShouldReturnBadRequestIfInputsAreNotValid() throws Exception {
         //given
         String toDoListJson = """
@@ -119,7 +124,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                post("/v1/list")
+                post("/api/v1/list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toDoListJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -128,10 +133,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void deleteToDoListShouldDeleteObjectFromDB() throws Exception {
         //when
         mvc.perform(
-                delete("/v1/list/{id}", listId)
+                delete("/api/v1/list/{id}", listId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
         )
@@ -142,10 +148,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void putActiveToDoListShouldReturnUpdatedToDoList() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/list/{id}/active/{active}", listId, false)
+                patch("/api/v1/list/{id}/active/{active}", listId, false)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -155,10 +162,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void putActiveToDoListShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/list/{id}/active/true", 50)
+                patch("/api/v1/list/{id}/active/true", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -169,6 +177,7 @@ public class ToDoListControllerIT {
 
 
     @Test
+    @WithMockUser
     void addTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
         String taskJson = """
@@ -180,7 +189,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/v1/list/{id}/task/add", listId)
+                patch("/api/v1/list/{id}/task/add", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -191,6 +200,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void addTaskShouldReturn404WithErrorMessageWhenListDoesNotExist() throws Exception {
         //given
         String task = """
@@ -202,7 +212,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/v1/list/{id}/task/add", 50)
+                patch("/api/v1/list/{id}/task/add", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(task)
                         .accept(MediaType.APPLICATION_JSON)
@@ -212,6 +222,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void addTaskShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
         //given
         String task = """
@@ -223,7 +234,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/v1/list/{id}/task/add", taskId)
+                patch("/api/v1/list/{id}/task/add", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(task)
                         .accept(MediaType.APPLICATION_JSON)
@@ -234,10 +245,11 @@ public class ToDoListControllerIT {
 
 
     @Test
+    @WithMockUser
     void removeTaskShouldRemoveUpdatedToDoList() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/list/{listId}/task/remove/{taskId}", listId, taskId)
+                patch("/api/v1/list/{listId}/task/remove/{taskId}", listId, taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -246,6 +258,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void removeTaskShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
         //given
         Task taskToBeRemoved = new Task("task to be removed");
@@ -254,7 +267,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                patch("/v1/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getId())
+                patch("/api/v1/list/{listId}/task/remove/{taskId}", 50, taskToBeRemoved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -263,10 +276,11 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void removeTaskShouldReturn404AndErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/list/{listId}/task/remove/{taskId}", listId, 50)
+                patch("/api/v1/list/{listId}/task/remove/{taskId}", listId, 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -275,6 +289,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updatedToDoListShouldReturnUpdatedToDoList() throws Exception {
         //given
         String testJson = """
@@ -286,7 +301,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/list/{id}", listId)
+                put("/api/v1/list/{id}", listId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(testJson)
                 .accept(MediaType.APPLICATION_JSON)
@@ -298,6 +313,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updatedToDoListShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
         //given
         String testJson = """
@@ -309,7 +325,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/list/{id}", 50)
+                put("/api/v1/list/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -319,6 +335,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updatedToDoListShouldReturn400WithErrorMessageWhenInputsAreNotValid() throws Exception {
         //given
         String testJson = """
@@ -330,7 +347,7 @@ public class ToDoListControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/list/{id}", listId)
+                put("/api/v1/list/{id}", listId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)

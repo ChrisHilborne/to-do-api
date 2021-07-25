@@ -31,7 +31,7 @@ public class User {
     private String email;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Column(name = "to_do_lists")
     private List<ToDoList> toDoLists = new ArrayList<>();
 

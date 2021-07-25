@@ -2,7 +2,6 @@ package com.chilborne.todoapi.web.controller;
 
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
-import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.mapper.ToDoListMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
@@ -18,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,13 +30,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DirtiesContext
 @WebMvcTest(ToDoListController.class)
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
 class ToDoListControllerTest {
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     @MockBean
     ToDoListServiceImpl service;
@@ -54,26 +52,26 @@ class ToDoListControllerTest {
     @Captor
     ArgumentCaptor<Boolean> booleanCaptor;
 
-    ToDoList testList;
-    ToDoListDto testDto;
+    private ToDoList testList;
+    private ToDoListDto testDto;
+
+    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    private String nowString;
 
     ToDoListMapper toDoListMapper = ToDoListMapper.INSTANCE;
-    TaskMapper taskMapper = TaskMapper.INSTANCE;
-
-    LocalDateTime now = LocalDateTime.now();
-    String nowString;
 
     @BeforeEach
     void init() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        nowString = now.format(formatter);
+        nowString = NOW.format(FORMATTER);
         testList = new ToDoList("test", "this is a test");
-        testList.setTimeCreated(now);
+        testList.setTimeCreated(NOW);
 
         testDto = toDoListMapper.convertToDoList(testList);
     }
 
     @Test
+    @WithMockUser
     void getToDoListShouldWorkWhenListExists() throws Exception {
         //given
         long id = 0L;
@@ -83,7 +81,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                get("/v1/list/" + id)
+                get("/api/v1/list/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -98,6 +96,7 @@ class ToDoListControllerTest {
 
 
     @Test
+    @WithMockUser
     void postToDoListShouldReturnNewlyCreatedToDoList() throws Exception {
         //given
         String testJson = """
@@ -111,7 +110,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                post("/v1/list")
+                post("/api/v1/list")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(testJson))
@@ -125,6 +124,7 @@ class ToDoListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void upDateToDoListShouldReturnUpdatedList() throws Exception {
         //given
         String testJson = """
@@ -139,7 +139,7 @@ class ToDoListControllerTest {
         //when
         when(service.updateToDoList(anyLong(), any(ToDoListDto.class))).thenReturn(testDto);
         mvc.perform(
-                put("/v1/list/{id}", testList.getId())
+                put("/api/v1/list/{id}", testList.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -162,10 +162,11 @@ class ToDoListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteToDoListShouldReturn201() throws Exception {
         //when
         mvc.perform(
-                delete("/v1/list/{id}", testList.getId())
+                delete("/api/v1/list/{id}", testList.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -176,6 +177,7 @@ class ToDoListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
         testList.setActive(false);
@@ -186,7 +188,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                patch("/v1/list/{id}/active/{active}", testList.getId(), false)
+                patch("/api/v1/list/{id}/active/{active}", testList.getId(), false)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -206,6 +208,7 @@ class ToDoListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addTaskShouldReturnListWithNewTask() throws Exception {
         //given
         String taskJson = """
@@ -213,7 +216,7 @@ class ToDoListControllerTest {
                       "name": "task"
                 }""";
         ToDoList testList = new ToDoList("test");
-        testList.setTimeCreated(now);
+        testList.setTimeCreated(NOW);
         Task testTask = new Task(testList, "task");
         testList.addTask(testTask);
 
@@ -224,7 +227,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                patch("/v1/list/" + testList.getId() + "/task/add")
+                patch("/api/v1/list/" + testList.getId() + "/task/add")
                         .accept("application/json")
                         .contentType("application/json")
                         .content(taskJson))
@@ -239,6 +242,7 @@ class ToDoListControllerTest {
 
 
     @Test
+    @WithMockUser
     void removeTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
         ToDoList testList = new ToDoList("testList");
@@ -256,7 +260,7 @@ class ToDoListControllerTest {
 
         //verify
         mvc.perform(
-                patch(String.format("/v1/list/%d/task/remove/%d", idTestList, idTaskToRemove))
+                patch(String.format("/api/v1/list/%d/task/remove/%d", idTestList, idTaskToRemove))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
