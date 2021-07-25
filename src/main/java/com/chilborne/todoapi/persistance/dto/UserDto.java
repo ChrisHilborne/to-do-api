@@ -1,6 +1,7 @@
 package com.chilborne.todoapi.persistance.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Email;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@ApiModel(value = "user")
 public class UserDto {
 
     @NotNull(message = "username is compulsory")

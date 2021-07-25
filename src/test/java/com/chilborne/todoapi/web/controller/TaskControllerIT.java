@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,10 +52,11 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void getTaskShouldReturnTaskWhenTheTaskExists() throws Exception {
         //when
         mvc.perform(
-                get("/v1/task/" + ID)
+                get("/api/v1/task/" + ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -65,10 +67,11 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void getTaskByIdShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                get("/v1/task/500")
+                get("/api/v1/task/500")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -79,10 +82,11 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/task/{id}/complete", ID)
+                patch("/api/v1/task/{id}/complete", ID)
                         .contentType(MediaType.APPLICATION_JSON)
         )
         //verify
@@ -97,6 +101,7 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void completeTaskShouldReturn208IfTaskExistsButHasAlreadyBeenCompleted() throws Exception {
         //given
         testTask.complete();
@@ -104,7 +109,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                patch("/v1/task/" + ID + "/complete")
+                patch("/api/v1/task/" + ID + "/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -114,10 +119,11 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void completeTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
-                patch("/v1/task/500/complete")
+                patch("/api/v1/task/500/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -128,6 +134,7 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updateTaskShouldReturnUpdatedTaskWhenTaskExists() throws Exception {
         //given
         String taskJson = """
@@ -139,7 +146,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/task/{id}", ID)
+                put("/api/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -150,6 +157,7 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updateTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //given
         String taskJson = """
@@ -161,7 +169,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/task/{id}", 50)
+                put("/api/v1/task/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -171,6 +179,7 @@ public class TaskControllerIT {
     }
 
     @Test
+    @WithMockUser
     void updateTaskShouldReturn400IfInputsAreNotValid() throws Exception {
         //given
         String taskJson = """
@@ -182,7 +191,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/v1/task/{id}", ID)
+                put("/api/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)

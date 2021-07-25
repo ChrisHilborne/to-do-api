@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DirtiesContext
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(TaskController.class)
 class TaskControllerTest {
@@ -60,6 +60,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getTask() throws Exception {
         //given
         String timeCreated = testTask.getTimeCreated().format(formatter);
@@ -69,7 +70,7 @@ class TaskControllerTest {
 
         //verify
         mvc.perform(
-                get("/v1/task/50")
+                get("/api/v1/task/50")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -83,6 +84,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser
     void completeTask() throws Exception {
         //given
         testTask.complete();
@@ -93,7 +95,7 @@ class TaskControllerTest {
 
         //verify
         mvc.perform(
-                patch("/v1/task/50/complete")
+                patch("/api/v1/task/50/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept("application/json")
         )
@@ -107,6 +109,7 @@ class TaskControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateTaskShouldReturnUpdatedTask() throws Exception {
         //given
         String taskJson = """
@@ -122,7 +125,7 @@ class TaskControllerTest {
         when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTask(testTask));
 
         mvc.perform(
-                put("/v1/task/{id}", testTask.getId())
+                put("/api/v1/task/{id}", testTask.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
         )
@@ -142,7 +145,5 @@ class TaskControllerTest {
                 () -> assertEquals("new name", passedTask.getName()),
                 () -> assertEquals("new description", passedTask.getDescription()));
     }
-
-
 
 }

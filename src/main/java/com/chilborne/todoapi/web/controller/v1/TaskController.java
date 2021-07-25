@@ -12,10 +12,10 @@ import javax.validation.Valid;
 
 @Api(value = "Task Controller")
 @RestController
-@RequestMapping(value = "v1/task", consumes = "application/json", produces = "application/json")
+@RequestMapping(value = "api/v1/task", consumes = "application/json", produces = "application/json")
 public class TaskController {
 
-    public static final String TASK_ROOT_URL = "http://localhost:8080/v1/task";
+    public static final String TASK_ROOT_URL = "http://localhost:8080/api/v1/task";
 
 
     private final TaskService service;

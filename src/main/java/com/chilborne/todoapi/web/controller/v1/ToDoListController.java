@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 @Api(value = "To Do List Controller")
 @RestController
-@RequestMapping(path = "v1/list", consumes = "application/json", produces = "application/json")
+@RequestMapping(path = "api/v1/list", consumes = "application/json", produces = "application/json")
 public class ToDoListController {
 
     public static final String TO_DO_LIST_ROOT_URL = "http://localhost:8080/vi/list";
