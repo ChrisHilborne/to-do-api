@@ -12,11 +12,13 @@ public interface UserService extends UserDetailsService {
 
     UserDto createUser(UserDto dto);
 
-    UserDto changeUsername(UserDto dto, String username);
+    UserDto changeUsername(String oldUsername, String newUsername);
 
-    UserDto changeEmail(UserDto dto, @Email String email);
+    UserDto changeEmail(String username, @Email String email);
 
-    void changePassword(UserDto dto, String newPwd);
+    void deleteUser(String username);
 
-    void checkUsernameIsUnique(String username) throws UsernameAlreadyExistsException;
+    void changePassword(String username, String newPwd);
+
+    boolean isUsernameUnique(String username) throws UsernameAlreadyExistsException;
 }

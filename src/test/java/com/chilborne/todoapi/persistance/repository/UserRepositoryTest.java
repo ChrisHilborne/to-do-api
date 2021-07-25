@@ -20,13 +20,13 @@ class UserRepositoryTest {
     UserRepository repository;
 
     User user;
-    static final String NAME = "USER";
+    static final String USERNAME = "USER";
     static final String PASSWORD = "PASSWORD";
     static final String EMAIL = "my@mail.com";
 
     @BeforeEach
     void setup() {
-        user = new User(NAME, PASSWORD, EMAIL);
+        user = new User(USERNAME, PASSWORD, EMAIL);
         repository.save(user);
     }
 
@@ -38,7 +38,7 @@ class UserRepositoryTest {
     @Test
     void findByUsernameShouldReturnOptionalOfUserWhenUserExists() {
         //when
-        Optional<User> returned = repository.findByUsername(NAME);
+        Optional<User> returned = repository.findByUsername(USERNAME);
 
         //verify
         assertTrue(returned.isPresent());
@@ -57,7 +57,7 @@ class UserRepositoryTest {
     @Test
     void existsByUsernameShouldReturnTrueWhenUsernameExists() {
         //when
-        boolean exists = repository.existsByUsername(NAME);
+        boolean exists = repository.existsByUsername(USERNAME);
 
         //verify
         assertTrue(exists);
@@ -70,5 +70,15 @@ class UserRepositoryTest {
 
         //verify
         assertFalse(exists);
+    }
+
+    @Test
+    void deleteByUsernameShouldDeleteUser() {
+        //when
+        repository.deleteByUsername(USERNAME);
+
+        //verify
+        Optional<User> check = repository.findByUsername(USERNAME);
+        assertTrue(check.isEmpty());
     }
 }

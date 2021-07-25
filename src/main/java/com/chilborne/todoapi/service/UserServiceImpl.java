@@ -58,7 +58,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        checkUsernameIsUnique(userDto.getUsername());
+        if (!isUsernameUnique(userDto.getUsername())) {
+            throw new UsernameAlreadyExistsException(userDto.getUsername());
+        }
         logger.info("Creating new user: {}", userDto.getUsername());
         User entity = mapper.convertUserDto(userDto);
         entity.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -66,36 +68,45 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto changeUsername(UserDto dto, String username) {
-        checkUsernameIsUnique(username);
-        logger.info("Changing username for User:{} to {}", dto.getUsername(), username);
-        User toUpdate = getUser(dto.getUsername());
-        toUpdate.setUsername(username);
+    public UserDto changeUsername(String oldUsername, String newUsername) {
+        if(!isUsernameUnique(newUsername)) {
+            throw new UsernameAlreadyExistsException(newUsername);
+        }
+        logger.info("Changing username for User:{} to {}", oldUsername, newUsername);
+        User toUpdate = getUser(oldUsername);
+        toUpdate.setUsername(newUsername);
         return saveUser(toUpdate);
     }
 
     @Override
-    public UserDto changeEmail(UserDto dto, @Email String email) {
-        logger.info("Changing User:{} email to {}",dto.getUsername(), email);
-        User toUpdate = getUser(dto.getUsername());
+    public UserDto changeEmail(String username, @Email String email) {
+        logger.info("Changing User:{} email to {}", username, email);
+        User toUpdate = getUser(username);
         toUpdate.setEmail(email);
         return saveUser(toUpdate);
     }
 
     @Override
-    public void changePassword(UserDto dto, String newPwd) {
-        logger.info("Changing password for User: {}", dto.getUsername());
-        User toUpdate = getUser(dto.getUsername());
+    public void deleteUser(String username) {
+        if(!repository.existsByUsername(username)) {
+            throw new UsernameNotFoundException(username);
+        }
+        logger.info("Deleting User:{}", username);
+        repository.deleteByUsername(username);
+    }
+
+    @Override
+    public void changePassword(String username, String newPwd) {
+        logger.info("Changing password for User: {}", username);
+        User toUpdate = getUser(username);
         toUpdate.setPassword(passwordEncoder.encode(newPwd));
         saveUser(toUpdate);
     }
 
 
     @Override
-    public void checkUsernameIsUnique(String username) throws UsernameAlreadyExistsException {
-        if (repository.existsByUsername(username)) {
-            throw new UsernameAlreadyExistsException(username);
-        }
+    public boolean isUsernameUnique(String username) throws UsernameAlreadyExistsException {
+        return !repository.existsByUsername(username);
     }
 
     @Override
