@@ -100,7 +100,7 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
-    @ApiOperation(value = "Add a new Task to to_do_list", notes = "Must provide Task to be added in Request Body")
+    @ApiOperation(value = "Add a new task to to_do_list", notes = "Must provide Task to be added in Request Body")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "ToDoListNotFoundException -> to_do_list with id:{id} not found"),
             @ApiResponse(code = 400, message = "InvalidDataException: { {task_property} : {constraint_message} }")
@@ -115,7 +115,7 @@ public class ToDoListController {
         return ResponseEntity.ok(result);
     }
 
-    @ApiOperation(value = "Remove a Task from to_do_list")
+    @ApiOperation(value = "Delete task from to_do_list")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "ToDoListNotFoundException -> to_do_list with id:{id} not found"),
             @ApiResponse(code = 404, message = "TaskNotFoundException -> to_do_list with id:{list_id} does not contain task with id:{task_id}")

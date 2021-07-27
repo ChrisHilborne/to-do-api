@@ -1,4 +1,4 @@
-package com.chilborne.todoapi.web.controller;
+package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
