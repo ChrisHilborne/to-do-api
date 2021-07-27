@@ -13,6 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/api/v1/user/register", "/api/login", "/api/logout");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
             .csrf()
@@ -21,9 +26,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .anyRequest()
                 .hasRole("USER")
-            .and()
-                .formLogin()
-                .loginProcessingUrl("/login")
             .and()
                 .httpBasic();
 
