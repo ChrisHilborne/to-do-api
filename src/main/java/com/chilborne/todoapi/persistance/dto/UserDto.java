@@ -1,12 +1,11 @@
 package com.chilborne.todoapi.persistance.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +14,14 @@ import java.util.Objects;
 @ApiModel(value = "user")
 public class UserDto {
 
-    @NotNull(message = "username is compulsory")
+    @NotBlank(message = "username is compulsory")
     private String username;
 
+    @NotBlank(message = "password is compulsory")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @NotBlank(message = "email is compulsory")
     @Email(message = "email not valid")
     private String email;
 
