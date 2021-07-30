@@ -1,7 +1,6 @@
 package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.dto.UserDto;
-import com.chilborne.todoapi.persistance.validation.OnPersist;
 import com.chilborne.todoapi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
+@Validated
 @RestController
 @RequestMapping(path = "api/v1/user", consumes = "application/json", produces = "application/json")
 public class UserController {
@@ -31,7 +32,6 @@ public class UserController {
     return ResponseEntity.ok(user);
   }
 
-  @Validated(OnPersist.class)
   @PostMapping(path = "/register")
   public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto user) {
     logger.info("Creating new User: {}", user.getUsername());
@@ -41,7 +41,7 @@ public class UserController {
 
   @PatchMapping(path = "/{oldUsername}/username")
   public ResponseEntity<UserDto> changeUsername(
-      @PathVariable String oldUsername, @RequestBody String username) {
+      @PathVariable String oldUsername, @RequestBody @NotBlank(message = "username cannot be blank") String username) {
     logger.info("Changing User: {} username to {}", oldUsername, username);
     UserDto updatedUser = service.changeUsername(oldUsername, username);
     return ResponseEntity.ok(updatedUser);
@@ -49,15 +49,18 @@ public class UserController {
 
   @PatchMapping(path = "/{username}/password")
   public ResponseEntity changePassword(
-      @PathVariable String username, @RequestBody String password) {
+      @PathVariable String username,
+      @RequestBody @NotBlank(message = "password cannot be blank") String password) {
     logger.info("Changing password for User: {}", username);
     service.changePassword(username, password);
     return ResponseEntity.ok().build();
   }
 
+  @Validated
   @PatchMapping(path = "/{username}/email")
   public ResponseEntity<UserDto> changeEmail(
-      @PathVariable String username, @RequestBody String email) {
+      @PathVariable String username,
+      @RequestBody @Email(message = "Email provided is not valid") String email) {
     logger.info("Changing email for User: {} to {}", username, email);
     UserDto updatedUser = service.changeEmail(username, email);
     return ResponseEntity.ok(updatedUser);
