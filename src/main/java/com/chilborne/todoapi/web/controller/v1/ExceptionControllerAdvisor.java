@@ -46,7 +46,9 @@ public class ExceptionControllerAdvisor {
     logger.error("Request: " + req.getRequestURI() + " raised " + e);
     HashMap<String, String> errors = new HashMap<>();
     for (ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {
-      errors.put(constraintViolation.getRootBean().toString(), constraintViolation.getMessage());
+      errors.put(
+          constraintViolation.getRootBean().toString(),
+          constraintViolation.getInvalidValue() + " : " + constraintViolation.getMessage());
     }
     return new ErrorResponse(HttpStatus.BAD_REQUEST, errors);
   }

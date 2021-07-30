@@ -57,8 +57,7 @@ class UserControllerIT {
   @Test
   @WithMockUser(
       username = USERNAME,
-      password = PASSWORD,
-      roles = {"USER"})
+      password = PASSWORD)
   void getUserShouldReturnUserDtoWith200StatusWhenUserWithCorrectUsernameAndRoleMakesRequest()
       throws Exception {
     //when
@@ -76,8 +75,7 @@ class UserControllerIT {
   @Test
   @WithMockUser(
       username = "fails",
-      password = PASSWORD,
-      roles = {"USER"})
+      password = PASSWORD)
   void getUserShouldReturn403WhenUserWithDifferentUsernameMakesRequest() throws Exception {
     //when
     mvc.perform(
@@ -87,6 +85,18 @@ class UserControllerIT {
         //verify
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  void getUserShouldReturnUnauthorizedStatusWhenNoAuthenticationIsPresent() throws Exception{
+    //when
+    mvc.perform(
+            get("/api/v1/user/{username}", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+            //verify
+            .andExpect(status().isUnauthorized());
+  }
+
 
   @Test
   void createUserShouldReturnNewlyCreatedUserDtoWith201Status() throws Exception {
@@ -195,8 +205,36 @@ class UserControllerIT {
                     .content(USERNAME)
                     .accept(MediaType.APPLICATION_JSON)
     )
+            //verify
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").isNotEmpty());
+  }
+
+  @Test
+  @WithMockUser(username = USERNAME, password = PASSWORD)
+  void changeUsernameShouldReturnErrorMessageWith401StatusWhenUsernameIsBlank() throws Exception {
+    //when
+    mvc.perform(
+            patch("/api/v1/user/{username}/username", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(" ")
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").isNotEmpty());
+  }
+
+  @Test
+  void changeUsernameShouldReturnUnauthorizedStatusWhenNoAuthentication() throws Exception {
+    //when
+    mvc.perform(
+            patch("/api/v1/user/{username}/username", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(USERNAME)
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            //verify
+            .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -242,6 +280,33 @@ class UserControllerIT {
 
   @Test
   @WithMockUser(username = USERNAME, password = PASSWORD)
+  void changePasswordShouldReturnErrorMessageResponseWith401StatusWhenNewPasswordIsBlank() throws Exception {
+    mvc.perform(
+            patch("/api/v1/user/{username}/password", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(" ")
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            //verify
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").isNotEmpty());
+  }
+
+  @Test
+  void changePasswordShouldReturnUnauthorizedWhenNoAuthorizationPresent() throws Exception {
+    //when
+    mvc.perform(
+            patch("/api/v1/user/{username}/password", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(NEW_PASSWORD)
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            //verify
+            .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(username = USERNAME, password = PASSWORD)
   void changeEmailShouldReturnUpdatedUSerWith200StatusWhenUserHasAccess() throws Exception {
     //when
     mvc.perform(
@@ -274,7 +339,7 @@ class UserControllerIT {
 
   @Test
   @WithMockUser(username = USERNAME, password = PASSWORD)
-  void changeEmailShouldReturnErrorMessageWith402StatusWhenEmailIsIncorrectlyFormatted() throws Exception {
+  void changeEmailShouldReturnErrorMessageWith401StatusWhenEmailIsIncorrectlyFormatted() throws Exception {
     //given
     String badEmail = "thisisnotanemail";
 
@@ -290,6 +355,53 @@ class UserControllerIT {
             .andExpect(jsonPath("$.error").isNotEmpty());
   }
 
+
   @Test
-  void deleteUser() {}
+  void changeEmailShouldReturnUnauthorizedWhenNoAuthorizationPresent() throws Exception {
+    //when
+    mvc.perform(
+            patch("/api/v1/user/{username}/email", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(NEW_EMAIL)
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            //verify
+            .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(username = USERNAME, password = PASSWORD)
+  void deleteUserShouldReturnNoContentFoundStatusWhenSuccessful() throws Exception {
+    //when
+    mvc.perform(
+            delete("/api/v1/user/{username}", USERNAME)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    )
+            //verify
+            .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(username = "fails", password = PASSWORD)
+  void deleteUserShouldReturnForbiddenWhenUserDoesNotHaveAccess() throws Exception {
+    //when
+    mvc.perform(
+            delete("/api/v1/user/{username}", USERNAME)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+    )
+            .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void deleteUserShouldReturnUnauthorizedWhenNoAuthenticationPresent() throws Exception {
+    //when
+    mvc.perform(
+            delete("/api/v1/user/{username}", USERNAME)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+    )
+            .andExpect(status().isUnauthorized());
+  }
 }
