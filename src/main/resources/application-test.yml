@@ -12,6 +12,9 @@ spring:
     password: test
   devtools:
     restart:
-      log-condition-evaluation-delta=false:
+      log-condition-evaluation-delta: false
 
 
+logging:
+  level:
+    org.springframework.security: DEBUG

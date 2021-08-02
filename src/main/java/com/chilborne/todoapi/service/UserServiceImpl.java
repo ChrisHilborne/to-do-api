@@ -45,7 +45,8 @@ public class UserServiceImpl implements UserService {
     return mapper.convertUser(user);
   }
 
-  private User getUser(String username) {
+  @Override
+  public User getUser(String username) {
     logger.info("Fetching User with username {}", username);
     return repository
         .findByUsername(username)
@@ -116,13 +117,4 @@ public class UserServiceImpl implements UserService {
     return new UserPrincipal(getUser(username));
   }
 
-  /**
-   * Method to fetch User Entity from DB using UserDto username and return fetched User Entity Id
-   *
-   * @param dto UserDto
-   * @return UUID userId
-   */
-  private UUID getUserId(UserDto dto) {
-    return getUser(dto.getUsername()).getUserId();
-  }
 }

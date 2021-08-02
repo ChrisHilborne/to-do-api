@@ -13,6 +13,7 @@ spring:
     username: user
     password: password
 
+
 #Jackson JSON
   jackson:
     default-property-inclusion: NON_NULL
