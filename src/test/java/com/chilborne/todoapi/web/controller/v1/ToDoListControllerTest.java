@@ -5,8 +5,8 @@ import com.chilborne.todoapi.persistance.dto.ToDoListDto;
 import com.chilborne.todoapi.persistance.mapper.ToDoListMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
+import com.chilborne.todoapi.persistance.model.User;
 import com.chilborne.todoapi.service.ToDoListServiceImpl;
-import com.chilborne.todoapi.web.controller.v1.ToDoListController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,50 +34,49 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
 class ToDoListControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    ToDoListServiceImpl service;
-
-    @Captor
-    ArgumentCaptor<ToDoList> toDoListCaptor;
-
-    @Captor
-    ArgumentCaptor<ToDoListDto> dtoCaptor;
-
-    @Captor
-    ArgumentCaptor<Long> idCaptor;
-
-    @Captor
-    ArgumentCaptor<Boolean> booleanCaptor;
-
-    private ToDoList testList;
-    private ToDoListDto testDto;
-
+    private static final String USERNAME = "user";
+    private static final String PASSWORD = "password";
     private static final LocalDateTime NOW = LocalDateTime.now();
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-    private String nowString;
-
+    @MockBean
+    ToDoListServiceImpl service;
+    @Captor
+    ArgumentCaptor<String> usernameCaptor;
+    @Captor
+    ArgumentCaptor<ToDoListDto> dtoCaptor;
+    @Captor
+    ArgumentCaptor<Long> idCaptor;
+    @Captor
+    ArgumentCaptor<Boolean> booleanCaptor;
     ToDoListMapper toDoListMapper = ToDoListMapper.INSTANCE;
+    @Autowired
+    private MockMvc mvc;
+    private ToDoList testList;
+    private ToDoListDto testDto;
+    private String nowString;
+    private User user;
 
     @BeforeEach
     void init() {
         nowString = NOW.format(FORMATTER);
+        user = new User(USERNAME, PASSWORD);
         testList = new ToDoList("test", "this is a test");
+        testList.setUser(user);
         testList.setTimeCreated(NOW);
+
+        user.addToDoList(testList);
 
         testDto = toDoListMapper.convertToDoList(testList);
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void getToDoListShouldWorkWhenListExists() throws Exception {
         //given
         long id = 0L;
 
         //when
-        when(service.getToDoListDtoById(id)).thenReturn(testDto);
+        when(service.getToDoListDtoByIdAndUsername(id, USERNAME)).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -90,13 +89,13 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.date_time_made").value(nowString)
                 );
 
-        verify(service).getToDoListDtoById(0L);
+        verify(service).getToDoListDtoByIdAndUsername(0L, USERNAME);
         verifyNoMoreInteractions(service);
     }
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void postToDoListShouldReturnNewlyCreatedToDoList() throws Exception {
         //given
         String testJson = """
@@ -106,7 +105,7 @@ class ToDoListControllerTest {
                 }""";
 
         //when
-        when(service.saveToDoList(any(ToDoListDto.class))).thenReturn(testDto);
+        when(service.newToDoList(any(ToDoListDto.class), anyString())).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -118,13 +117,13 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.description").value("this is a test")
                 );
-        verify(service).saveToDoList(dtoCaptor.capture());
+        verify(service).newToDoList(dtoCaptor.capture(), eq("user"));
         verifyNoMoreInteractions(service);
         assertTrue(toDoListMapper.compare(testList, dtoCaptor.getValue()));
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void upDateToDoListShouldReturnUpdatedList() throws Exception {
         //given
         String testJson = """
@@ -137,7 +136,7 @@ class ToDoListControllerTest {
         testList.setDescription("so was this description");
         testDto = toDoListMapper.convertToDoList(testList);
         //when
-        when(service.updateToDoList(anyLong(), any(ToDoListDto.class))).thenReturn(testDto);
+        when(service.updateToDoList(anyLong(), any(ToDoListDto.class), anyString())).thenReturn(testDto);
         mvc.perform(
                 put("/api/v1/list/{id}", testList.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,11 +148,13 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("this name was recently updated"))
                 .andExpect(jsonPath("$.description").value("so was this description"))
                 .andExpect(jsonPath("$.list_id").value(testList.getId()));
-        verify(service).updateToDoList(idCaptor.capture(), dtoCaptor.capture());
+        verify(service).updateToDoList(idCaptor.capture(), dtoCaptor.capture(), usernameCaptor.capture());
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();
         assertEquals(testList.getId(), passedId);
+        String passedUsername = usernameCaptor.getValue();
+        assertEquals(USERNAME, passedUsername);
         ToDoListDto passedToDoList = dtoCaptor.getValue();
         assertAll("@passedToDoList has name and description of @testJson",
                 () -> assertEquals("this name was recently updated", passedToDoList.getName()),
@@ -162,7 +163,7 @@ class ToDoListControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void deleteToDoListShouldReturn201() throws Exception {
         //when
         mvc.perform(
@@ -172,19 +173,19 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isNoContent());
 
-        verify(service).deleteToDoList(testList.getId());
+        verify(service).deleteToDoList(testList.getId(), USERNAME);
         verifyNoMoreInteractions(service);
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void setActiveShouldReturnUpdatedToDoList() throws Exception {
         //given
         testList.setActive(false);
         testDto.setActive(false);
 
         //when
-        when(service.setToDoListActive(anyLong(), anyBoolean())).thenReturn(testDto);
+        when(service.setToDoListActive(anyLong(), anyString(), anyBoolean())).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -196,19 +197,21 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.date_time_made").value(nowString));
-        verify(service).setToDoListActive(anyLong(), anyBoolean());
+        verify(service).setToDoListActive(anyLong(), anyString(), anyBoolean());
         verifyNoMoreInteractions(service);
 
-        verify(service).setToDoListActive(idCaptor.capture(), booleanCaptor.capture());
+        verify(service).setToDoListActive(idCaptor.capture(), usernameCaptor.capture(), booleanCaptor.capture());
         long passedId = idCaptor.getValue();
+        String passedUsername = usernameCaptor.getValue();
         boolean passedBoolean = booleanCaptor.getValue();
         assertEquals(testList.getId(), passedId);
+        assertEquals(USERNAME, passedUsername);
         assertFalse(passedBoolean);
 
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void addTaskShouldReturnListWithNewTask() throws Exception {
         //given
         String taskJson = """
@@ -223,7 +226,7 @@ class ToDoListControllerTest {
         testDto = toDoListMapper.convertToDoList(testList);
 
         //when
-        when(service.addTaskToDoList(anyLong(), any(TaskDto.class))).thenReturn(testDto);
+        when(service.addTaskToDoList(anyLong(), anyString(), any(TaskDto.class))).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -235,14 +238,14 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.tasks[0].name").value("task"));
 
-        verify(service).addTaskToDoList(anyLong(), any(TaskDto.class));
+        verify(service).addTaskToDoList(anyLong(), anyString(), any(TaskDto.class));
         verifyNoMoreInteractions(service);
 
     }
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void removeTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
         ToDoList testList = new ToDoList("testList");
@@ -256,7 +259,7 @@ class ToDoListControllerTest {
         testDto = toDoListMapper.convertToDoList(testList);
 
         //when
-        when(service.removeTaskToDoList(idTestList, idTaskToRemove)).thenReturn(testDto);
+        when(service.removeTaskToDoList(idTestList, USERNAME, idTaskToRemove)).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -266,7 +269,7 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tasks[0].name").value("task1"));
-        verify(service).removeTaskToDoList(idTestList, idTaskToRemove);
+        verify(service).removeTaskToDoList(idTestList, USERNAME, idTaskToRemove);
         verifyNoMoreInteractions(service);
     }
 

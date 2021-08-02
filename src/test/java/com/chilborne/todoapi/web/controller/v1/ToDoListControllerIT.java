@@ -2,7 +2,9 @@ package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
+import com.chilborne.todoapi.persistance.model.User;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
+import com.chilborne.todoapi.persistance.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,36 +30,47 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class ToDoListControllerIT {
 
+    static final String USERNAME = "name";
+    static final String PASSWORD = "secret";
+    static final String EMAIL = "please@mail.me";
     @Autowired
     MockMvc mvc;
-
     @Autowired
-    ToDoListRepository repository;
-
+    ToDoListRepository listRepository;
+    @Autowired
+    UserRepository userRepository;
     ToDoList list;
     long listId;
-
     Task task;
     long taskId;
+    User user;
 
     @BeforeEach
     void initData() {
         list = new ToDoList("test");
         task = new Task(list, "task");
         list.addTask(task);
-        repository.save(list);
+
+
+        user = new User(USERNAME, PASSWORD, EMAIL);
+        user.addToDoList(list);
+        userRepository.save(user);
+
+        list.setUser(user);
+        listRepository.save(list);
         listId = list.getId();
         taskId = task.getId();
     }
 
     @AfterEach
     void tearDownData() {
-        repository.deleteAll();
+        userRepository.deleteAll();
+        listRepository.deleteAll();
     }
 
     @Test
-    @WithMockUser
-    void getToDoListByIdShouldReturnListWhenItExists() throws Exception {
+    @WithMockUser(username = USERNAME, password = PASSWORD)
+    void getToDoListByIdShouldReturnListWhenItExistsAndBelongsToAuthenticatedUser() throws Exception {
         //when
         mvc.perform(
                 get("/api/v1/list/{id}", listId)
@@ -68,6 +81,19 @@ public class ToDoListControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
                 .andExpect(jsonPath("$.list_id").value(listId));
+    }
+
+    @Test
+    @WithMockUser(username = "fails", password = PASSWORD)
+    void getToDoListByIdShouldReturnNotFoundStatusWhenDoesNotBelongToAuthenticatedUser() throws Exception {
+        //when
+        mvc.perform(
+                get("/api/v1/list/{id}", listId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                //verify
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -85,8 +111,8 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    @WithMockUser
-    void newToDoListShouldReturnCreatedList() throws Exception {
+    @WithMockUser(username = USERNAME)
+    void newToDoListShouldReturnCreatedListBelongingToAuthenticatedUser() throws Exception {
         //given
         String newTaskJson =
         """
@@ -106,12 +132,13 @@ public class ToDoListControllerIT {
                 //verify
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("new task"))
-                .andExpect(jsonPath("$.description").value("some adjectives"));
+                .andExpect(jsonPath("$.description").value("some adjectives"))
+                .andExpect(jsonPath("$.username").value(USERNAME));
     }
 
     @Test
     @WithMockUser
-    void postNewToDoListShouldReturnBadRequestIfInputsAreNotValid() throws Exception {
+    void newToDoListShouldReturnBadRequestIfInputsAreNotValid() throws Exception {
         //given
         String toDoListJson = """
                 {
@@ -131,7 +158,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void deleteToDoListShouldDeleteObjectFromDB() throws Exception {
         //when
         mvc.perform(
@@ -142,12 +169,12 @@ public class ToDoListControllerIT {
                 //verify
                 .andExpect(status().isNoContent());
 
-        assertTrue(repository.findById(listId).isEmpty());
+        assertTrue(listRepository.findById(listId).isEmpty());
     }
 
     @Test
-    @WithMockUser
-    void putActiveToDoListShouldReturnUpdatedToDoList() throws Exception {
+    @WithMockUser(username = USERNAME, password = PASSWORD)
+    void putActiveToDoListShouldReturnUpdatedToDoListWhenListBelongsToAuthenticatedUser() throws Exception {
         //when
         mvc.perform(
                 patch("/api/v1/list/{id}/active/{active}", listId, false)
@@ -157,6 +184,19 @@ public class ToDoListControllerIT {
                 //verify
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
+    }
+
+    @Test
+    @WithMockUser(username = "fails", password = PASSWORD)
+    void putActiveToDoListShouldReturnNotFoundStatusWhenListDoesNotBelongToAuthenticatedUser() throws Exception {
+        //when
+        mvc.perform(
+                patch("/api/v1/list/{id}/active/{active}", listId, false)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                //verify
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -175,7 +215,7 @@ public class ToDoListControllerIT {
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void addTaskShouldReturnUpdatedToDoList() throws Exception {
         //given
         String taskJson = """
@@ -243,7 +283,7 @@ public class ToDoListControllerIT {
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void removeTaskShouldRemoveUpdatedToDoList() throws Exception {
         //when
         mvc.perform(
@@ -261,7 +301,7 @@ public class ToDoListControllerIT {
         //given
         Task taskToBeRemoved = new Task("task to be removed");
         list.addTask(taskToBeRemoved);
-        repository.save(list);
+        listRepository.save(list);
 
         //when
         mvc.perform(
@@ -287,7 +327,7 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void updatedToDoListShouldReturnUpdatedToDoList() throws Exception {
         //given
         String testJson = """
@@ -311,8 +351,8 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    @WithMockUser
-    void updatedToDoListShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
+    @WithMockUser(username = USERNAME)
+    void updatedToDoListShouldReturn404WithErrorMessageWhenToDoListDoesNotExist() throws Exception {
         //given
         String testJson = """
                 {

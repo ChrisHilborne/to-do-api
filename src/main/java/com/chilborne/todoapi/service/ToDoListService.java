@@ -2,35 +2,33 @@ package com.chilborne.todoapi.service;
 
 import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.exception.ToDoListNotFoundException;
-import com.chilborne.todoapi.exception.UsernameAlreadyExistsException;
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.dto.ToDoListDto;
-import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
 public interface ToDoListService {
 
-    ToDoListDto getToDoListDtoById(long id) throws ToDoListNotFoundException;
+    ToDoListDto getToDoListDtoByIdAndUsername(long id, String username) throws ToDoListNotFoundException;
 
     ToDoListDto saveToDoList(ToDoList list);
 
-    ToDoListDto saveToDoList(ToDoListDto listDto);
+    ToDoListDto newToDoList(ToDoListDto listDto, String username);
 
-    List<ToDoListDto> getAllToDoList();
+    List<ToDoListDto> getAllToDoList(String username);
 
-    void deleteToDoList(long id);
+    void deleteToDoList(long id, String username);
 
-    ToDoListDto updateToDoList(long id, ToDoListDto toDoList);
+    ToDoListDto updateToDoList(long id, ToDoListDto toDoList, String username);
 
-    ToDoListDto setToDoListActive(long id, boolean active) throws ToDoListNotFoundException;
+    ToDoListDto setToDoListActive(long id, String username, boolean active) throws ToDoListNotFoundException;
 
-    ToDoListDto addTaskToDoList(long id, TaskDto task) throws ToDoListNotFoundException;
+    ToDoListDto addTaskToDoList(long id, String username, TaskDto task) throws ToDoListNotFoundException;
 
-    ToDoListDto removeTaskToDoList(long listId, long taskId) throws TaskNotFoundException;
+    ToDoListDto removeTaskToDoList(long listId, String username, long taskId) throws TaskNotFoundException;
 
 
 }

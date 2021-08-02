@@ -44,8 +44,8 @@ public class ToDoList {
     private List<Task> tasks = new LinkedList<>();
 
     @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "username")
     private User user;
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
