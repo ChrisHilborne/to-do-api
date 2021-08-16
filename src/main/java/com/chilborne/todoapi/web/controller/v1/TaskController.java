@@ -12,14 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Api(value = "Task Controller")
 @RestController
-@RequestMapping(value = "api/v1/task", consumes = "application/json", produces = "application/json")
+@RequestMapping(value = "api/v1/task")
 public class TaskController {
 
   public static final String TASK_ROOT_URL = "http://localhost:8080/api/v1/task";
-
   private final TaskService service;
   private final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
@@ -34,10 +34,10 @@ public class TaskController {
             code = 404,
             message = "TaskNotFoundException -> Task with id:{task_id} not found")
       })
-  @GetMapping("/{id}")
+  @GetMapping(path ="/{id}", produces = "application/json")
   public ResponseEntity<TaskDto> getTaskById(@PathVariable long id) {
     logger.info("Processing GET Request for Task id: " + id);
-    TaskDto result = service.getTaskById(id);
+    TaskDto result = service.getTaskDtoById(id);
     return ResponseEntity.ok(result);
   }
 
@@ -55,14 +55,14 @@ public class TaskController {
             message =
                 "TaskAlreadyCompletedException -> This task was already completed at {date_time_finished}")
       })
-  @PatchMapping("/{id}/complete")
+  @PatchMapping(path = "/{id}/complete", produces = "application/json")
   public ResponseEntity<TaskDto> completeTask(@PathVariable long id) {
     logger.info("Processing PATCH Request to Complete Task id: " + id);
     TaskDto result = service.completeTask(id);
     return ResponseEntity.ok(result);
   }
 
-  @ApiOperation(value = "Update Task")
+  @ApiOperation(value = "Update Task Name and/or Description")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -72,11 +72,11 @@ public class TaskController {
             code = 400,
             message = "InvalidDataException : { {task_property} : {constraint message} }")
       })
-  @PutMapping("/{id}")
-  public ResponseEntity<TaskDto> updateTask(
+  @PatchMapping(path = "/{id}", produces = "application/json", consumes = "application/json")
+  public ResponseEntity<TaskDto> updateTaskNameAndDescription(
       @PathVariable long id, @Valid @RequestBody TaskDto task) {
     logger.info("Processing PUT Request to update Task id: " + id);
-    TaskDto result = service.updateTask(id, task);
+    TaskDto result = service.updateTaskNameAndDescription(id, task);
     return ResponseEntity.ok(result);
   }
 }

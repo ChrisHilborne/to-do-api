@@ -76,7 +76,7 @@ class ToDoListControllerTest {
         long id = 0L;
 
         //when
-        when(service.getToDoListDtoByIdAndUsername(id, USERNAME)).thenReturn(testDto);
+        when(service.getToDoListDtoById(id, USERNAME)).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -89,7 +89,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.date_time_made").value(nowString)
                 );
 
-        verify(service).getToDoListDtoByIdAndUsername(0L, USERNAME);
+        verify(service).getToDoListDtoById(0L, USERNAME);
         verifyNoMoreInteractions(service);
     }
 
@@ -136,7 +136,7 @@ class ToDoListControllerTest {
         testList.setDescription("so was this description");
         testDto = toDoListMapper.convertToDoList(testList);
         //when
-        when(service.updateToDoList(anyLong(), any(ToDoListDto.class), anyString())).thenReturn(testDto);
+        when(service.updateToDoListNameAndDescription(anyLong(), any(ToDoListDto.class), anyString())).thenReturn(testDto);
         mvc.perform(
                 put("/api/v1/list/{id}", testList.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,7 +148,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.name").value("this name was recently updated"))
                 .andExpect(jsonPath("$.description").value("so was this description"))
                 .andExpect(jsonPath("$.list_id").value(testList.getId()));
-        verify(service).updateToDoList(idCaptor.capture(), dtoCaptor.capture(), usernameCaptor.capture());
+        verify(service).updateToDoListNameAndDescription(idCaptor.capture(), dtoCaptor.capture(), usernameCaptor.capture());
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();
@@ -259,7 +259,7 @@ class ToDoListControllerTest {
         testDto = toDoListMapper.convertToDoList(testList);
 
         //when
-        when(service.removeTaskToDoList(idTestList, USERNAME, idTaskToRemove)).thenReturn(testDto);
+        when(service.removeTaskFromToDoList(idTestList, USERNAME, idTaskToRemove)).thenReturn(testDto);
 
         //verify
         mvc.perform(
@@ -269,7 +269,7 @@ class ToDoListControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tasks[0].name").value("task1"));
-        verify(service).removeTaskToDoList(idTestList, USERNAME, idTaskToRemove);
+        verify(service).removeTaskFromToDoList(idTestList, USERNAME, idTaskToRemove);
         verifyNoMoreInteractions(service);
     }
 

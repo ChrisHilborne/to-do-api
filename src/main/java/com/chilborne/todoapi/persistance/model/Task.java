@@ -39,8 +39,8 @@ public class Task {
     @Column(name = "date_time_finished", columnDefinition = "TIMESTAMP")
     private LocalDateTime timeCompleted;
 
-    @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE" , nullable = false)
-    private boolean active;
+    @Column(name = "active", columnDefinition = "boolean default true" , nullable = false)
+    private boolean active = true;
 
     public Task() {}
 
@@ -58,13 +58,6 @@ public class Task {
         this.description = description;
     }
 
-    public boolean complete() {
-        //must check both @active and @timeComplete because @active is only populated when persisted in DB
-        if (!this.active && timeCompleted != null) return false;
-        this.active = false;
-        timeCompleted = LocalDateTime.now().withNano(0);
-        return true;
-    }
 
     public long getId() {
         return id;

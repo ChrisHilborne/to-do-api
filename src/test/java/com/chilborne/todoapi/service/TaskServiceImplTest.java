@@ -5,8 +5,8 @@ import com.chilborne.todoapi.exception.TaskNotFoundException;
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
-import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
+import com.chilborne.todoapi.security.access.TaskAccessManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,176 +15,123 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceImplTest {
 
-    @Mock
-    TaskRepository repository;
+  @Mock TaskRepository taskRepository;
+  @Mock TaskAccessManager taskAccessManager;
+  @Mock TaskMapper taskMapper;
+  @InjectMocks TaskServiceImpl taskService;
 
-    @Mock
-    TaskMapper mockMapper;
+  @Captor ArgumentCaptor<Task> taskCaptor;
+  private Task task;
+  private TaskDto taskDto;
+  private long taskId;
 
-    TaskMapper mapper = TaskMapper.INSTANCE;
+  @BeforeEach
+  void init() {
+    task = new Task("test task");
+    task.setActive(true);
+    taskDto = TaskMapper.INSTANCE.convertTask(task);
+    taskId = task.getId();
+  }
 
-    @InjectMocks
-    TaskServiceImpl service;
+  @Test
+  void getTaskDtoByIdShouldReturnDtoWhenTaskExists() {
+    // given
+    given(taskRepository.findById(taskId)).willReturn(Optional.of(task));
+    given(taskMapper.convertTask(task)).willReturn(taskDto);
 
-    @Captor
-    ArgumentCaptor<Task> taskCaptor;
+    // when
+    TaskDto result = taskService.getTaskDtoById(taskId);
 
-    Task testTask;
-    TaskDto testDto;
-    Task mockTask = mock(Task.class);
-    LocalDateTime now = LocalDateTime.now();
+    // verify
+    assertEquals(taskDto, result);
+  }
 
-    @BeforeEach
-    void init() {
-        ToDoList testList = new ToDoList("test list");
-        testTask = new Task(testList, "test task");
-        testTask.setId(50L);
-        testTask.setTimeCreated(now);
-        testDto = mapper.convertTask(testTask);
-    }
+  @Test
+  void getTaskDtoByIdShouldThrowExceptionWHenTaskDoesNotExist() {
+    // given
+    given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
-    @Test
-    void getTaskByIdShouldReturnCorrectTaskWhenItExists() {
-        //given
-        given(repository.findById(50L)).willReturn(Optional.ofNullable(testTask));
-        given(mockMapper.convertTask(testTask)).willReturn(mapper.convertTask(testTask));
+    // verify
+    assertThrows(TaskNotFoundException.class, () -> taskService.getTaskDtoById(taskId));
+  }
 
-        //when
-        TaskDto result = service.getTaskById(50L);
+  @Test
+  void checkTaskAccessShouldNotThrowExceptionWhenUserHasAccess() {
+    // verify
+    assertDoesNotThrow(() -> taskService.checkTaskAccess(task));
 
-        //verify
-        assertTrue(mapper.compare(testTask, result));
-        verify(repository).findById(50L);
-        verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTask(testTask);
-        verifyNoMoreInteractions(mockMapper);
-    }
+  }
 
-    @Test
-    void getTaskByIdShouldThrowTaskNotFoundExceptionWhenItDoesNotExist() {
-        //given
-        given(repository.findById(50L)).willReturn(Optional.empty());
+  @Test
+  void checkTaskAccessShouldThrowExceptionWhenUserDoesNotHaveAccess() {
+    // given
+    doThrow(new AccessDeniedException("No Access")).when(taskAccessManager).checkAccess(task);
 
-        //verify
-        Exception e = assertThrows(TaskNotFoundException.class, () -> service.getTaskById(50L));
-        assertEquals("Task with id:50 not found", e.getMessage());
-    }
+    // verify
+    assertThrows(AccessDeniedException.class, () -> taskService.checkTaskAccess(task));
+  }
 
-    @Test
-    void saveTaskShouldReturnSavedTask() {
-        //given
-        given(repository.save(testTask)).willReturn(testTask);
-        given(mockMapper.convertTask(testTask)).willReturn(mapper.convertTask(testTask));
+  @Test
+  void completeTaskShouldReturnedUpdatedTaskDtoWhenTaskHasNotBeenCompletedAlready() {
+    // given
+    given(taskRepository.findById(taskId)).willReturn(Optional.of(task));
+    given(taskMapper.convertTask(any(Task.class))).willReturn(taskDto);
 
-        //when
-        TaskDto result = service.saveTask(testTask);
+    // when
+    TaskDto result = taskService.completeTask(taskId);
 
-        //verify
-        assertTrue(mapper.compare(testTask, result));
-        verify(repository).save(testTask);
-        verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTask(testTask);
-        verifyNoMoreInteractions(mockMapper);
-    }
+    // verify
+    assertFalse(task.isActive());
+    assertNotNull(task.getTimeCompleted());
 
-    @Test
-    void completeTaskShouldReturnUpdatedTaskIfTaskHasNotBeenCompletedAlready() {
-        //given
-        testTask.complete();
+    verify(taskMapper).convertTask(taskCaptor.capture());
+    Task capturedTask = taskCaptor.getValue();
+    assertFalse(capturedTask.isActive());
+    assertNotNull(capturedTask.getTimeCompleted());
+  }
 
-        //when
-        when(mockTask.complete()).thenReturn(true);
-        when(repository.findById(50L)).thenReturn(Optional.of(mockTask));
-        when(repository.save(mockTask)).thenReturn(testTask);
-        when(mockMapper.convertTask(testTask)).thenReturn(mapper.convertTask(testTask));
+  @Test
+  void completeTaskShouldThrowTaskAlreadyCompletedExceptionIfItHasAlreadyBeenCompleted() {
+    // given
+    task.setActive(false);
+    task.setTimeCompleted(LocalDateTime.now());
 
-        TaskDto completeTask = service.completeTask(50L);
+    given(taskRepository.findById(taskId)).willReturn(Optional.of(task));
 
-        //verify
-        verify(mockTask).complete();
-        verifyNoMoreInteractions(mockTask);
+    // verify
+    assertThrows(TaskAlreadyCompletedException.class, () -> taskService.completeTask(taskId));
+  }
 
-        verify(repository).findById(50L);
-        verify(repository).save(mockTask);
-        verifyNoMoreInteractions(repository);
+  @Test
+  void updateTaskNameAndDescriptionShouldUpdatedTask() {
+    // given
+    taskDto.setName("New Name");
+    taskDto.setDescription("Description");
 
-        assertTrue(mapper.compare(testTask, completeTask));
-    }
+    given(taskRepository.findById(taskId)).willReturn(Optional.of(task));
+    given(taskRepository.existsById(taskId)).willReturn(true);
+    given(taskRepository.save(any(Task.class))).willReturn(task);
+    given(taskMapper.convertTask(any(Task.class)))
+        .willReturn(taskDto);
 
-    @Test
-    void completeTaskShouldThrowTaskAlreadyCompletedExceptionIfTaskHasBeenCompletedAlready() {
-        //given
-        testTask.complete();
-        String timeCompleted = testTask.getTimeCompleted()
-                .format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yy"));
+    // when
+    TaskDto result = taskService.updateTaskNameAndDescription(taskId, taskDto);
 
-        //when
-        when(repository.findById(50L)).thenReturn(Optional.ofNullable(testTask));
-
-        //verify
-        Exception e = assertThrows(TaskAlreadyCompletedException.class,
-                () -> service.completeTask(50L));
-        assertEquals("This task was already completed at " + timeCompleted,
-                        e.getMessage());
-    }
-
-    @Test
-    void updateTaskShouldReturnUpdatedTaskIfTaskAlreadyExists() {
-        //given
-        testDto.setName("this is a new name");
-        long testTaskId = testDto.getTaskId();
-
-        //when
-        when(repository.existsById(testTaskId)).thenReturn(true);
-        when(repository.save(any(Task.class))).thenReturn(testTask);
-        when(mockMapper.convertTaskDto(testDto)).thenReturn(mapper.convertTaskDto(testDto));
-        when(mockMapper.convertTask(testTask)).thenReturn(mapper.convertTask(testTask));
-
-        TaskDto updated = service.updateTask(testTaskId, testDto);
-
-        //verify
-        verify(repository).existsById(testTaskId);
-        verify(repository).save(any(Task.class));
-        verifyNoMoreInteractions(repository);
-        verify(mockMapper).convertTask(testTask);
-        verifyNoMoreInteractions(mockMapper);
-
-        assertTrue(mapper.compare(testTask, updated));
-    }
-
-    @Test
-    void updatedTaskShouldThrowTaskNotFoundExceptionIfTaskDoesNotExist() {
-        //given
-        testDto.setName("this is a new name");
-        long testTaskId = testDto.getTaskId();
-
-        //when
-        when(repository.existsById(testTaskId)).thenReturn(false);
-
-        Exception e = assertThrows(
-                TaskNotFoundException.class,
-                () -> service.updateTask(testTaskId, testDto));
-
-        //verify
-        verify(repository).existsById(testTaskId);
-        verifyNoMoreInteractions(repository);
-        verifyNoInteractions(mockMapper);
-
-    }
-
-
-
-
+    // verify
+    assertEquals(taskDto.getName(), task.getName());
+    assertEquals(taskDto.getDescription(), task.getDescription());
+  }
 }

@@ -4,8 +4,8 @@ import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.mapper.TaskMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
+import com.chilborne.todoapi.persistance.model.User;
 import com.chilborne.todoapi.service.TaskServiceImpl;
-import com.chilborne.todoapi.web.controller.v1.TaskController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,26 +46,37 @@ class TaskControllerTest {
     ArgumentCaptor<TaskDto> taskCaptor;
 
     TaskMapper mapper = TaskMapper.INSTANCE;
+    private Task testTask;
+    private ToDoList testList;
+    private User testUser;
 
-    Task testTask;
+    private static final String USERNAME = "username1";
+    private static final String PASSWORD = "secret";
+
 
     static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     @BeforeEach
     void init() {
-        ToDoList testList = new ToDoList("test list");
         testTask = new Task(testList, "test task");
         testTask.setTimeCreated(LocalDateTime.now());
+
+        testList = new ToDoList("ToDoList");
+        testList.addTask(testTask);
+        testList.setUser(testUser);
+
+        testUser = new User(USERNAME, PASSWORD);
+        testUser.addToDoList(testList);
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void getTask() throws Exception {
         //given
         String timeCreated = testTask.getTimeCreated().format(formatter);
 
         //when
-        when(service.getTaskById(50L)).thenReturn(mapper.convertTask(testTask));
+        when(service.getTaskDtoById(50L)).thenReturn(mapper.convertTask(testTask));
 
         //verify
         mvc.perform(
@@ -78,15 +89,16 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.task_id").value(testTask.getId()))
                 .andExpect(jsonPath("$.date_time_made").value(timeCreated));
 
-        verify(service).getTaskById(50L);
+        verify(service).getTaskDtoById(50L);
         verifyNoMoreInteractions(service);
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void completeTask() throws Exception {
         //given
-        testTask.complete();
+        testTask.setActive(false);
+        testTask.setTimeCompleted(LocalDateTime.now());
         String timeCompleted = testTask.getTimeCompleted().format(formatter);
 
         //when
@@ -108,7 +120,7 @@ class TaskControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void updateTaskShouldReturnUpdatedTask() throws Exception {
         //given
         String taskJson = """
@@ -121,10 +133,10 @@ class TaskControllerTest {
         testTask.setDescription("new description");
 
         //when
-        when(service.updateTask(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTask(testTask));
+        when(service.updateTaskNameAndDescription(anyLong(), any(TaskDto.class))).thenReturn(mapper.convertTask(testTask));
 
         mvc.perform(
-                put("/api/v1/task/{id}", testTask.getId())
+                patch("/api/v1/task/{id}", testTask.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
         )
@@ -133,7 +145,7 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.name").value("new name"))
                 .andExpect(jsonPath("$.description").value("new description"));
 
-        verify(service).updateTask(idCaptor.capture(), taskCaptor.capture());
+        verify(service).updateTaskNameAndDescription(idCaptor.capture(), taskCaptor.capture());
         verifyNoMoreInteractions(service);
 
         long passedId = idCaptor.getValue();

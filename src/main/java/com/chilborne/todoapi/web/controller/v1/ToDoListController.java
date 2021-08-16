@@ -22,13 +22,11 @@ import java.util.List;
 
 @Api(value = "To Do List Controller")
 @RestController
-@RequestMapping(path = "api/v1/list", consumes = "application/json", produces = "application/json")
+@RequestMapping(path = "api/v1/list")
 public class ToDoListController {
 
   public static final String TO_DO_LIST_ROOT_URL = "http://localhost:8080/vi/list";
-
   private final ToDoListService service;
-
   private final Logger logger = LoggerFactory.getLogger(ToDoListController.class);
 
   public ToDoListController(ToDoListServiceImpl service) {
@@ -40,19 +38,21 @@ public class ToDoListController {
       value = {
         @ApiResponse(
             code = 404,
-            message = "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
+            message =
+                "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
       })
-  @GetMapping(value = "/{id}")
+  @GetMapping(path = "/{id}", produces = "application/json")
   public ResponseEntity<ToDoListDto> getToDoListById(@PathVariable long id, Principal principal) {
     logger.info("Processing GET Request for ToDoList (id: " + id + ")");
-    ToDoListDto result = service.getToDoListDtoByIdAndUsername(id, principal.getName());
+    ToDoListDto result = service.getToDoListDtoById(id, principal.getName());
     return ResponseEntity.ok(result);
   }
 
   @ApiOperation(value = "Find All to_do_lit belonging to logged in user")
-  @GetMapping(value = "/all")
+  @GetMapping(path = "/all", produces = "application/json")
   public ResponseEntity<List<ToDoListDto>> getAllToDoLists(Principal principal) {
-    logger.debug("Processing GET Request for all ToDoLists beloning to User:{}", principal.getName());
+    logger.debug(
+        "Processing GET Request for all ToDoLists beloning to User:{}", principal.getName());
     List<ToDoListDto> result = service.getAllToDoList(principal.getName());
     return ResponseEntity.ok(result);
   }
@@ -64,18 +64,18 @@ public class ToDoListController {
             code = 400,
             message = "InvalidDataException: { {to_do_list_property} : {constraint_message} }")
       })
-  @PostMapping(value = "")
+  @PostMapping(path = "", produces = "application/json", consumes = "application/json")
   @Validated({OnPersist.class})
-  public ResponseEntity<ToDoListDto> newToDoList(@Valid @RequestBody ToDoListDto list, Principal principal) {
+  public ResponseEntity<ToDoListDto> newToDoList(
+      @Valid @RequestBody ToDoListDto list, Principal principal) {
     logger.info("Processing POST request for new ToDoList");
     ToDoListDto result = service.newToDoList(list, principal.getName());
     return ResponseEntity.status(HttpStatus.CREATED).body(result);
   }
 
   @ApiOperation(
-      value = "Update to_do_list",
+      value = "Update to_do_list name and description",
       notes = "Any fields provided will be updated, except list_id and date_time_created")
-  @PutMapping(value = "/{id}")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -85,10 +85,12 @@ public class ToDoListController {
             code = 400,
             message = "InvalidDataException: { {to_do_list_property} : {constraint_message} }")
       })
-  public ResponseEntity<ToDoListDto> updateToDoList(
+  @PutMapping(path = "/{id}", produces = "application/json", consumes = "application/json")
+  public ResponseEntity<ToDoListDto> updateToDoListNameAndDescription(
       @PathVariable long id, @Valid @RequestBody ToDoListDto toDoList, Principal principal) {
     logger.info("Processing PUT Request to update ToDoList:{} to {}", id, toDoList.toString());
-    ToDoListDto result = service.updateToDoList(id, toDoList, principal.getName());
+    ToDoListDto result =
+        service.updateToDoListNameAndDescription(id, toDoList, principal.getName());
     return ResponseEntity.ok(result);
   }
 
@@ -97,7 +99,8 @@ public class ToDoListController {
       value = {
         @ApiResponse(
             code = 404,
-            message = "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
+            message =
+                "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
       })
   @DeleteMapping(value = "/{id}")
   public ResponseEntity deleteToDoList(@PathVariable long id, Principal principal) {
@@ -111,9 +114,10 @@ public class ToDoListController {
       value = {
         @ApiResponse(
             code = 404,
-            message = "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
+            message =
+                "ToDoListNotFoundException -> to_do_list with id:{id} belonging to User:{username} not found")
       })
-  @PatchMapping(value = "/{id}/active/{active}")
+  @PatchMapping(path = "/{id}/active/{active}", produces = "application/json")
   public ResponseEntity<ToDoListDto> setActive(
       @PathVariable long id, @PathVariable boolean active, Principal principal) {
     logger.info(String.format("Setting Active of ToDoList (id: %d) to %b", id, active));
@@ -123,7 +127,7 @@ public class ToDoListController {
 
   @ApiOperation(
       value = "Add a new task to to_do_list",
-      notes = "Must provide Task to be added in Request Body")
+      notes = "Must provide task to be added in Request Body")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -133,7 +137,7 @@ public class ToDoListController {
             code = 400,
             message = "InvalidDataException: { {task_property} : {constraint_message} }")
       })
-  @PatchMapping(value = "/{id}/task/add")
+  @PatchMapping(path = "/{id}/task/add", produces = "application/json", consumes = "application/json")
   @Validated({OnPersist.class})
   public ResponseEntity<ToDoListDto> addTaskToList(
       @PathVariable long id, @Valid @RequestBody TaskDto task, Principal principal) {
@@ -156,11 +160,11 @@ public class ToDoListController {
             message =
                 "TaskNotFoundException -> to_do_list with id:{list_id} does not contain task with id:{task_id}")
       })
-  @PatchMapping(value = "/{listId}/task/remove/{taskId}")
+  @PatchMapping(path = "/{listId}/task/remove/{taskId}", produces = "application/json")
   public ResponseEntity<ToDoListDto> removeTaskFromList(
       @PathVariable long listId, @PathVariable long taskId, Principal principal) {
     logger.info(String.format("Removing Task with id %d from ToDoList with id %d", taskId, listId));
-    ToDoListDto result = service.removeTaskToDoList(listId, principal.getName(), taskId);
+    ToDoListDto result = service.removeTaskFromToDoList(listId, principal.getName(), taskId);
     return ResponseEntity.ok(result);
   }
 }

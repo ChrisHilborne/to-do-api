@@ -7,6 +7,9 @@ import com.chilborne.todoapi.web.error.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,6 +24,14 @@ import java.util.HashMap;
 public class ExceptionControllerAdvisor {
 
   private final Logger logger = LoggerFactory.getLogger(ExceptionControllerAdvisor.class);
+
+  @ExceptionHandler({AccessDeniedException.class})
+  public ErrorResponse handleAccessDeniedException(HttpServletRequest request, Exception e) {
+    String username =
+        ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails()).getUsername();
+    logger.error("Request: {} - made by User {} - raised {}", request, username, e);
+    return new ErrorResponse(HttpStatus.FORBIDDEN, e);
+  }
 
   @ExceptionHandler({DataNotFoundException.class})
   public ErrorResponse handleDataNotFoundException(HttpServletRequest req, Exception e) {

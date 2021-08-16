@@ -12,12 +12,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Configuration
+@Component
 @Profile("!test")
-public class BootstrapData {
+public class BootstrapData implements CommandLineRunner {
 
   private final ToDoListRepository toDoListRepository;
   private final UserRepository userRepository;
@@ -33,9 +34,8 @@ public class BootstrapData {
     this.encoder = encoder;
   }
 
-  @Bean
-  CommandLineRunner init() {
-    return args -> {
+  @Override
+  public void run(String... args) throws Exception {
       logger.debug("Bootstrapping data...");
       User user = new User("user", encoder.encode("password"), "email@test.com");
 
@@ -49,6 +49,6 @@ public class BootstrapData {
       userRepository.save(user);
       toDoListRepository.save(toDoList);
       logger.debug("Data bootstrapped.");
-    };
   }
+
 }

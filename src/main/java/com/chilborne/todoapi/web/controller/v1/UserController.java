@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 
 @Validated
 @RestController
-@RequestMapping(path = "api/v1/user", consumes = "application/json", produces = "application/json")
+@RequestMapping(path = "api/v1/user")
 public class UserController {
 
   private final UserService service;
@@ -25,29 +25,29 @@ public class UserController {
     this.service = service;
   }
 
-  @GetMapping(path = "/{username}")
+  @GetMapping(path = "/{username}", produces = "application/json")
   public ResponseEntity<UserDto> getUser(@PathVariable String username) {
     logger.info("Fetching User: {}", username);
     UserDto user = service.getUserByUsername(username);
     return ResponseEntity.ok(user);
   }
 
-  @PostMapping(path = "/register")
+  @PostMapping(path = "/register", produces = "application/json", consumes = "application/json")
   public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto user) {
     logger.info("Creating new User: {}", user.getUsername());
     UserDto newUser = service.createUser(user);
     return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
   }
 
-  @PatchMapping(path = "/{oldUsername}/username")
+  @PatchMapping(path = "/{username}/username", produces = "application/json")
   public ResponseEntity<UserDto> changeUsername(
-      @PathVariable String oldUsername, @RequestBody @NotBlank(message = "username cannot be blank") String username) {
-    logger.info("Changing User: {} username to {}", oldUsername, username);
-    UserDto updatedUser = service.changeUsername(oldUsername, username);
+      @PathVariable String username, @RequestBody @NotBlank(message = "username cannot be blank") String newUsername) {
+    logger.info("Changing User: {} username to {}", username, newUsername);
+    UserDto updatedUser = service.changeUsername(username, newUsername);
     return ResponseEntity.ok(updatedUser);
   }
 
-  @PatchMapping(path = "/{username}/password")
+  @PatchMapping(path = "/{username}/password", produces = "application/json", consumes = "application/json")
   public ResponseEntity changePassword(
       @PathVariable String username,
       @RequestBody @NotBlank(message = "password cannot be blank") String password) {
@@ -57,7 +57,7 @@ public class UserController {
   }
 
   @Validated
-  @PatchMapping(path = "/{username}/email")
+  @PatchMapping(path = "/{username}/email", produces = "application/json")
   public ResponseEntity<UserDto> changeEmail(
       @PathVariable String username,
       @RequestBody @Email(message = "Email provided is not valid") String email) {

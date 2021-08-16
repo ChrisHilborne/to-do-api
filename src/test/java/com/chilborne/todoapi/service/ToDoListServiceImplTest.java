@@ -30,7 +30,7 @@ class ToDoListServiceImplTest {
   static final String USERNAME = "user";
   static final String PASSWORD = "password";
   static final LocalDateTime NOW = LocalDateTime.now();
-  @Mock ToDoListRepository repository;
+  @Mock ToDoListRepository toDoListRepository;
   @Mock ToDoListMapper mockListMapper;
   @Mock TaskMapper mockTaskMapper;
   @InjectMocks ToDoListServiceImpl service;
@@ -58,15 +58,15 @@ class ToDoListServiceImplTest {
   @Test
   void saveToDoList() {
     // given
-    given(repository.save(testList)).willReturn(testList);
+    given(toDoListRepository.save(testList)).willReturn(testList);
     given(mockListMapper.convertToDoList(testList)).willReturn(testDto);
 
     // when
     ToDoListDto result = service.saveToDoList(testList);
 
     // verify
-    verify(repository).save(testList);
-    verifyNoMoreInteractions(repository);
+    verify(toDoListRepository).save(testList);
+    verifyNoMoreInteractions(toDoListRepository);
     verify(mockListMapper).convertToDoList(testList);
     verifyNoMoreInteractions(mockListMapper);
     assertTrue(toDoListMapper.compare(testList, result));
@@ -75,12 +75,12 @@ class ToDoListServiceImplTest {
   @Test
   void getToDoListById_Success() {
     // given
-    given(repository.findByIdAndUserUsername(1L, USERNAME))
+    given(toDoListRepository.findByIdAndUserUsername(1L, USERNAME))
         .willReturn(Optional.ofNullable(testList));
     given(mockListMapper.convertToDoList(testList)).willReturn(testDto);
 
     // when
-    ToDoListDto result = service.getToDoListDtoByIdAndUsername(1L, USERNAME);
+    ToDoListDto result = service.getToDoListDtoById(1L, USERNAME);
 
     // verify
     assertTrue(toDoListMapper.compare(testList, result));
@@ -89,24 +89,24 @@ class ToDoListServiceImplTest {
   @Test
   void getToDoListById_Fail() {
     // given
-    given(repository.findByIdAndUserUsername(1L, USERNAME)).willReturn(Optional.empty());
+    given(toDoListRepository.findByIdAndUserUsername(1L, USERNAME)).willReturn(Optional.empty());
 
     // verify
-    assertThrows(RuntimeException.class, () -> service.getToDoListDtoByIdAndUsername(1L, USERNAME));
+    assertThrows(RuntimeException.class, () -> service.getToDoListDtoById(1L, USERNAME));
   }
 
   @Test
   void getAllToDoList() {
     // given
-    given(repository.findByUserUsername(USERNAME)).willReturn(List.of(testList));
+    given(toDoListRepository.findByUserUsername(USERNAME)).willReturn(List.of(testList));
     given(mockListMapper.convertToDoList(testList)).willReturn(testDto);
 
     // when
     List<ToDoListDto> result = service.getAllToDoList(USERNAME);
 
     // verify
-    verify(repository, times(1)).findByUserUsername(USERNAME);
-    verifyNoMoreInteractions(repository);
+    verify(toDoListRepository, times(1)).findByUserUsername(USERNAME);
+    verifyNoMoreInteractions(toDoListRepository);
 
     verify(mockListMapper).convertToDoList(testList);
     verifyNoMoreInteractions(mockListMapper);
@@ -118,19 +118,19 @@ class ToDoListServiceImplTest {
   @Test
   void deleteToDoListShouldDeleteListWhenItExistsAndBelongsToUser() {
     // given
-    given(repository.existsByIdAndUserUsername(1L, USERNAME)).willReturn(true);
+    given(toDoListRepository.existsByIdAndUserUsername(1L, USERNAME)).willReturn(true);
 
     // when
     service.deleteToDoList(1L, USERNAME);
 
     // verify
-    verify(repository, times(1)).deleteById(1L);
+    verify(toDoListRepository, times(1)).deleteById(1L);
   }
 
   @Test
   void deleteToDoListShouldThrowToDoListNotFoundExceptionIfListDoesNotExist() {
     // given
-    given(repository.existsByIdAndUserUsername(1L, user.getUsername())).willReturn(false);
+    given(toDoListRepository.existsByIdAndUserUsername(1L, user.getUsername())).willReturn(false);
 
     // verify
     assertThrows(ToDoListNotFoundException.class, () -> service.deleteToDoList(1L, USERNAME));
@@ -144,9 +144,9 @@ class ToDoListServiceImplTest {
     deactivated.setActive(false);
     ToDoListDto deactivatedDto = toDoListMapper.convertToDoList(deactivated);
 
-    given(repository.findByIdAndUserUsername(1L, USERNAME))
+    given(toDoListRepository.findByIdAndUserUsername(1L, USERNAME))
         .willReturn(Optional.ofNullable(testList));
-    given(repository.save(any(ToDoList.class))).willReturn(deactivated);
+    given(toDoListRepository.save(any(ToDoList.class))).willReturn(deactivated);
     given(mockListMapper.convertToDoList(deactivated)).willReturn(deactivatedDto);
 
     // when
@@ -167,10 +167,10 @@ class ToDoListServiceImplTest {
     listWithThirdTask.addTask(thirdTask);
     ToDoListDto listWithThirdTaskDto = toDoListMapper.convertToDoList(listWithThirdTask);
 
-    given(repository.findByIdAndUserUsername(1L, USERNAME))
+    given(toDoListRepository.findByIdAndUserUsername(1L, USERNAME))
         .willReturn(Optional.ofNullable(testList));
     given(mockTaskMapper.convertTaskDto(thirdTaskDto)).willReturn(thirdTask);
-    given(repository.save(any(ToDoList.class))).willReturn(listWithThirdTask);
+    given(toDoListRepository.save(any(ToDoList.class))).willReturn(listWithThirdTask);
     given(mockListMapper.convertToDoList(listWithThirdTask)).willReturn(listWithThirdTaskDto);
 
     // when
@@ -195,12 +195,12 @@ class ToDoListServiceImplTest {
     ToDoListDto minusTaskDto = toDoListMapper.convertToDoList(minusTask);
 
     // when
-    when(repository.findByIdAndUserUsername(1L, USERNAME))
+    when(toDoListRepository.findByIdAndUserUsername(1L, USERNAME))
         .thenReturn(Optional.ofNullable(testList));
-    when(repository.save(any(ToDoList.class))).thenReturn(minusTask);
+    when(toDoListRepository.save(any(ToDoList.class))).thenReturn(minusTask);
     when(mockListMapper.convertToDoList(minusTask)).thenReturn(minusTaskDto);
 
-    ToDoListDto result = service.removeTaskToDoList(1L, USERNAME, toRemove.getId());
+    ToDoListDto result = service.removeTaskFromToDoList(1L, USERNAME, toRemove.getId());
 
     // verify
     assertTrue(toDoListMapper.compare(minusTask, result));
@@ -209,40 +209,31 @@ class ToDoListServiceImplTest {
   @Test
   void removeTaskShouldThrowExceptionIfTaskIsNotPresentInList() {
     // when
-    when(repository.findByIdAndUserUsername(0L, USERNAME))
+    when(toDoListRepository.findByIdAndUserUsername(0L, USERNAME))
         .thenReturn(Optional.ofNullable(testList));
 
     // verify
     assertThrows(
-        RuntimeException.class, () -> service.removeTaskToDoList(testList.getId(), USERNAME, 500L));
+        RuntimeException.class, () -> service.removeTaskFromToDoList(testList.getId(), USERNAME, 500L));
   }
 
   @Test
-  void updateListShouldReturnUpdatedToDoListIfItAlreadyExists() {
+  void updateListShouldUpdateToDoListIfItAlreadyExists() {
     // given
-    testList.setName("this is another name");
-    testDto = toDoListMapper.convertToDoList(testList);
-
+    testDto.setName("this is another name");
+    testDto.setDescription("this is another description");
     long testListId = testList.getId();
 
     // when
-    when(repository.existsById(testListId)).thenReturn(true);
-    when(mockListMapper.convertListDto(testDto)).thenReturn(testList);
-    when(repository.save(testList)).thenReturn(testList);
+    when(toDoListRepository.findByIdAndUserUsername(testListId, USERNAME)).thenReturn(Optional.of(testList));
+    when(toDoListRepository.save(any(ToDoList.class))).thenReturn(testList);
     when(mockListMapper.convertToDoList(testList)).thenReturn(testDto);
 
-    ToDoListDto updated = service.updateToDoList(testListId, testDto, USERNAME);
+    ToDoListDto updated = service.updateToDoListNameAndDescription(testListId, testDto, USERNAME);
 
     // verify
-    verify(repository).existsById(testListId);
-    verify(repository).save(testList);
-    verifyNoMoreInteractions(repository);
-
-    verify(mockListMapper).convertListDto(testDto);
-    verify(mockListMapper).convertToDoList(testList);
-    verifyNoMoreInteractions(mockListMapper);
-
-    assertTrue(toDoListMapper.compare(testList, updated));
+    assertEquals(testDto.getName(), testList.getName());
+    assertEquals(testDto.getDescription(), testList.getDescription());
   }
 
   @Test
@@ -254,20 +245,18 @@ class ToDoListServiceImplTest {
     long testListId = testDto.getListId();
 
     // when
-    when(repository.existsById(testListId)).thenReturn(false);
+    when(toDoListRepository.findByIdAndUserUsername(testListId, USERNAME)).thenReturn(Optional.empty());
 
     // verify
     assertThrows(
-        ToDoListNotFoundException.class, () -> service.updateToDoList(testListId, testDto, USERNAME));
-    verify(repository).existsById(testListId);
-    verifyNoMoreInteractions(repository);
+        ToDoListNotFoundException.class, () -> service.updateToDoListNameAndDescription(testListId, testDto, USERNAME));
   }
 
   @Test
   void
       getToDoListByIdAndUsernameShouldReturnToDoListWithPassedIdBelongingToUserWithPassedUsername() {
     // given
-    given(repository.findByIdAndUserUsername(testList.getId(), user.getUsername()))
+    given(toDoListRepository.findByIdAndUserUsername(testList.getId(), user.getUsername()))
         .willReturn(Optional.of(testList));
 
     // when
@@ -281,7 +270,7 @@ class ToDoListServiceImplTest {
   void
       getToDoListByIdAndUsernameShouldThrowToDoListNotFoundExceptionWhenRepositoryReturnsEmptyOptional() {
     // given
-    given(repository.findByIdAndUserUsername(testList.getId(), user.getUsername()))
+    given(toDoListRepository.findByIdAndUserUsername(testList.getId(), user.getUsername()))
         .willReturn(Optional.empty());
 
     // verify

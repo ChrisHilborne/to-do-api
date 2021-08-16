@@ -3,39 +3,37 @@ package com.chilborne.todoapi.service;
 import com.chilborne.todoapi.exception.UsernameAlreadyExistsException;
 import com.chilborne.todoapi.persistance.dto.UserDto;
 import com.chilborne.todoapi.persistance.model.User;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.Email;
 
-public interface UserService extends UserDetailsService {
+public interface UserService {
 
   @Transactional(readOnly = true)
-  @PreAuthorize("#username == authentication.principal.username")
-  UserDto getUserByUsername(String username);
+  UserDto getUserByUsername(String username) throws UsernameNotFoundException, AccessDeniedException;
+
+  User getUserIfAuthorized(String username);
 
   @Transactional
-  UserDto createUser(UserDto dto);
-
-  User getUser(String username);
+  UserDto createUser(UserDto dto) throws UsernameAlreadyExistsException;
 
   @Transactional
-  @PreAuthorize("#oldUsername == authentication.principal.username")
-  UserDto changeUsername(String oldUsername, String newUsername);
+  UserDto changeUsername(String oldUsername, String newUsername) throws UsernameAlreadyExistsException, AccessDeniedException;
 
   @Transactional
-  @PreAuthorize("#username == authentication.principal.username")
-  UserDto changeEmail(String username, @Email String email);
+  UserDto changeEmail(String username, @Email String email) throws AccessDeniedException;
 
   @Transactional
-  @PreAuthorize("#username == authentication.principal.username")
-  void deleteUser(String username);
+  void deleteUser(String username) throws UsernameNotFoundException, AccessDeniedException;
 
   @Transactional
-  @PreAuthorize("#username == authentication.principal.username")
-  void changePassword(String username, String newPwd);
+  void changePassword(String username, String newPwd) throws AccessDeniedException;
 
   @Transactional(readOnly = true)
-  boolean isUsernameUnique(String username) throws UsernameAlreadyExistsException;
+  boolean isUsernameUnique(String username);
+
+  void checkUserAccess(User user);
 }

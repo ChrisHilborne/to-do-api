@@ -6,11 +6,12 @@ import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.persistance.model.Task;
 
 public interface TaskService {
-    TaskDto getTaskById(long id) throws TaskNotFoundException;
 
-    TaskDto saveTask(Task task);
+  TaskDto getTaskDtoById(long id) throws TaskNotFoundException;
 
-    TaskDto completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException;
+  TaskDto completeTask(long id) throws TaskNotFoundException, TaskAlreadyCompletedException;
 
-    TaskDto updateTask(long id, TaskDto task);
+  TaskDto updateTaskNameAndDescription(long id, TaskDto task);
+
+  void checkTaskAccess(Task task);
 }
