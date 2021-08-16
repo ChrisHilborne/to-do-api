@@ -6,6 +6,7 @@ import com.chilborne.todoapi.persistance.mapper.UserMapper;
 import com.chilborne.todoapi.persistance.model.User;
 import com.chilborne.todoapi.persistance.repository.UserRepository;
 import com.chilborne.todoapi.security.UserPrincipal;
+import com.chilborne.todoapi.security.access.UserAccessManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,7 @@ class UserServiceImplTest {
   static final String EMAIL = "send@me.mail";
   @Mock UserRepository repository;
   @Mock UserMapper mapper;
+  @Mock UserAccessManager accessManager;
   @Mock PasswordEncoder passwordEncoder;
   @InjectMocks UserServiceImpl service;
   @Captor ArgumentCaptor<User> userCaptor;

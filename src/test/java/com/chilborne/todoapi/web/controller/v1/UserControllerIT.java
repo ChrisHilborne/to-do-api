@@ -56,14 +56,14 @@ class UserControllerIT {
 
   @Test
   @WithMockUser(
-      username = USERNAME,
-      password = PASSWORD)
+          username = USERNAME,
+          password = PASSWORD
+  )
   void getUserShouldReturnUserDtoWith200StatusWhenUserWithCorrectUsernameAndRoleMakesRequest()
       throws Exception {
     //when
     mvc.perform(
             get("/api/v1/user/{username}", USERNAME)
-                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         //verify
         .andExpect(status().isOk())
@@ -240,11 +240,14 @@ class UserControllerIT {
   @Test
   @WithMockUser(username = "fails", password = PASSWORD)
   void changeUsernameShouldReturnForbiddenWhenUserDoesNotHaveAccess() throws Exception {
+    //given
+    String newUsername = "new username";
+
     //when
     mvc.perform(
             patch("/api/v1/user/{username}/username", USERNAME)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(USERNAME)
+                    .content(newUsername)
                     .accept(MediaType.APPLICATION_JSON)
     )
             .andExpect(status().isForbidden());

@@ -7,6 +7,6 @@ public class TaskNotFoundException extends DataNotFoundException {
     }
 
     public TaskNotFoundException(long id) {
-        super("Task with id:" + id + " not found");
+        super("No Task with id: " + id + " found");
     }
 }

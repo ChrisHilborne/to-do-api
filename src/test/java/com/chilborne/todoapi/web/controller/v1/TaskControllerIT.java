@@ -1,7 +1,11 @@
 package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.model.Task;
+import com.chilborne.todoapi.persistance.model.ToDoList;
+import com.chilborne.todoapi.persistance.model.User;
 import com.chilborne.todoapi.persistance.repository.TaskRepository;
+import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
+import com.chilborne.todoapi.persistance.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import java.time.format.DateTimeFormatter;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,31 +31,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class TaskControllerIT {
 
-    @Autowired
-    MockMvc mvc;
+    private static final String USERNAME = "user name";
+    private static final String PASSWORD = "secr3t";
+    private User testUser;
+    private ToDoList testList;
+    private Task testTask;
+    private long ID;
 
-    @Autowired
-    TaskRepository repository;
-
-    Task testTask;
-    long ID;
-
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    @Autowired MockMvc mvc;
+    @Autowired TaskRepository taskRepository;
+    @Autowired ToDoListRepository toDoListRepository;
+    @Autowired UserRepository userRepository;
 
     @BeforeEach
     void initialiseTaskData() {
         testTask = new Task("test task");
-        repository.save(testTask);
+        testList = new ToDoList("test list");
+        testUser = new User(USERNAME, PASSWORD);
+
+        testTask.setToDoList(testList);
+        testList.addTask(testTask);
+        testList.setUser(testUser);
+        testUser.addToDoList(testList);
+
+        userRepository.save(testUser);
+        toDoListRepository.save(testList);
+        taskRepository.save(testTask);
         ID = testTask.getId();
     }
 
     @AfterEach
     void tearDownTaskData() {
-        repository.deleteAll();
+        userRepository.deleteAll();
+        toDoListRepository.deleteAll();
+        taskRepository.deleteAll();
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void getTaskShouldReturnTaskWhenTheTaskExists() throws Exception {
         //when
         mvc.perform(
@@ -66,7 +83,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void getTaskByIdShouldReturn404WithErrorMessageWhenTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
@@ -81,7 +98,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void completeTaskShouldReturnCompletedTaskWhenTaskExistsAndHasNotBeenCompletedBefore() throws Exception {
         //when
         mvc.perform(
@@ -93,18 +110,15 @@ public class TaskControllerIT {
                 .andExpect(jsonPath("$.active").value(false))
                 .andExpect(jsonPath("$.date_time_finished").isNotEmpty());
 
-        //check DB has been updated
-        testTask.complete();
-        Task savedTask = repository.findById(ID).get();
-        assertTrue(savedTask.equals(testTask));
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void completeTaskShouldReturn208IfTaskExistsButHasAlreadyBeenCompleted() throws Exception {
         //given
-        testTask.complete();
-        repository.save(testTask);
+        testTask.setActive(false);
+        testTask.setTimeCompleted(LocalDateTime.now());
+        taskRepository.save(testTask);
 
         //when
         mvc.perform(
@@ -118,7 +132,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void completeTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //when
         mvc.perform(
@@ -133,7 +147,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void updateTaskShouldReturnUpdatedTaskWhenTaskExists() throws Exception {
         //given
         String taskJson = """
@@ -145,7 +159,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/api/v1/task/{id}", ID)
+                patch("/api/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -156,7 +170,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void updateTaskShouldReturn404IfTaskDoesNotExist() throws Exception {
         //given
         String taskJson = """
@@ -168,7 +182,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/api/v1/task/{id}", 50)
+                patch("/api/v1/task/{id}", 50)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)
@@ -178,7 +192,7 @@ public class TaskControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void updateTaskShouldReturn400IfInputsAreNotValid() throws Exception {
         //given
         String taskJson = """
@@ -190,7 +204,7 @@ public class TaskControllerIT {
 
         //when
         mvc.perform(
-                put("/api/v1/task/{id}", ID)
+                patch("/api/v1/task/{id}", ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(taskJson)
                         .accept(MediaType.APPLICATION_JSON)

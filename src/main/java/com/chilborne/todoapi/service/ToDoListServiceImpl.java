@@ -52,7 +52,7 @@ public class ToDoListServiceImpl implements ToDoListService {
   public ToDoListDto newToDoList(ToDoListDto listDto, String username) {
     logger.info("Saving ToDoList: {} to User: {}", listDto.getName(), username);
     ToDoList toSave = toDoListMapper.convertListDto(listDto);
-    User user = userService.getUser(username);
+    User user = userService.getUserIfAuthorized(username);
     toSave.setUser(user);
     ToDoList saved = repository.save(toSave);
     return toDoListMapper.convertToDoList(saved);
@@ -60,7 +60,7 @@ public class ToDoListServiceImpl implements ToDoListService {
 
   @Override
   @Transactional(readOnly = true)
-  public ToDoListDto getToDoListDtoByIdAndUsername(long id, String username) throws ToDoListNotFoundException {
+  public ToDoListDto getToDoListDtoById(long id, String username) throws ToDoListNotFoundException {
     logger.info("Fetching ToDoList with id: " + id);
     ToDoList result = getToDoListByIdAndUsername(id, username);
     return toDoListMapper.convertToDoList(result);
@@ -81,17 +81,16 @@ public class ToDoListServiceImpl implements ToDoListService {
     logger.info("Deleting ToDoList:{} belonging to User:{}", id, username);
     if (existsByIdAndUsername(id, username)) {
       repository.deleteById(id);
-      }
+    }
   }
 
   @Override
-  public ToDoListDto updateToDoList(long id, ToDoListDto listDto, String username) {
-    repository.existsByIdAndUserUsername(id, username);
-    ToDoList toUpdate = toDoListMapper.convertListDto(listDto);
-    toUpdate.setId(id);
-    User listOwner = userService.getUser(username);
-    toUpdate.setUser(listOwner);
-    return saveToDoList(toUpdate); 
+  public ToDoListDto updateToDoListNameAndDescription(
+      long id, ToDoListDto listDto, String username) {
+    ToDoList toUpdate = getToDoListByIdAndUsername(id, username);
+    toUpdate.setName(listDto.getName());
+    toUpdate.setDescription(listDto.getDescription());
+    return saveToDoList(toUpdate);
   }
 
   @Override
@@ -116,7 +115,7 @@ public class ToDoListServiceImpl implements ToDoListService {
   }
 
   @Override
-  public ToDoListDto removeTaskToDoList(long listId, String username, long taskId)
+  public ToDoListDto removeTaskFromToDoList(long listId, String username, long taskId)
       throws TaskNotFoundException {
     logger.info(String.format("Removing Task (id: %d) from ToDoList (id; %d)", taskId, listId));
     ToDoList toUpdate = getToDoListByIdAndUsername(listId, username);
@@ -127,29 +126,23 @@ public class ToDoListServiceImpl implements ToDoListService {
           String.format("list with id:%d does not contain task with id:%d", listId, taskId));
   }
 
-  /**
-   * Private method to return ToDoList object with null check to methods in ToDoListService. Allows
-   * us to avoid multiple uses of ToDoListMapper.
-   */
-  private ToDoList getToDoList(long id) throws ToDoListNotFoundException {
-    logger.info("Getting ToDoList with id: " + id);
-    return repository.findById(id).orElseThrow(() -> new ToDoListNotFoundException(id));
-  }
-
-  ToDoList getToDoListByIdAndUsername(long id, String username)
-      throws ToDoListNotFoundException {
+  ToDoList getToDoListByIdAndUsername(long id, String username) throws ToDoListNotFoundException {
     logger.info("Getting ToDoList with id:{}, belonging to User:{}", id, username);
     return repository
         .findByIdAndUserUsername(id, username)
         .orElseThrow(() -> new ToDoListNotFoundException(id, username));
   }
 
+  @Override
+  public boolean listBelongsToUser(long listId, String username) {
+    return repository.existsByIdAndUserUsername(listId, username);
+  }
+
   private boolean existsByIdAndUsername(long id, String username) throws ToDoListNotFoundException {
     logger.debug("Checking existence of ToDoList with id:{}, belonging to User:{}", id, username);
     if (repository.existsByIdAndUserUsername(id, username)) {
       return true;
-    }
-    else {
+    } else {
       throw new ToDoListNotFoundException(id, username);
     }
   }
