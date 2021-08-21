@@ -2,17 +2,18 @@ package com.chilborne.todoapi.web.controller.v1;
 
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.service.TaskService;
+import com.chilborne.todoapi.service.ToDoListService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Api(value = "Task Controller")
 @RestController
@@ -20,11 +21,11 @@ import java.security.Principal;
 public class TaskController {
 
   public static final String TASK_ROOT_URL = "http://localhost:8080/api/v1/task";
-  private final TaskService service;
+  private final TaskService taskService;
   private final Logger logger = LoggerFactory.getLogger(TaskController.class);
 
-  public TaskController(TaskService service) {
-    this.service = service;
+  public TaskController(TaskService taskService) {
+    this.taskService = taskService;
   }
 
   @ApiOperation(value = "Find Task by Id")
@@ -37,8 +38,18 @@ public class TaskController {
   @GetMapping(path ="/{id}", produces = "application/json")
   public ResponseEntity<TaskDto> getTaskById(@PathVariable long id) {
     logger.info("Processing GET Request for Task id: " + id);
-    TaskDto result = service.getTaskDtoById(id);
+    TaskDto result = taskService.getTaskDtoById(id);
     return ResponseEntity.ok(result);
+  }
+
+  @PostMapping(path = "/", consumes = "application/json", produces = "application/json")
+  public ResponseEntity<TaskDto> newTask(
+    @RequestBody @Valid TaskDto taskDto) {
+    logger.info("Creating new Task:{} in ToDoList id:{}", taskDto.toString(), taskDto.getListId());
+    TaskDto result = taskService.newTask(taskDto);
+    return ResponseEntity
+      .status(HttpStatus.CREATED)
+      .body(result);
   }
 
   @ApiOperation(
@@ -58,7 +69,7 @@ public class TaskController {
   @PatchMapping(path = "/{id}/complete", produces = "application/json")
   public ResponseEntity<TaskDto> completeTask(@PathVariable long id) {
     logger.info("Processing PATCH Request to Complete Task id: " + id);
-    TaskDto result = service.completeTask(id);
+    TaskDto result = taskService.completeTask(id);
     return ResponseEntity.ok(result);
   }
 
@@ -76,7 +87,7 @@ public class TaskController {
   public ResponseEntity<TaskDto> updateTaskNameAndDescription(
       @PathVariable long id, @Valid @RequestBody TaskDto task) {
     logger.info("Processing PUT Request to update Task id: " + id);
-    TaskDto result = service.updateTaskNameAndDescription(id, task);
+    TaskDto result = taskService.updateTaskNameAndDescription(id, task);
     return ResponseEntity.ok(result);
   }
 }

@@ -9,6 +9,7 @@ import com.chilborne.todoapi.persistance.mapper.ToDoListMapper;
 import com.chilborne.todoapi.persistance.model.Task;
 import com.chilborne.todoapi.persistance.model.ToDoList;
 import com.chilborne.todoapi.persistance.model.User;
+import com.chilborne.todoapi.persistance.repository.TaskRepository;
 import com.chilborne.todoapi.persistance.repository.ToDoListRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +23,21 @@ import java.util.stream.Collectors;
 @Service
 public class ToDoListServiceImpl implements ToDoListService {
 
-  private final ToDoListRepository repository;
+  private final ToDoListRepository toDoListRepository;
+  private final TaskRepository taskRepository;
   private final UserService userService;
   private final ToDoListMapper toDoListMapper;
   private final TaskMapper taskMapper;
   private final Logger logger = LoggerFactory.getLogger(ToDoListServiceImpl.class);
 
   public ToDoListServiceImpl(
-      ToDoListRepository repository,
-      UserService userService,
-      ToDoListMapper toDoListMapper,
-      TaskMapper taskMapper) {
-    this.repository = repository;
+    ToDoListRepository toDoListRepository,
+    TaskRepository taskRepository,
+    UserService userService,
+    ToDoListMapper toDoListMapper,
+    TaskMapper taskMapper) {
+    this.toDoListRepository = toDoListRepository;
+    this.taskRepository = taskRepository;
     this.userService = userService;
     this.toDoListMapper = toDoListMapper;
     this.taskMapper = taskMapper;
@@ -43,8 +47,9 @@ public class ToDoListServiceImpl implements ToDoListService {
   @Transactional(propagation = Propagation.SUPPORTS)
   public ToDoListDto saveToDoList(ToDoList list) {
     logger.info("Saving ToDoList (name: " + list.getName() + ")");
-    ToDoList saved = repository.save(list);
-    return toDoListMapper.convertToDoList(saved);
+    ToDoList saved = toDoListRepository.save(list);
+    ToDoListDto savedDto = toDoListMapper.convertToDoList(saved);
+    return savedDto;
   }
 
   @Override
@@ -54,7 +59,7 @@ public class ToDoListServiceImpl implements ToDoListService {
     ToDoList toSave = toDoListMapper.convertListDto(listDto);
     User user = userService.getUserIfAuthorized(username);
     toSave.setUser(user);
-    ToDoList saved = repository.save(toSave);
+    ToDoList saved = toDoListRepository.save(toSave);
     return toDoListMapper.convertToDoList(saved);
   }
 
@@ -70,7 +75,7 @@ public class ToDoListServiceImpl implements ToDoListService {
   @Transactional(readOnly = true)
   public List<ToDoListDto> getAllToDoList(String username) {
     logger.info("Fetching all ToDoLists for User:{}", username);
-    return repository.findByUserUsername(username).stream()
+    return toDoListRepository.findByUserUsername(username).stream()
         .map(toDoListMapper::convertToDoList)
         .collect(Collectors.toList());
   }
@@ -80,7 +85,7 @@ public class ToDoListServiceImpl implements ToDoListService {
   public void deleteToDoList(long id, String username) {
     logger.info("Deleting ToDoList:{} belonging to User:{}", id, username);
     if (existsByIdAndUsername(id, username)) {
-      repository.deleteById(id);
+      toDoListRepository.deleteById(id);
     }
   }
 
@@ -110,6 +115,7 @@ public class ToDoListServiceImpl implements ToDoListService {
     ToDoList toUpdate = getToDoListByIdAndUsername(listId, username);
     Task newTask = taskMapper.convertTaskDto(taskDto);
     newTask.setToDoList(toUpdate);
+    //newTask = taskRepository.save(newTask);
     toUpdate.addTask(newTask);
     return saveToDoList(toUpdate);
   }
@@ -128,19 +134,19 @@ public class ToDoListServiceImpl implements ToDoListService {
 
   ToDoList getToDoListByIdAndUsername(long id, String username) throws ToDoListNotFoundException {
     logger.info("Getting ToDoList with id:{}, belonging to User:{}", id, username);
-    return repository
+    return toDoListRepository
         .findByIdAndUserUsername(id, username)
         .orElseThrow(() -> new ToDoListNotFoundException(id, username));
   }
 
   @Override
   public boolean listBelongsToUser(long listId, String username) {
-    return repository.existsByIdAndUserUsername(listId, username);
+    return toDoListRepository.existsByIdAndUserUsername(listId, username);
   }
 
   private boolean existsByIdAndUsername(long id, String username) throws ToDoListNotFoundException {
     logger.debug("Checking existence of ToDoList with id:{}, belonging to User:{}", id, username);
-    if (repository.existsByIdAndUserUsername(id, username)) {
+    if (toDoListRepository.existsByIdAndUserUsername(id, username)) {
       return true;
     } else {
       throw new ToDoListNotFoundException(id, username);

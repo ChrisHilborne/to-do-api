@@ -48,7 +48,7 @@ class ToDoListControllerTest {
     ArgumentCaptor<Long> idCaptor;
     @Captor
     ArgumentCaptor<Boolean> booleanCaptor;
-    ToDoListMapper toDoListMapper = ToDoListMapper.INSTANCE;
+    @Autowired ToDoListMapper toDoListMapper;
     @Autowired
     private MockMvc mvc;
     private ToDoList testList;
@@ -119,7 +119,6 @@ class ToDoListControllerTest {
                 );
         verify(service).newToDoList(dtoCaptor.capture(), eq("user"));
         verifyNoMoreInteractions(service);
-        assertTrue(toDoListMapper.compare(testList, dtoCaptor.getValue()));
     }
 
     @Test

@@ -49,7 +49,7 @@ class ToDoListTest {
     }
 
     @Test
-    void removeTaskShouldNotRemoveTaskAndReturnFalseWhenTaskIsNotPresent() {
+    void removeTaskShouldNotRemoveAnyTaskAndReturnFalseWhenTaskIsNotPresent() {
         //given
         list.setTasks(List.of(first, second));
 

@@ -20,12 +20,16 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
-@Api(value = "To Do List Controller")
+@Api(
+    value = "To Do List Controller",
+    position = 0,
+    basePath = "api/v1/list",
+    description = "Create, Read, Update and Delete to_do_lists belonging to authenticated user")
 @RestController
 @RequestMapping(path = "api/v1/list")
 public class ToDoListController {
 
-  public static final String TO_DO_LIST_ROOT_URL = "http://localhost:8080/vi/list";
+  public static final String TO_DO_LIST_ROOT_URL = "http://localhost:8080/v1/list";
   private final ToDoListService service;
   private final Logger logger = LoggerFactory.getLogger(ToDoListController.class);
 
@@ -33,7 +37,7 @@ public class ToDoListController {
     this.service = service;
   }
 
-  @ApiOperation(value = "Find to_do_list by Id")
+  @ApiOperation(value = "Find to_do_list by Id", position = 2, produces = "application/jsom")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -48,7 +52,10 @@ public class ToDoListController {
     return ResponseEntity.ok(result);
   }
 
-  @ApiOperation(value = "Find All to_do_lit belonging to logged in user")
+  @ApiOperation(
+      value = "Find all to_do_lists belonging to authenticated user",
+      position = 3,
+      produces = "application/jsom")
   @GetMapping(path = "/all", produces = "application/json")
   public ResponseEntity<List<ToDoListDto>> getAllToDoLists(Principal principal) {
     logger.debug(
@@ -57,7 +64,12 @@ public class ToDoListController {
     return ResponseEntity.ok(result);
   }
 
-  @ApiOperation(value = "New to_do_list", code = 401)
+  @ApiOperation(
+      value = "Create to_do_list",
+      code = 401,
+      position = 1,
+      consumes = "application/jsom",
+      produces = "application/jsom")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -67,15 +79,17 @@ public class ToDoListController {
   @PostMapping(path = "", produces = "application/json", consumes = "application/json")
   @Validated({OnPersist.class})
   public ResponseEntity<ToDoListDto> newToDoList(
-      @Valid @RequestBody ToDoListDto list, Principal principal) {
+      @RequestBody @Valid ToDoListDto list, Principal principal) {
     logger.info("Processing POST request for new ToDoList");
     ToDoListDto result = service.newToDoList(list, principal.getName());
     return ResponseEntity.status(HttpStatus.CREATED).body(result);
   }
 
   @ApiOperation(
-      value = "Update to_do_list name and description",
-      notes = "Any fields provided will be updated, except list_id and date_time_created")
+      value = "Update to_do_list name and/or description",
+      position = 4,
+      produces = "application/json",
+      consumes = "application/json")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -87,14 +101,16 @@ public class ToDoListController {
       })
   @PutMapping(path = "/{id}", produces = "application/json", consumes = "application/json")
   public ResponseEntity<ToDoListDto> updateToDoListNameAndDescription(
-      @PathVariable long id, @Valid @RequestBody ToDoListDto toDoList, Principal principal) {
+      @PathVariable long id,
+      @RequestBody @Valid ToDoListDto toDoList,
+      Principal principal) {
     logger.info("Processing PUT Request to update ToDoList:{} to {}", id, toDoList.toString());
     ToDoListDto result =
         service.updateToDoListNameAndDescription(id, toDoList, principal.getName());
     return ResponseEntity.ok(result);
   }
 
-  @ApiOperation(value = "Delete to_do_list")
+  @ApiOperation(value = "Delete to_do_list", position = 5)
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -109,7 +125,7 @@ public class ToDoListController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @ApiOperation(value = "Change whether to_do_list is active")
+  @ApiOperation(value = "Change whether to_do_list is active", position = 6)
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -127,6 +143,7 @@ public class ToDoListController {
 
   @ApiOperation(
       value = "Add a new task to to_do_list",
+      position = 7,
       notes = "Must provide task to be added in Request Body")
   @ApiResponses(
       value = {
@@ -137,10 +154,15 @@ public class ToDoListController {
             code = 400,
             message = "InvalidDataException: { {task_property} : {constraint_message} }")
       })
-  @PatchMapping(path = "/{id}/task/add", produces = "application/json", consumes = "application/json")
+  @PatchMapping(
+      path = "/{id}/task/add",
+      produces = "application/json",
+      consumes = "application/json")
   @Validated({OnPersist.class})
   public ResponseEntity<ToDoListDto> addTaskToList(
-      @PathVariable long id, @Valid @RequestBody TaskDto task, Principal principal) {
+      @PathVariable long id,
+      @RequestBody @Valid TaskDto task,
+      Principal principal) {
     logger.info(
         String.format(
             "Processing PATCH Request to add new Task (name: %s) to ToDoList (id: %d)",
@@ -149,7 +171,7 @@ public class ToDoListController {
     return ResponseEntity.ok(result);
   }
 
-  @ApiOperation(value = "Delete task from to_do_list")
+  @ApiOperation(value = "Delete task from to_do_list", position = 8)
   @ApiResponses(
       value = {
         @ApiResponse(
