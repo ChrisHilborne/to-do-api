@@ -230,7 +230,9 @@ public class ToDoListControllerIT {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tasks[1].name").value("task 2"))
-                .andExpect(jsonPath("$.tasks[1].description").value("task description"));
+                .andExpect(jsonPath("$.tasks[1].description").value("task description"))
+                .andExpect(jsonPath("$.tasks[1].task_id").value(String.valueOf(taskId + 1)))
+                .andExpect(jsonPath("$.tasks[1].list_id").value(listId));
     }
 
     @Test
