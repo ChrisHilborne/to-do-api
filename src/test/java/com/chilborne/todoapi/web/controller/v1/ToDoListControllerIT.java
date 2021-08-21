@@ -33,12 +33,9 @@ public class ToDoListControllerIT {
     static final String USERNAME = "name";
     static final String PASSWORD = "secret";
     static final String EMAIL = "please@mail.me";
-    @Autowired
-    MockMvc mvc;
-    @Autowired
-    ToDoListRepository listRepository;
-    @Autowired
-    UserRepository userRepository;
+    @Autowired MockMvc mvc;
+    @Autowired ToDoListRepository listRepository;
+    @Autowired UserRepository userRepository;
     ToDoList list;
     long listId;
     Task task;
@@ -137,14 +134,13 @@ public class ToDoListControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = USERNAME)
     void newToDoListShouldReturnBadRequestIfInputsAreNotValid() throws Exception {
         //given
         String toDoListJson = """
                 {
-                      "name": "",
-                      "description": "is",
-                      "active" : "false"
+                      "active" : "false",
+                      "id" : 100
                 }""";
 
         //when

@@ -20,15 +20,18 @@ public class TaskServiceImpl implements TaskService {
   private final TaskRepository taskRepository;
   private final TaskAccessManager taskAccessManager;
   private final TaskMapper mapper;
+  private final ToDoListService toDoListService;
   private final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
 
   public TaskServiceImpl(
-          TaskRepository taskRepository,
-          TaskAccessManager taskAccessManager,
-          TaskMapper mapper) {
-    this.taskRepository = taskRepository;
-    this.taskAccessManager = taskAccessManager;
-    this.mapper = mapper;
+    TaskRepository taskRepository,
+    TaskAccessManager taskAccessManager,
+    TaskMapper mapper,
+    ToDoListService toDoListService) {
+      this.taskRepository = taskRepository;
+      this.taskAccessManager = taskAccessManager;
+      this.toDoListService = toDoListService;
+      this.mapper = mapper;
   }
 
   @Override
@@ -83,6 +86,12 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public void checkTaskAccess(Task task) {
     taskAccessManager.checkAccess(task);
+  }
+
+  @Override
+  public TaskDto newTask(TaskDto taskDto) {
+    //TODO implement method
+    return new TaskDto();
   }
 
 

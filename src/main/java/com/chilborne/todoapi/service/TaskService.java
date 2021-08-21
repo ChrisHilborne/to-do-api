@@ -14,4 +14,6 @@ public interface TaskService {
   TaskDto updateTaskNameAndDescription(long id, TaskDto task);
 
   void checkTaskAccess(Task task);
+
+  TaskDto newTask(TaskDto taskDto);
 }

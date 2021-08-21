@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface ToDoListService {
 
+    //TODO implement authorization check without passing username to each method
     ToDoListDto getToDoListDtoById(long id, String username) throws ToDoListNotFoundException;
 
     ToDoListDto saveToDoList(ToDoList list);
