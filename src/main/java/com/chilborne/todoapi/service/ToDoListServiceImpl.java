@@ -115,7 +115,6 @@ public class ToDoListServiceImpl implements ToDoListService {
     ToDoList toUpdate = getToDoListByIdAndUsername(listId, username);
     Task newTask = taskMapper.convertTaskDto(taskDto);
     newTask.setToDoList(toUpdate);
-    //newTask = taskRepository.save(newTask);
     toUpdate.addTask(newTask);
     return saveToDoList(toUpdate);
   }
