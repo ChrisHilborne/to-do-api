@@ -112,22 +112,43 @@ public class ToDoListDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ToDoListDto that = (ToDoListDto) o;
+        ToDoListDto listDto = (ToDoListDto) o;
 
-        if (active != that.active) return false;
-        if (!Objects.equals(name, that.name)) return false;
-        if (!Objects.equals(description, that.description)) return false;
-        if (!Objects.equals(dateTimeMade, that.dateTimeMade)) return false;
-        return Objects.equals(tasks, that.tasks);
+        if (listId != listDto.listId) return false;
+        if (active != listDto.active) return false;
+        if (!name.equals(listDto.name)) return false;
+        if (!description.equals(listDto.description)) return false;
+        if (username != null ? !username.equals(listDto.username) : listDto.username != null) return false;
+        if (dateTimeMade != null ? !dateTimeMade.equals(listDto.dateTimeMade) : listDto.dateTimeMade != null)
+            return false;
+        if (tasks != null ? !tasks.equals(listDto.tasks) : listDto.tasks != null) return false;
+        return url != null ? url.equals(listDto.url) : listDto.url == null;
     }
 
     @Override
     public int hashCode() {
-        int result = 31 + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
+        int result = (int) (listId ^ (listId >>> 32));
+        result = 31 * result + name.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (dateTimeMade != null ? dateTimeMade.hashCode() : 0);
         result = 31 * result + (tasks != null ? tasks.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
+        result = 31 * result + (url != null ? url.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ToDoListDto{" +
+          "listId=" + listId +
+          ", name='" + name + '\'' +
+          ", description='" + description + '\'' +
+          ", username='" + username + '\'' +
+          ", dateTimeMade=" + dateTimeMade +
+          ", tasks=" + tasks +
+          ", active=" + active +
+          ", url='" + url + '\'' +
+          '}';
     }
 }

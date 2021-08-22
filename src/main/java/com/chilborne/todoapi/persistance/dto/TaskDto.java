@@ -121,24 +121,41 @@ public class TaskDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TaskDto taskDTO = (TaskDto) o;
+        TaskDto taskDto = (TaskDto) o;
 
-        if (active != taskDTO.active) return false;
-        if (!name.equals(taskDTO.name)) return false;
-        if (!Objects.equals(description, taskDTO.description)) return false;
-        if (!Objects.equals(dateTimeMade, taskDTO.dateTimeMade))
+        if (taskId != taskDto.taskId) return false;
+        if (listId != taskDto.listId) return false;
+        if (active != taskDto.active) return false;
+        if (!name.equals(taskDto.name)) return false;
+        if (!description.equals(taskDto.description)) return false;
+        if (dateTimeMade != null ? !dateTimeMade.equals(taskDto.dateTimeMade) : taskDto.dateTimeMade != null)
             return false;
-        return Objects.equals(dateTimeFinished, taskDTO.dateTimeFinished);
+        return dateTimeFinished != null ? dateTimeFinished.equals(taskDto.dateTimeFinished) : taskDto.dateTimeFinished == null;
     }
 
     @Override
     public int hashCode() {
-
-        int result = 31 + name.hashCode();
-        result = 31 * result + (description != null ? description.hashCode() : 0);
+        int result = (int) (taskId ^ (taskId >>> 32));
+        result = 31 * result + name.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + (int) (listId ^ (listId >>> 32));
         result = 31 * result + (dateTimeMade != null ? dateTimeMade.hashCode() : 0);
         result = 31 * result + (dateTimeFinished != null ? dateTimeFinished.hashCode() : 0);
         result = 31 * result + (active ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskDto{" +
+          "taskId=" + taskId +
+          ", name='" + name + '\'' +
+          ", description='" + description + '\'' +
+          ", listId=" + listId +
+          ", dateTimeMade=" + dateTimeMade +
+          ", dateTimeFinished=" + dateTimeFinished +
+          ", active=" + active +
+          ", url='" + url + '\'' +
+          '}';
     }
 }
