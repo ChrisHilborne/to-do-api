@@ -96,4 +96,14 @@ public class UserDto {
     result = 31 * result + (toDoLists != null ? toDoLists.hashCode() : 0);
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "UserDto{" +
+      "username='" + username + '\'' +
+      ", password='" + password + '\'' +
+      ", email='" + email + '\'' +
+      ", toDoLists=" + toDoLists +
+      '}';
+  }
 }
