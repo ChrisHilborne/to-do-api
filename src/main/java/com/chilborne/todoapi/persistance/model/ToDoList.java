@@ -36,7 +36,6 @@ public class ToDoList {
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
     @Column(name = "date_time_made", updatable = false, columnDefinition = "TIMESTAMP")
-    @Null(groups = OnPersist.class, message = "time_created is automatically generated on list creation")
     private LocalDateTime timeCreated;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "toDoList", fetch = FetchType.EAGER)
@@ -49,7 +48,6 @@ public class ToDoList {
     private User user;
 
     @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
-    @Null(groups = OnPersist.class, message = "ToDoList is activated on list creation")
     private boolean active = true;
 
     public ToDoList() {}

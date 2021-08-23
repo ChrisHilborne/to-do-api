@@ -32,7 +32,7 @@ public class Task {
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
     @CreationTimestamp
-    @Column(name = "date_time_created", insertable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "date_time_created", updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime timeCreated;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
