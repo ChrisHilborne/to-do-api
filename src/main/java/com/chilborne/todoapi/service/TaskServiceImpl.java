@@ -62,7 +62,7 @@ public class TaskServiceImpl implements TaskService {
     if (toComplete.isActive()) {
       toComplete.setActive(false);
       toComplete.setTimeCompleted(LocalDateTime.now());
-      return mapper.convertTask(toComplete);
+      return saveTask(toComplete);
     } else {
       throw new TaskAlreadyCompletedException(
           "This task was already completed at "

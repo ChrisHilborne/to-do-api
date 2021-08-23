@@ -126,7 +126,8 @@
 							<version>1.4.2.Final</version>
 						</path>
 					</annotationProcessorPaths>
-                </configuration>
+					<compilerArgs>--enable-preview</compilerArgs>
+				</configuration>
             </plugin>
         </plugins>
 	</build>
