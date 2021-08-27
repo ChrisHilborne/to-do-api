@@ -14,7 +14,6 @@
 </a>
 
 
-
 ## Table of contents
 * [General info](#general-info)
 * [Word In Progress](#wip)
@@ -63,9 +62,7 @@ $ java -jar to-do-api-0.0.1-SNAPSHOT.jar
 ```
 
 ## Using the API 
-
-[Postman](https://chilborne.postman.co/workspace/To-Do-List-Service~b9b9da37-69c2-4a2c-be89-d3837dec6726/documentation/13586779-ba6129a8-72ad-4c57-988c-3d550c04ef70)
-[Swagger]
+API documentation is available on [SwaggerHub](https://app.swaggerhub.com/apis-docs/ChrisHilborne/TO_DO_LIST/1.0) and as part of a publicly available [Postman Collection](https://chilborne.postman.co/workspace/To-Do-List-Service~b9b9da37-69c2-4a2c-be89-d3837dec6726/documentation/13586779-ba6129a8-72ad-4c57-988c-3d550c04ef70). You will find everything you need to use TO-DO-API here. 
 
 ## Licence
-
+[Apache 2.0](https://github.com/ChrisHilborne/to-do-api/blob/main/LICENSE)
