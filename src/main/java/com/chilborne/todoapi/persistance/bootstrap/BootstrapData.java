@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+//@Component
 @Profile("!test")
 public class BootstrapData implements CommandLineRunner {
 
