@@ -1,9 +1,14 @@
 #H2 Config
 spring:
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: com.chilborne.todoapi.persistance.dialect.SQLiteDialect
+    hibernate:
+      dll-auto: update
   datasource:
-    url : jdbc:sqlite:TO_DO.db
+    url : jdbc:sqlite:TO_DO.sqlite
+    direver-class-name: org.sqlite.JDBC
+    username: admin
+    password: password
 
 
   #Jackson JSON
