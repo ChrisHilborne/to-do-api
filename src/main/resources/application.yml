@@ -2,10 +2,11 @@
 spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url : jdbc:sqlite:TO_DO.db
 
 
-
-#Jackson JSON
+  #Jackson JSON
   jackson:
     default-property-inclusion: NON_NULL
     property-naming-strategy: SNAKE_CASE
