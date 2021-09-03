@@ -88,6 +88,7 @@ class TaskServiceImplTest {
   void completeTaskShouldReturnedUpdatedTaskDtoWhenTaskHasNotBeenCompletedAlready() {
     // given
     given(taskRepository.findById(taskId)).willReturn(Optional.of(task));
+    given(taskRepository.save(any(Task.class))).willReturn(task);
     given(taskMapper.convertTask(any(Task.class))).willReturn(taskDto);
 
     // when
