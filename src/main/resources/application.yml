@@ -15,6 +15,17 @@ spring:
     username: user
     password: password
 
+# Logging
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+  file:
+    name: logs/log
+spring.mvc:
+  log-request-details: true
+
+
 
 #Jackson JSON
   jackson:
