@@ -8,6 +8,9 @@ target/
 ### Postman ###
 postman/
 
+### H2 Database files ###
+*.db
+
 ### STS ###
 .apt_generated
 .classpath
