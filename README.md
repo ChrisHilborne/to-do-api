@@ -33,7 +33,7 @@ This is a work in progress. The following features and improvements are in the p
 - Cache local data
 - Add HTTP `Cache-Control` headers to all HTTP responses
 - Add ETags to responses to `GET` requests
-- Log all incoming connections in separate `.log` file
+- Log all incoming connections in separate `.log` file [(done)](https://github.com/ChrisHilborne/to-do-api/commit/7c45a80d2e6596bd027c66663fb3da59e557b23e)
 - Cache session tokens in a local Redis cache
 - Replace H2 in-memory database with SQLite [(done)](https://github.com/ChrisHilborne/to-do-api/commit/ec1cbd790d66ece1aaeecf75788e863f3ea69e2d)
 - Implement authentication with OAuth2     
