@@ -35,7 +35,7 @@ This is a work in progress. The following features and improvements are in the p
 - Add ETags to responses to `GET` requests
 - Log all incoming connections in separate `.log` file
 - Cache session tokens in a local Redis cache
-- Replace H2 in-memory database with SQLite [done](https://github.com/ChrisHilborne/to-do-api/commit/ec1cbd790d66ece1aaeecf75788e863f3ea69e2d)
+- Replace H2 in-memory database with SQLite [(done)](https://github.com/ChrisHilborne/to-do-api/commit/ec1cbd790d66ece1aaeecf75788e863f3ea69e2d)
 - Implement authentication with OAuth2     
 
 You can find more information in the [issues](https://github.com/ChrisHilborne/to-do-api/issues) section.
