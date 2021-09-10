@@ -1,0 +1,55 @@
+Configuration:
+  name: default
+
+  Properties:
+    Property:
+     name: log-path
+     value: "logs"
+
+  Appenders:
+
+    Console:
+      name: console_appender
+      target: SYSTEM_OUT
+      PatternLayout: 
+        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" 
+    
+    File:
+      - name: connection_appender
+      fileName: ${log-path}/connections.log
+      PatternLayout:
+        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+
+      - name: error_appender
+      fileName: ${log-path}/error.log
+      PatternLayout: 
+        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+
+    RollingFile:
+      - name: debugger_appender
+        fileName: ${log-path}/debug.log
+        filePattern: "logs/archive/debug.log.%d{yyyy-MM-dd-hh-mm}.gz"
+        PatternLayout:
+          pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 100 MB
+        DefaultRollOverStrategy:
+          max: 10
+  
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: console_appender
+        level: info
+        - ref: error_appender
+        level: error
+        - ref: debugger_appender
+        level: debug
+    Logger:
+      - name: org.springframework.web.filter.CommonsRequestLoggingFilter
+        level: debug
+        AppenderRef:
+          - ref: connection_logger
+            level: debug  
