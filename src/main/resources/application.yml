@@ -1,17 +1,20 @@
 #H2 Config
 spring:
   jpa:
-    database-platform: com.chilborne.todoapi.persistance.dialect.SQLiteDialect
-    hibernate:
-      dll-auto: update
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: false
   datasource:
-    url : jdbc:sqlite:TO_DO.sqlite
-    direver-class-name: org.sqlite.JDBC
-    username: admin
+    url: jdbc:h2:mem:todolist
+    driverClassName: org.h2.Driver
+    username: user
     password: password
 
 
-  #Jackson JSON
+#Jackson JSON
   jackson:
     default-property-inclusion: NON_NULL
     property-naming-strategy: SNAKE_CASE
