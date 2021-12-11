@@ -13,8 +13,11 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.format.DateTimeFormatter;
 
+<<<<<<< HEAD
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
+=======
+>>>>>>> 16a783a612ad99685fe77e010537f021cfde1e4c
 public class JacksonJsonConfig {
 
     private static final String dateFormat = "yyyy-MM-dd";
@@ -29,7 +32,11 @@ public class JacksonJsonConfig {
             builder.simpleDateFormat(dateFormat);
             builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
             builder.serializers(new LocalDateSerializer(dateFormatter));
+<<<<<<< HEAD
             builder.propertyNamingStrategy(SNAKE_CASE);
+=======
+            builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+>>>>>>> 16a783a612ad99685fe77e010537f021cfde1e4c
             builder.indentOutput(true);
             builder.defaultViewInclusion(true);
             builder.serializationInclusion(JsonInclude.Include.NON_NULL);

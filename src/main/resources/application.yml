@@ -15,6 +15,7 @@ spring:
     username: user
     password: password
 
+<<<<<<< HEAD
 # Logging
 #logging:
 #  level:
@@ -26,6 +27,8 @@ spring:
 #  log-request-details: true
 
 
+=======
+>>>>>>> 16a783a612ad99685fe77e010537f021cfde1e4c
 
 #Jackson JSON
   jackson:
