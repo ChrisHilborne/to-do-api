@@ -2,22 +2,16 @@ package com.chilborne.todoapi.web.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.format.DateTimeFormatter;
 
-<<<<<<< HEAD
+
 import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
 
-=======
->>>>>>> 16a783a612ad99685fe77e010537f021cfde1e4c
 public class JacksonJsonConfig {
 
     private static final String dateFormat = "yyyy-MM-dd";
@@ -32,11 +26,7 @@ public class JacksonJsonConfig {
             builder.simpleDateFormat(dateFormat);
             builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
             builder.serializers(new LocalDateSerializer(dateFormatter));
-<<<<<<< HEAD
             builder.propertyNamingStrategy(SNAKE_CASE);
-=======
-            builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
->>>>>>> 16a783a612ad99685fe77e010537f021cfde1e4c
             builder.indentOutput(true);
             builder.defaultViewInclusion(true);
             builder.serializationInclusion(JsonInclude.Include.NON_NULL);
