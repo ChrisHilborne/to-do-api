@@ -6,7 +6,7 @@
 <a href = https://start.spring.io>
     <img src= https://img.shields.io/badge/Spring_Boot-informational?style=flat&logo=springboot&logoColor=white&color=49464d>
 </a>
-<a href = https://documenter.getpostman.com/view/13586779/TzzHksaT>
+<a href = https://go.postman.co/workspace/To-Do-List-Service~b9b9da37-69c2-4a2c-be89-d3837dec6726/collection/13586779-3b9dc06f-cab0-4267-ad19-a38a0abc470e?action=share&creator=13586779>
     <img src= https://img.shields.io/badge/Postman-informational?style=flat&logo=postman&logoColor=white&color=49464d>
 </a>
 <a href = https://app.swaggerhub.com/apis-docs/ChrisHilborne/TO_DO_LIST/1.0>
