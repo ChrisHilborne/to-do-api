@@ -27,7 +27,6 @@
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
-					<version>${spring-boot.version}</version>
 				</exclusion>
 			</exclusions>
 		</dependency>
