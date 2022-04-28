@@ -3,10 +3,9 @@ package com.chilborne.todoapi.web.controller.v1;
 import com.chilborne.todoapi.persistance.dto.TaskDto;
 import com.chilborne.todoapi.service.TaskService;
 import com.chilborne.todoapi.service.ToDoListService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,8 +27,8 @@ public class TaskController {
     this.taskService = taskService;
   }
 
-  @ApiOperation(value = "Find Task by Id")
-  @ApiResponses(
+  @Operation(value = "Find Task by Id")
+  @ApiResponse( Responses(
       value = {
         @ApiResponse(
             code = 404,

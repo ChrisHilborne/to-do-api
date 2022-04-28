@@ -15,7 +15,7 @@
 	<description>Backend rest API for to-do list App</description>
 	<properties>
 		<log4j2.version>2.17.1</log4j2.version>
-		<java.version>8</java.version>
+		<java.version>18</java.version>
 		<spring-boot.version>2.6.6</spring-boot.version>
 	</properties>
 	<dependencies>
@@ -102,6 +102,7 @@
 			<version>2.11.3</version>
 		</dependency>
 
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -122,6 +123,16 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>23.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-models</artifactId>
+			<version>2.1.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>spring-boot-springdoc</artifactId>
+			<version>3.1.2</version>
 		</dependency>
 
 	</dependencies>
@@ -151,6 +162,7 @@
 						<version>${spring-restdocs.version}</version>
 					</dependency>
 				</dependencies>
+
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
