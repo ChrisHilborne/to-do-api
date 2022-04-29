@@ -9,11 +9,15 @@ import org.springframework.stereotype.Component;
 public class UsernameAccessManager implements AccessManager<String> {
 
   public void checkAccess(String username) {
-    UserDetails userDetails =
-        (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    if (!userDetails.getUsername().equals(username)) {
-      throw new AccessDeniedException("User: " + username + " does not have access");
+    try {
+      UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+      if (userDetails.getUsername().equals(username)) {
+        throw new AccessDeniedException("User: " + username + " does not have access");
+      }
+    } catch (ClassCastException e) {
+      throw new AccessDeniedException("User does not have access");
     }
   }
 }

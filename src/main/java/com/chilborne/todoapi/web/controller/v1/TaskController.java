@@ -6,6 +6,7 @@ import com.chilborne.todoapi.service.ToDoListService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Api(value = "Task Controller")
+@Tag(name = "Task Controller")
 @RestController
 @RequestMapping(value = "api/v1/task")
 public class TaskController {
@@ -27,17 +28,30 @@ public class TaskController {
     this.taskService = taskService;
   }
 
-  @Operation(value = "Find Task by Id")
-  @ApiResponse( Responses(
-      value = {
-        @ApiResponse(
-            code = 404,
-            message = "TaskNotFoundException -> Task with id:{task_id} not found")
-      })
+  @Operation(summary = "Find Task by Id", responses =
+    @ApiResponse(responseCode = "404", description = "TaskNotFoundException -> Task with id:{task_id} not found"))
   @GetMapping(path ="/{id}", produces = "application/json")
   public ResponseEntity<TaskDto> getTaskById(@PathVariable long id) {
     logger.info("Processing GET Request for Task id: " + id);
     TaskDto result = taskService.getTaskDtoById(id);
+    return ResponseEntity.ok(result);
+  }
+
+  @Operation(summary= "Mark Task as Complete",
+    description = "Once completed a Task cannot be reactivated, date_time_finished will be generated automatically",
+    responses = {
+      @ApiResponse(
+        responseCode = "404",
+        description = "TaskNotFoundException -> Task with id:{task_id} not found"),
+      @ApiResponse(
+        responseCode = "208",
+        description =
+          "TaskAlreadyCompletedException -> This task was already completed at {date_time_finished}")
+    })
+  @PatchMapping(path = "/{id}/complete", produces = "application/json")
+  public ResponseEntity<TaskDto> completeTask(@PathVariable long id) {
+    logger.info("Processing PATCH Request to Complete Task id: " + id);
+    TaskDto result = taskService.completeTask(id);
     return ResponseEntity.ok(result);
   }
 
@@ -51,36 +65,14 @@ public class TaskController {
       .body(result);
   }
 
-  @ApiOperation(
-      value = "Mark Task as Complete",
-      notes =
-          "Once completed a Task cannot be reactivated, date_time_finished will be generated automatically")
-  @ApiResponses(
-      value = {
+  @Operation(summary = "Update Task Name and/or Description",
+    responses = {
         @ApiResponse(
-            code = 404,
-            message = "TaskNotFoundException -> Task with id:{task_id} not found"),
+            responseCode = "404",
+            description = "TaskNotFoundException -> Task with id:{task_id} not found"),
         @ApiResponse(
-            code = 208,
-            message =
-                "TaskAlreadyCompletedException -> This task was already completed at {date_time_finished}")
-      })
-  @PatchMapping(path = "/{id}/complete", produces = "application/json")
-  public ResponseEntity<TaskDto> completeTask(@PathVariable long id) {
-    logger.info("Processing PATCH Request to Complete Task id: " + id);
-    TaskDto result = taskService.completeTask(id);
-    return ResponseEntity.ok(result);
-  }
-
-  @ApiOperation(value = "Update Task Name and/or Description")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            code = 404,
-            message = "TaskNotFoundException -> Task with id:{task_id} not found"),
-        @ApiResponse(
-            code = 400,
-            message = "InvalidDataException : { {task_property} : {constraint message} }")
+            responseCode = "400",
+            description = "InvalidDataException : { {task_property} : {constraint message} }")
       })
   @PatchMapping(path = "/{id}", produces = "application/json", consumes = "application/json")
   public ResponseEntity<TaskDto> updateTaskNameAndDescription(
