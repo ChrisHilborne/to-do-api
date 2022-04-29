@@ -1,8 +1,7 @@
 package com.chilborne.todoapi.persistance.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@ApiModel(value = "user")
+@Schema(title = "user")
 public class UserDto {
 
   @NotBlank(message = "username is compulsory")
@@ -25,7 +24,7 @@ public class UserDto {
   @Email(message = "email not valid")
   private String email;
 
-  @ApiModelProperty(name = "to_do_lists")
+  @Schema(name = "to_do_lists")
   private List<ToDoListDto> toDoLists = new ArrayList<>();
 
   public UserDto() {}
